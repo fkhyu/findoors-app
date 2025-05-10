@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "findoors",
+    "slug": "findoors",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "app",
+    "scheme": "findoors",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
