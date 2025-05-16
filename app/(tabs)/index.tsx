@@ -167,11 +167,13 @@ const geojson3D = {
 
 
 export default function HomeScreen() {
+  const styleUrlKey = process.env.EXPO_PUBLIC_MAPTILER_KEY as string
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <MapView
         style={styles.map}
-        styleURL="https://api.maptiler.com/maps/streets-v2/style.json?key=KWuj8x5BEIPKrWM4B9xN"
+        styleURL={`https://api.maptiler.com/maps/streets-v2/style.json?key=${styleUrlKey}`}
         compassViewMargins={{ x: 10, y: 40 }}
         pitchEnabled={true}
       >

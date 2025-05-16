@@ -1,50 +1,74 @@
-# Welcome to your Expo app 👋
+# findoors
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native / Expo-powered indoor/outdoor navigation app using Mapbox & custom-built local BLE Beacons.
 
-## Get started
+## Table of Contents
 
-1. Install dependencies
+1. [Features](#features)  
+2. [Tech Stack](#tech-stack)  
+3. [Prerequisites](#prerequisites)  
+4. [Getting Started](#getting-started)  
+
+## Features
+
+- 📍 Interactive maps with [`@rnmapbox/maps`](package.json)  
+- 🚀 File-based routing with [Expo Router](app/_layout.tsx)  
+- 🌐 Localization with Lingui  
+- 🎨 Custom UI components in [components](components/)  
+
+## TODO Features
+
+- 🔒 Authentication & real-time data via [`@supabase/supabase-js`](package.json) ([`lib/supabase.ts`](lib/supabase.ts))  
+
+## Tech Stack
+
+- **React Native** & **Expo** ([expo](package.json))  
+- **Expo Router** for navigation  
+- **Mapbox** for mapping  
+- **Supabase** for backend temporarily
+- **TypeScript**  
+- **ESLint** & **Prettier**  
+
+## Prerequisites
+
+- Node.js ≥14  
+- npm or yarn  
+- Expo CLI:  
+
+For custom build follow [eas local build guide](https://docs.expo.dev/build-reference/local-builds/) or use eas-cli.
+
+  ```bash
+  npm install -g expo-cli eas-cli
+  ```
+
+## Getting Started
+
+1. Clone the repo
 
    ```bash
+   git clone https://github.com/your-org/findoors.git
+   cd findoors/app
+   ```
+
+2. Install dependencies
+
+   ```bash
+   yarn install
+   # or
    npm install
    ```
 
-2. Start the app
+3. Copy & configure your environment
 
    ```bash
-   npx expo start
+   cp .env.example .env
+   # Make sure to edit the .env file to include your URL and ANON_KEY
    ```
 
-In the output, you'll find options to open the app in a
+4. Run the app
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+   ```bash
+   yarn expo start
+   # or
+   npx expo start
+   ```
