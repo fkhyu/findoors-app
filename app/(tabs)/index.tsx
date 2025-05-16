@@ -173,7 +173,7 @@ export default function HomeScreen() {
     <GestureHandlerRootView style={styles.container}>
       <MapView
         style={styles.map}
-        styleURL={`https://api.maptiler.com/maps/streets-v2/style.json?key=${styleUrlKey}`}
+        styleURL={`https://api.maptiler.com/maps/streets-v2/style.json?key=XSJRg4GXeLgDiZ98hfVp`}
         compassViewMargins={{ x: 10, y: 40 }}
         pitchEnabled={true}
       >
@@ -182,6 +182,11 @@ export default function HomeScreen() {
           zoomLevel={16}
           animationDuration={1000}
           pitch={5}
+          maxBounds={{
+            ne: [24.620221246474574, 59.98446920858392],
+            sw: [25.016749575387433, 60.28339638856884]
+          }}
+          minZoomLevel={9}
         />
         <ShapeSource id="buildingSource" shape={geojson3D}>
           <FillExtrusionLayer
