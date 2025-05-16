@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+// components/modal/FilterModal.tsx
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import {
-  Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,120 +9,95 @@ import {
   View,
 } from 'react-native';
 
-// Define types for filter options
 export interface FilterOptions {
-  // Add your filter properties here, for example:
   category?: string;
-  price?: {
-    min: number;
-    max: number;
-  };
+  price?: { min: number; max: number };
   sortBy?: string;
   bookable?: boolean;
   equipment?: string[];
-  // Add more filter options as needed
 }
 
 interface FilterModalProps {
-  visible: boolean;
   onClose: () => void;
   onApplyFilters: (filters: FilterOptions) => void;
   initialFilters?: FilterOptions;
 }
 
-const FilterModal: React.FC<FilterModalProps> = ({
-  visible,
-  onClose,
-  onApplyFilters,
-  initialFilters = {},
-}) => {
-  const [filters, setFilters] = useState<FilterOptions>(initialFilters)
+const FilterModal = forwardRef<BottomSheetModal, FilterModalProps>(
+  ({ onClose, onApplyFilters, initialFilters = {} }, ref) => {
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const [filters, setFilters] = useState(initialFilters);
+  const snapPoints = useMemo(() => ['80%'], []);
 
-  // ← only reset when `visible` changes
+  // expose present/dismiss to parent
+  useImperativeHandle(ref, () => ({
+    present: () => bottomSheetRef.current?.present(),
+    dismiss: () => bottomSheetRef.current?.dismiss(),
+  }), []);
+
   useEffect(() => {
-    if (visible) {
-      setFilters(initialFilters)
-    }
-  }, [visible])   // ← remove initialFilters here
+    // sync filters when opening
+    bottomSheetRef.current?.present();
+    setFilters(initialFilters);
+  }, [initialFilters]);
 
-  const handleApplyFilters = () => {
-    onApplyFilters(filters)
-    onClose()
-  }
-
-  const handleResetFilters = () => {
-    setFilters({});
+  const handleApply = () => {
+    onApplyFilters(filters);
+    bottomSheetRef.current?.dismiss();
   };
 
+  const handleReset = () => setFilters({});
+
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
+    <BottomSheetModal
+      ref={bottomSheetRef}
+      index={1}
+      snapPoints={snapPoints}
+      backgroundStyle={styles.modalContent}
+      onDismiss={onClose}
     >
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Filters</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Text style={styles.closeButton}>✕</Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.filtersContainer}>
-            {/* Add your filter controls here */}
-            {/* For example: */}
-            <View style={styles.filterSection}>
-              <Text style={styles.sectionTitle}>Category</Text>
-              {/* Add category selection UI here */}
-            </View>
-
-            <View style={styles.filterSection}>
-              <Text style={styles.sectionTitle}>Price Range</Text>
-              {/* Add price range controls here */}
-            </View>
-
-            <View style={styles.filterSection}>
-              <Text style={styles.sectionTitle}>Sort By</Text>
-              {/* Add sorting options here */}
-            </View>
-          </ScrollView>
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.resetButton]}
-              onPress={handleResetFilters}
-            >
-              <Text style={styles.resetButtonText}>Reset</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[styles.button, styles.applyButton]}
-              onPress={handleApplyFilters}
-            >
-              <Text style={styles.applyButtonText}>Apply Filters</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={styles.modalContent}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Filters</Text>
+          <TouchableOpacity onPress={() => bottomSheetRef.current?.dismiss()}>
+            <Text style={styles.closeButton}>✕</Text>
+          </TouchableOpacity>
         </View>
-      </SafeAreaView>
-    </Modal>
+
+        <ScrollView style={styles.filtersContainer}>
+          {/* Your filter controls */}
+        </ScrollView>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.resetButton]}
+            onPress={handleReset}
+          >
+            <Text style={styles.resetButtonText}>Reset</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.applyButton]}
+            onPress={handleApply}
+          >
+            <Text style={styles.applyButtonText}>Apply</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </BottomSheetModal>
   );
-};
+}
+);
+
+FilterModal.displayName = 'FilterModal';
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
   modalContent: {
     backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
     paddingBottom: 30,
-    height: '80%',
+    height: '100%',
   },
   header: {
     flexDirection: 'row',
@@ -130,53 +105,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#ECECEC',
+    borderColor: '#ECECEC',
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  closeButton: {
-    fontSize: 20,
-  },
-  filtersContainer: {
-    flex: 1,
-  },
-  filterSection: {
-    marginVertical: 15,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
+  title: { fontSize: 18, fontWeight: 'bold' },
+  closeButton: { fontSize: 20 },
+  filtersContainer: { flex: 1 },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
   },
-  button: {
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resetButton: {
-    flex: 1,
-    marginRight: 10,
-    backgroundColor: '#f1f1f1',
-  },
-  applyButton: {
-    flex: 2,
-    backgroundColor: '#007BFF',
-  },
-  resetButtonText: {
-    color: '#333',
-  },
-  applyButtonText: {
-    color: 'white',
-    fontWeight: '600',
-  },
+  button: { paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
+  resetButton: { flex: 1, marginRight: 10, backgroundColor: '#f1f1f1' },
+  applyButton: { flex: 2, backgroundColor: '#007BFF' },
+  resetButtonText: { color: '#333' },
+  applyButtonText: { color: '#fff', fontWeight: '600' },
 });
 
 export default FilterModal;

@@ -16,6 +16,12 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
+        name="bleTester"
+        options={{
+          title: 'BLE Debug',
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
           title: 'Home',

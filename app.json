@@ -39,13 +39,26 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "@maplibre/maplibre-react-native",
+      [
+        "@rnmapbox/maps",
+        {
+          "accessToken": "pk.eyJ1Ijoib25yZWMiLCJhIjoiY21hbnR4ZHhvMDAxMDJpc2RhN3puNnI0byJ9.uh_ot8HPgdRD4WicKeGpNQ"
+        }
+      ],
       [
         "expo-dev-client",
         {
           "launchMode": "most-recent"
         }
+      ],
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Show current location on map and scan for beacons."
+        }
       ]
+      
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,64 +1,54 @@
-import { buildings } from '@/assets/placeholder/buildings';
-import { useLocalSearchParams } from 'expo-router';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { floors } from '@/assets/placeholder/floors'
+import FloorItem from '@/components/floorItem'
+import { Floor } from '@/types'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React from 'react'
+import { FlatList, StyleSheet, View } from 'react-native'
 
-const BuildingDetails = () => {
-  // Get the slug from the route parameters
+export default function TabTwoScreen() {
+  const router = useRouter()
   const { slug } = useLocalSearchParams();
 
-  // Find the building by slug
-  const building = buildings.find((b) => b.id === slug);
-  if (!building) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Building not found</Text>
-      </View>
-    );
+  // <-- define your handler here:
+  const handlePressFloor = (floor: Floor) => {
+    // e.g. navigate or show an alert
+    router.push(`/buildings/floors/${floor.id}`)
   }
-  
+
+  const filteredFloors = floors.filter((floor) => floor.buildingId === slug)
+
   return (
-    <View style={styles.container}>
-      {building.imageUrl && (
-        <Image
-          source={{ uri: building.imageUrl }}
-          style={{ width: '100%', height: '30%' }}
-          resizeMode="cover"
-        />
-      )}
-      <View style={styles.topContainer}>
-        <Text style={styles.htwo}>{building.name}</Text>
-        <Text style={styles.subtitle}>{building.id}</Text>
-        <Text style={styles.subtitle}>{building.address}</Text>
-      </View>
+    <View style={{ flex: 1 }}>
+      <FlatList
+        contentContainerStyle={{ paddingBottom: 16 }}
+        data={filteredFloors}
+        keyExtractor={f => f.id}
+        renderItem={({ item }) => (
+          <FloorItem
+            item={item}
+            onPressFloor={handlePressFloor}
+          />
+        )}
+      />
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 18,
-  },
-  htwo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  topContainer: {
+  header: {
     width: '100%',
+    padding: 16,
+    paddingTop: 50,
     backgroundColor: '#f8f8f8',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
-    padding: 12,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
-});
-
-export default BuildingDetails;
+  headerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+})

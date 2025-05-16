@@ -1,38 +1,34 @@
-import { buildings } from '@/assets/placeholder/buildings';
+import { rooms } from '@/assets/placeholder/rooms';
 import { useLocalSearchParams } from 'expo-router';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
-const BuildingDetails = () => {
+const RoomDetails = () => {
   // Get the slug from the route parameters
   const { slug } = useLocalSearchParams();
 
   // Find the building by slug
-  const building = buildings.find((b) => b.id === slug);
-  if (!building) {
+  const room = rooms.find((r) => r.id === slug);
+  if (!room) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Building not found</Text>
+        <Text style={styles.title}>Room not found</Text>
       </View>
     );
   }
   
   return (
     <View style={styles.container}>
-      <View style={styles.topContainer}>
-        <Text style={styles.htwo}>{building.name}</Text>
-        <Text style={styles.subtitle}>{building.id}</Text>
-        <Text style={styles.subtitle}>{building.address}</Text>
-      </View>
-      {building.imageUrl && (
+      {room.imageUrl && (
         <Image
-          source={{ uri: building.imageUrl }}
+          source={{ uri: room.imageUrl }}
           style={{ width: '100%', height: '30%' }}
           resizeMode="cover"
         />
       )}
-      
-      
-      <Text style={styles.subtitle}>Image URL: {building.imageUrl}</Text>
+      <View style={styles.topContainer}>
+        <Text style={styles.htwo}>{room.name}</Text>
+        <Text style={styles.subtitle}>{room.id}</Text>
+      </View>
     </View>
   );
 };
@@ -65,4 +61,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BuildingDetails;
+export default RoomDetails;

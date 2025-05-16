@@ -6,12 +6,15 @@ export interface Building {
   longitude: number;
   address: string;
   imageUrl?: string;
+  floorIds?: string[];
 }
 
 export interface Floor {
   id: string;
   number: number;
-  building: Building;
+  roomIds: string[];
+  buildingId: string;
+  imageUrl?: string;
 }
 
 export interface User {
@@ -36,10 +39,11 @@ export interface Room {
   id: string;
   number: string;
   name: string;
-  building: Building;
-  floor: Floor;
+  buildingId: string;
+  floorId: string;
   capacity: number;
   features: string[];
+  isBookable: boolean;
   accessible: boolean;
   tags: string[];
   latitude: number;
@@ -65,4 +69,9 @@ export interface ApiResponse<T> {
     message: string;
     code: string;
   };
+}
+
+declare module "*.po" {
+  import type { Messages } from "@lingui/core";
+  export const messages: Messages;
 }
