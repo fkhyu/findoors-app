@@ -1,6 +1,6 @@
 # findoors
 
-A React Native / Expo-powered indoor/outdoor navigation app using Mapbox & custom-built local BLE Beacons.
+A React Native / Expo-powered indoor/outdoor campus/office navigation app using Mapbox & custom-built local BLE Beacons.
 
 ## Table of Contents
 
