@@ -8,7 +8,7 @@ msgstr ""
 "Language: en\n"
 "Project-Id-Version: otamaps-app\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2025-05-19 18:13\n"
+"PO-Revision-Date: 2025-05-19 19:30\n"
 "Last-Translator: \n"
 "Language-Team: English\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: app/buildings/floors/rooms/[slug].tsx:53
 msgid "Book"
-msgstr ""
+msgstr "Book"
 
 #: app/buildings/floors/rooms/[slug].tsx:67
 msgid "Booking Information"
