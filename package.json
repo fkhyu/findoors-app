@@ -61,6 +61,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@crowdin/cli": "^4.7.0",
     "@lingui/babel-plugin-lingui-macro": "^5.3.1",
     "@lingui/metro-transformer": "^5.3.1",
     "@types/react": "~19.0.10",
