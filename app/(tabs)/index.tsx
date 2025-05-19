@@ -1,293 +1,14 @@
+import { geojson } from "@/assets/geos/map";
 import FriendItem from "@/components/friendItem";
+import { getCachedGeoJSON } from "@/components/functions/geoJson";
 import MapBottomSheet from "@/components/mapBottomSheet";
 import { BottomSheetFlatList, BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { Camera, FillExtrusionLayer, ImageSource, MapView, RasterLayer, ShapeSource, UserLocation, setAccessToken } from '@rnmapbox/maps';
-import React from "react";
+import { Camera, FillExtrusionLayer, FillLayer, ImageSource, MapView, RasterLayer, ShapeSource, UserLocation, setAccessToken } from '@rnmapbox/maps';
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-const geojson3D = {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              24.81741049567501,
-              60.18420109071207
-            ],
-            [
-              24.8170223152558,
-              60.184169254246704
-            ],
-            [
-              24.81702180028573,
-              60.184169185612404
-            ],
-            [
-              24.817021322253517,
-              60.18416906823014
-            ],
-            [
-              24.817020899619113,
-              60.18416890663278
-            ],
-            [
-              24.817020548703177,
-              60.18416870706071
-            ],
-            [
-              24.817020283056873,
-              60.18416847722065
-            ],
-            [
-              24.817020112938533,
-              60.18416822598829
-            ],
-            [
-              24.81702004491753,
-              60.18416796306529
-            ],
-            [
-              24.8170200816206,
-              60.18416769860485
-            ],
-            [
-              24.817096811565744,
-              60.183941802727
-            ],
-            [
-              24.817096949222275,
-              60.18394155002083
-            ],
-            [
-              24.817097182460536,
-              60.18394131529525
-            ],
-            [
-              24.817097502495052,
-              60.18394110739178
-            ],
-            [
-              24.817097897270973,
-              60.18394093414156
-            ],
-            [
-              24.817098351918112,
-              60.18394080207049
-            ],
-            [
-              24.817098849311115,
-              60.18394071615335
-            ],
-            [
-              24.81709937071449,
-              60.183940679626396
-            ],
-            [
-              24.81709989648835,
-              60.1839406938655
-            ],
-            [
-              24.817317971008773,
-              60.183957259615276
-            ],
-            [
-              24.817317985189124,
-              60.183957260711566
-            ],
-            [
-              24.81749668514453,
-              60.183971316492915
-            ],
-            [
-              24.81749720674074,
-              60.18397138449449
-            ],
-            [
-              24.81749769098702,
-              60.18397150244357
-            ],
-            [
-              24.8174981187544,
-              60.18397166568081
-            ],
-            [
-              24.81749847314497,
-              60.18397186775793
-            ],
-            [
-              24.81749874015939,
-              60.18397210069238
-            ],
-            [
-              24.8174989092499,
-              60.18397235528264
-            ],
-            [
-              24.817498973736996,
-              60.18397262147174
-            ],
-            [
-              24.817498931073256,
-              60.183972888744535
-            ],
-            [
-              24.817416675822503,
-              60.18419925751339
-            ],
-            [
-              24.81741668836629,
-              60.18419926462309
-            ],
-            [
-              24.817416954364507,
-              60.18419949362043
-            ],
-            [
-              24.817417125400528,
-              60.184199744019864
-            ],
-            [
-              24.81741719490154,
-              60.18420000619869
-            ],
-            [
-              24.817417160196655,
-              60.18420027008155
-            ],
-            [
-              24.81741702261956,
-              60.1842005255275
-            ],
-            [
-              24.817416787457255,
-              60.18420076272
-            ],
-            [
-              24.817416463746902,
-              60.18420097254379
-            ],
-            [
-              24.81741606392851,
-              60.184201146935486
-            ],
-            [
-              24.817415980562334,
-              60.18420117087546
-            ],
-            [
-              24.81741210512181,
-              60.18421183611752
-            ],
-            [
-              24.817411959715336,
-              60.18421209048913
-            ],
-            [
-              24.817411717295613,
-              60.18421232586842
-            ],
-            [
-              24.81741138717869,
-              60.18421253320989
-            ],
-            [
-              24.81741098205078,
-              60.18421270454553
-            ],
-            [
-              24.81741051748072,
-              60.184212833291014
-            ],
-            [
-              24.817410011321677,
-              60.1842129144987
-            ],
-            [
-              24.817409483025063,
-              60.184212945047854
-            ],
-            [
-              24.817408952893018,
-              60.18421292376446
-            ],
-            [
-              24.817408441298227,
-              60.18421285146647
-            ],
-            [
-              24.81740796790099,
-              60.18421273093219
-            ],
-            [
-              24.8174075508937,
-              60.18421256679375
-            ],
-            [
-              24.817407206301716,
-              60.18421236535885
-            ],
-            [
-              24.817406947367513,
-              60.18421213436855
-            ],
-            [
-              24.817406784041783,
-              60.184211882699664
-            ],
-            [
-              24.817406722601046,
-              60.184211620023696
-            ],
-            [
-              24.817406765406425,
-              60.18421135643514
-            ],
-            [
-              24.81741049567501,
-              60.18420109071207
-            ]
-          ],
-          [
-            [
-              24.817411460529158,
-              60.184198435426225
-            ],
-            [
-              24.81749309837344,
-              60.18397376588499
-            ],
-            [
-              24.81731714444183,
-              60.1839599260923
-            ],
-            [
-              24.81710171715317,
-              60.18394356143827
-            ],
-            [
-              24.817025885557,
-              60.18416681264987
-            ],
-            [
-              24.817411460529158,
-              60.184198435426225
-            ]
-          ]
-        ]
-      },
-      "properties": {
-        "type": "wall",
-        "width": 0.3,
-        "height": 2.5
-      }
-    }
-  ]
-};
+const geojson3D = geojson;
 
 const eraser = {
   type: 'geojson',
@@ -322,11 +43,21 @@ export default function HomeScreen() {
 
   setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN as string)
 
+  const [geoData, setGeoData] = useState(null);
+
+  // On mount: try loading from cache
+  useEffect(() => {
+    (async () => {
+      const cached = await getCachedGeoJSON();
+      if (cached) setGeoData(cached);
+    })();
+  }, []);
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <MapView
         style={styles.map}
-        styleURL={`https://api.maptiler.com/maps/streets-v2/style.json?key=XSJRg4GXeLgDiZ98hfVp`}
+        styleURL={`https://api.maptiler.com/maps/openstreetmap/style.json?key=XSJRg4GXeLgDiZ98hfVp`}
         compassViewMargins={{ x: 10, y: 40 }}
         pitchEnabled={true}
       >
@@ -345,11 +76,19 @@ export default function HomeScreen() {
           <FillExtrusionLayer
             id="extrusionLayer"
             style={{
-              fillExtrusionHeight: 8,
+              fillExtrusionHeight: 1,
               fillExtrusionBase: 0,
-              fillExtrusionColor: '#FF6347', 
-              fillExtrusionOpacity: 0.7,
+              fillExtrusionColor: '#444444', 
+              fillExtrusionOpacity: 0.1,
             }}
+          />
+          <FillLayer
+            id="fill"
+            style={{
+              fillColor: '#444444',
+              fillOpacity: 0.5,
+            }}
+            onPress={() => {}}
           />
         </ShapeSource>
         <UserLocation
@@ -405,12 +144,12 @@ export default function HomeScreen() {
             }}
           />
           <BottomSheetFlatList 
-            data={[{ name: 'Friend 1', id: '1' }, { name: 'Friend 2', id: '2' }, { name: 'Friend 3', id: '3' }]}
+            data={[{ name: 'Faru Yusufpov', id: '1' }, { name: 'Toivo Kallio', id: '2' }, { name: 'Wilmer von Harpe', id: '3' }, { name: 'Maximilian Bergström', id: '4' }]}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <FriendItem {...item}/>
             )}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: 20, flex: 1, height: '100%' }}
           />
         </View>
       </MapBottomSheet>

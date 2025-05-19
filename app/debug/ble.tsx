@@ -1,54 +1,123 @@
+// import notifee, { AndroidImportance } from '@notifee/react-native';
+import { Buffer } from 'buffer';
 import React, { useEffect, useState } from 'react';
-import { Button, FlatList, StyleSheet, Text, View } from 'react-native';
-import { BleManager } from 'react-native-ble-plx';
+import { Alert, Button, FlatList, PermissionsAndroid, Platform, StyleSheet, Text, View } from 'react-native';
+import { BleManager, Device } from 'react-native-ble-plx';
 
-const BLEScreen = () => {
-  const [manager] = useState(new BleManager());
-  const [devices, setDevices] = useState([]);
-  const [scanning, setScanning] = useState(false);
+// Your BLE Service UUID
+const SERVICE_UUID = 'f47fcfd9-0634-49de-8e99-80d05ae8fcef';
 
-  const startScan = () => {
-    setScanning(true);
-    setDevices([]); // Clear previous list
+export default function BLEScreen() {
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [isScanning, setIsScanning] = useState(false);
+  const bleManager = new BleManager();
 
-    manager.startDeviceScan(null, null, (error, device) => {
+  useEffect(() => {
+    requestPermissions().then(() => startScan());
+
+    return () => {
+      stopScan();
+      bleManager.destroy();
+    };
+  }, []);
+
+  const requestPermissions = async () => {
+    if (Platform.OS === 'android') {
+      await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+        PermissionsAndroid.PERMISSIONS.FOREGROUND_SERVICE,
+      ]);
+    }
+  };
+
+  const startForegroundService = async () => {
+    const channelId = await notifee.createChannel({
+      id: 'ble-scan',
+      name: 'BLE Scanning',
+      importance: AndroidImportance.HIGH,
+    });
+
+    await notifee.displayNotification({
+      title: 'Room Scanner Active',
+      body: 'Scanning for room devices in the background.',
+      android: {
+        channelId,
+        asForegroundService: true,
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
+  };
+
+  const startScan = async () => {
+    if (Platform.OS === 'android') {
+      await startForegroundService();
+    }
+
+    setIsScanning(true);
+    setDevices([]);
+
+    bleManager.startDeviceScan([], { allowDuplicates: true }, (error, device) => {
       if (error) {
-        console.error('Scan error:', error);
-        setScanning(false);
+        Alert.alert('Scan Error', error.message);
+        setIsScanning(false);
         return;
       }
 
-      if (device && device.name) {
-        const roomNumber = device.manufacturerData
-          ? atob(device.manufacturerData.replace('Room:', ''))
-          : 'Unknown';
-
-        setDevices((prevDevices) => {
-          const exists = prevDevices.some((d) => d.id === device.id);
-          if (!exists) {
-            return [...prevDevices, { ...device, roomNumber }];
-          }
-          return prevDevices;
+      if (device && isTargetDevice(device)) {
+        setDevices(prevDevices => {
+          const exists = prevDevices.some(d => d.id === device.id);
+          return exists
+            ? prevDevices.map(d => (d.id === device.id ? device : d))
+            : [...prevDevices, device];
         });
       }
     });
-
-    setTimeout(() => {
-      manager.stopDeviceScan();
-      setScanning(false);
-    }, 10000);
   };
 
   const stopScan = () => {
-    manager.stopDeviceScan();
-    setScanning(false);
+    bleManager.stopDeviceScan();
+    setIsScanning(false);
+    notifee.stopForegroundService();
   };
 
-  useEffect(() => {
-    return () => {
-      manager.destroy();
-    };
-  }, [manager]);
+  const isTargetDevice = (device: Device): boolean => {
+    if (device.serviceUUIDs?.some(uuid => uuid.includes(SERVICE_UUID))) return true;
+
+    if (device.serviceData) {
+      return Object.keys(device.serviceData).some(key => key.includes(SERVICE_UUID));
+    }
+
+    if (device.manufacturerData) {
+      try {
+        const decoded = Buffer.from(device.manufacturerData, 'base64').toString();
+        return /^\d{3,5}$/.test(decoded);
+      } catch {}
+    }
+
+    return false;
+  };
+
+  const extractRoomNumber = (device: Device): string => {
+    if (device.serviceData) {
+      for (const data of Object.values(device.serviceData)) {
+        try {
+          return Buffer.from(data, 'base64').toString();
+        } catch {}
+      }
+    }
+
+    if (device.manufacturerData) {
+      try {
+        return Buffer.from(device.manufacturerData, 'base64').toString();
+      } catch {}
+    }
+
+    return 'Unknown';
+  };
 
   return (
     <View style={styles.container}>
@@ -56,19 +125,25 @@ const BLEScreen = () => {
       <Text style={styles.description}>Bluetooth Low Energy debugging interface</Text>
       
       <Button
-        title={scanning ? "Stop Scanning" : "Start Scanning"}
-        onPress={scanning ? stopScan : startScan}
-        color={scanning ? '#f44336' : '#4caf50'}
+        title={isScanning ? "Stop Scanning" : "Start Scanning"}
+        onPress={isScanning ? stopScan : startScan}
+        color={isScanning ? '#f44336' : '#4caf50'}
       />
 
       <FlatList
-        data={devices}
+        data={devices.slice().sort((a, b) => {
+          // Sort by RSSI strength (higher values = stronger signal)
+          const rssiA = a.rssi ?? -999;
+          const rssiB = b.rssi ?? -999;
+          return rssiB - rssiA;
+        })}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.deviceContainer}>
             <Text style={styles.deviceName}>{item.name || 'Unknown Device'}</Text>
             <Text style={styles.deviceId}>{item.id}</Text>
-            <Text style={styles.deviceRoom}>Room Number: {item.roomNumber || 'N/A'}</Text>
+            <Text style={styles.deviceId}>RSSI: {item.rssi}</Text>
+            <Text style={styles.deviceRoom}>Room Number: {extractRoomNumber(item) || 'N/A'}</Text>
           </View>
         )}
         ListEmptyComponent={<Text style={styles.noDevices}>No devices found</Text>}
@@ -123,5 +198,3 @@ const styles = StyleSheet.create({
     color: '#888',
   },
 });
-
-export default BLEScreen;

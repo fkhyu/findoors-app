@@ -51,6 +51,7 @@ export interface Room {
   imageUrl?: string;
   description?: string;
   lastUpdated?: Date;
+  reservations?: string[];
 }
 
 export interface SearchFilters {
@@ -66,7 +67,7 @@ export type SortOrder = 'nearest' | 'alphabetical' | 'recently-added';
 export interface ApiResponse<T> {
   data?: T;
   error?: {
-    message: string;
+    message: string; 
     code: string;
   };
 }

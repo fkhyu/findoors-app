@@ -59,7 +59,6 @@
         }
       ],
       "expo-localization",
-      "./plugins/ibeacons-config.js",
       [
         "react-native-ble-plx",
         {

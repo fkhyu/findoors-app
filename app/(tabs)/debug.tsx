@@ -10,7 +10,7 @@ const Debug = () => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Debug Options</Text>
       <FlatList
-        data={[{id: 1, name: 'BLE debugging', screenURL: '/debug/ble'}, {id: 2, name: 'Import debug GeoJSON', screenURL: '/debug/geojson'}]} // Example data
+        data={[{id: 1, name: 'BLE debugging', screenURL: '/debug/ble'}, {id: 2, name: 'Import debug GeoJSON', screenURL: '/debug/geoJsonImport'}]} // Example data
         renderItem={({ item }) => (
           <Pressable style={styles.option} onPress={() => router.push(item.screenURL as any)}>
             <Text style={styles.optionText}>{item.name}</Text>
