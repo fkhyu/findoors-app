@@ -2,6 +2,7 @@ import { rooms } from '@/assets/placeholder/rooms';
 import FeatureIcon from '@/components/featureIcon';
 import Spacer from '@/components/Spacer';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Trans } from '@lingui/react/macro';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -15,7 +16,7 @@ const RoomDetails = () => {
   if (!room) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Room not found</Text>
+        <Text style={styles.title}><Trans>Room not found</Trans></Text>
       </View>
     );
   }
@@ -31,12 +32,12 @@ const RoomDetails = () => {
       )}
       <View style={styles.topContainer}>
         <View style={styles.topLeftContainer}>
-          <Text style={styles.htwo}>{room.name}</Text>
-          <Text style={styles.subtitle}>{room.number}</Text>
+          <Text style={styles.subtitle}>{room.name}</Text>
+          <Text style={styles.htwo}>{room.number}</Text>
         </View>
         <View style={styles.topRightContainer}>
           <Text style={styles.htwoplus}>{room.capacity}</Text>
-          <Text style={styles.hthree}>seats</Text>
+          <Text style={styles.hthree}><Trans>seats</Trans></Text>
         </View>
       </View>
       <View style={styles.topContainer}>
@@ -49,7 +50,7 @@ const RoomDetails = () => {
             router.push(`/schedule/${room.id}`);
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: 500 }}>Book</Text>
+          <Text style={{ fontSize: 20, fontWeight: 500 }}><Trans>Book</Trans></Text>
         </Pressable>
         <Link style={styles.topRightButton} href={{pathname: "/", params: { roomId: room.id, floor: room.floorId }}} asChild>
           <Pressable style={({ pressed }) => [
@@ -58,12 +59,12 @@ const RoomDetails = () => {
             ]}  
             onPress={() => {router.push(`/`);}}
           >
-            <Text style={{ fontSize: 20, fontWeight: 600, }}>Show on Map</Text>
+            <Text style={{ fontSize: 20, fontWeight: 600, }}><Trans>Show on Map</Trans></Text>
           </Pressable>
           </Link>
       </View>
       <View style={styles.bookingContainer}>
-        <Text style={styles.title}>Booking Information</Text>
+        <Text style={styles.title}><Trans>Booking Information</Trans></Text>
         <Text style={styles.subtitle}>
           {room.bookingInfo || 'No booking information available'}
         </Text>
@@ -84,7 +85,7 @@ const RoomDetails = () => {
       )}
       <Spacer/>
       <View style={styles.featuresContainer}>
-        <Text style={{ fontSize: 20, fontWeight: 500, }}>Features</Text>
+        <Text style={{ fontSize: 20, fontWeight: 500, }}><Trans>Features</Trans></Text>
         <View style={{ flexDirection: 'row' }}>
           {room.features.length > 0 ? (
             room.features.map((feature, index) => (
@@ -102,35 +103,64 @@ const RoomDetails = () => {
       </View>
       <Spacer/>
       <View style={styles.reviewsContainer}>
-        <MaterialIcons 
-          name="star"
-          size={24}
-          color="#FFD700"
-        />
-        <MaterialIcons 
-          name="star"
-          size={24}
-          color="#FFD700"
-        />
-        <MaterialIcons 
-          name="star"
-          size={24}
-          color="#FFD700"
-        />
-        <MaterialIcons 
-          name="star"
-          size={24}
-          color="#FFD700"
-        />
-        <MaterialIcons 
-          name="star"
-          size={24}
-          color="#FFD700"
-        />
+        <View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialIcons 
+              name="star"
+              size={24}
+              color="#FFD700"
+            />
+            <MaterialIcons 
+              name="star"
+              size={24}
+              color="#FFD700"
+            />
+            <MaterialIcons 
+              name="star"
+              size={24}
+              color="#FFD700"
+            />
+            <MaterialIcons 
+              name="star"
+              size={24}
+              color="#FFD700"
+            />
+            <MaterialIcons 
+              name="star"
+              size={24}
+              color="#FFD700"
+            />
+          </View>
+          <Text style={{ fontSize: 14, fontWeight: 400, }}>5/5</Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Pressable 
+            style={({ pressed }) => [
+              styles.smallButton,
+              pressed && styles.pressed
+            ]} 
+            onPress={() => {
+              router.push(`/report/room/${room.id}`);
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: 400 }}>Review</Text>
+          </Pressable>
+        </View>
       </View>
       <Spacer/>
-      <View style={styles.reviewsContainer}>
+      <View style={styles.reportContainer}>
         <Text style={{ fontSize: 20, fontWeight: 500, }}>Any issues?</Text>
+        <Pressable 
+          style={({ pressed }) => [
+            styles.smallButton,
+            pressed && styles.pressed
+          ]} 
+          onPress={() => {
+            router.push(`/report/room/${room.id}`);
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 400 }}>Report</Text>
+        </Pressable>
       </View>
     </ScrollView>
   );
@@ -225,6 +255,23 @@ const styles = StyleSheet.create({
     padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  reportContainer: {
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  smallButton: {
+    padding: 12,
+    borderRadius: 8,
+    paddingVertical: 6,
+    backgroundColor: '#dedede',
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 });
 

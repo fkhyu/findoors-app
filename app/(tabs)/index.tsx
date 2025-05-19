@@ -3,7 +3,7 @@ import FriendItem from "@/components/friendItem";
 import { getCachedGeoJSON } from "@/components/functions/geoJson";
 import MapBottomSheet from "@/components/mapBottomSheet";
 import { BottomSheetFlatList, BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { Camera, FillExtrusionLayer, FillLayer, ImageSource, MapView, RasterLayer, ShapeSource, UserLocation, setAccessToken } from '@rnmapbox/maps';
+import { Camera, CustomLocationProvider, FillExtrusionLayer, FillLayer, ImageSource, MapView, RasterLayer, setAccessToken, ShapeSource, UserLocation } from '@rnmapbox/maps';
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -44,6 +44,12 @@ export default function HomeScreen() {
   setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN as string)
 
   const [geoData, setGeoData] = useState(null);
+  const [friends, setFriends] = useState([
+    { name: 'Faru Yusupov', id: '1', lat: 60.18394233125424, lon: 24.818510511790645 },
+    { name: 'Toivo Kallio', id: '2', lat: 60.18394233125424, lon: 24.818510511790645 },
+    { name: 'Wilmer von Harpe', id: '3', lat: 60.18394233125424, lon: 24.818510511790645 },
+    { name: 'Maximilian Bergström', id: '4', lat: 60.18394233125424, lon: 24.818510511790645 },
+  ]);
 
   // On mount: try loading from cache
   useEffect(() => {
@@ -76,10 +82,10 @@ export default function HomeScreen() {
           <FillExtrusionLayer
             id="extrusionLayer"
             style={{
-              fillExtrusionHeight: 1,
+              fillExtrusionHeight: 10,
               fillExtrusionBase: 0,
               fillExtrusionColor: '#444444', 
-              fillExtrusionOpacity: 0.1,
+              fillExtrusionOpacity: 0.8,
             }}
           />
           <FillLayer
@@ -88,13 +94,16 @@ export default function HomeScreen() {
               fillColor: '#444444',
               fillOpacity: 0.5,
             }}
-            onPress={() => {}}
+
           />
         </ShapeSource>
-        <UserLocation
-          showsUserHeadingIndicator={false} 
-        />
 
+        <CustomLocationProvider
+          coordinate={[24.18510511790645, 60.18394233125424]}
+          heading={0}
+        />
+        <UserLocation/>
+      
         <ImageSource
           id="buildingImage"
           url={require('@/assets/images/floor0.png')}
@@ -124,8 +133,11 @@ export default function HomeScreen() {
             rasterOpacity: 0,
           }}
         />
+
+        
       </MapView>
 
+      
       <MapBottomSheet
         initialSnap="mid"
       >

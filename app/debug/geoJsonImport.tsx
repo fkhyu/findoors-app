@@ -38,7 +38,7 @@ const GeoJsonImport = () => {
       </Pressable>
       <Pressable onPress={handleCachedList} style={{ padding: 16, backgroundColor: '#e0e0e0', borderRadius: 8, marginVertical: 8, width: '100%' }}>
         <Text style={{ fontSize: 18, color: '#333' }}>
-          See Cached GeoJSON
+          t(See Cached GeoJSON)
         </Text>
       </Pressable>
       <ScrollView>

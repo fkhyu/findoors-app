@@ -2,7 +2,7 @@ import { Room } from "@/types";
 
 export const rooms: Room[] = [
   { id: '1', name: 'Room 101', number: "101", floorId: '1', capacity: 20, imageUrl: 'https://placeholder.pagebee.io/api/random/600/300' },
-  { id: '2', name: 'Room 102', number: "102", floorId: '1', capacity: 20, features: ['tv', 'kitchen', 'blackboard'], isBookable: true, imageUrl: 'https://placeholder.pagebee.io/api/random/600/300' },
+  { id: '2409', name: 'Keittiökemian Luokka', number: "2409", floorId: '2', capacity: 20, features: ['tv', 'kitchen', 'blackboard'], isBookable: true, imageUrl: 'https://placeholder.pagebee.io/api/random/600/300' },
   { id: '3', name: 'Room 103', number: "103", floorId: '1', capacity: 20, imageUrl: 'https://placeholder.pagebee.io/api/random/600/300' },
   { id: '4', name: 'Room 201', number: "201", floorId: '2', capacity: 20, imageUrl: 'https://placeholder.pagebee.io/api/random/600/300' },
   { id: '5', name: 'Room 202', number: "202", floorId: '2', capacity: 20, imageUrl: 'https://placeholder.pagebee.io/api/random/600/300' },
