@@ -24,33 +24,33 @@ msgstr "Book"
 
 #: app/buildings/floors/rooms/[slug].tsx:67
 msgid "Booking Information"
-msgstr ""
+msgstr "Booking Information"
 
 #: app/(tabs)/_layout.tsx:41
-msgid "buildings"
+msgid "Buildings"
 msgstr "Buildings"
 
 #: app/(tabs)/_layout.tsx:23
-msgid "debug"
+msgid "Debug"
 msgstr "Debug"
 
 #: app/buildings/floors/rooms/[slug].tsx:88
 msgid "Features"
-msgstr ""
+msgstr "Features"
 
 #: app/(tabs)/_layout.tsx:32
-msgid "map"
+msgid "Map"
 msgstr "Map"
 
 #: app/buildings/floors/rooms/[slug].tsx:19
 msgid "Room not found"
-msgstr ""
+msgstr "Room not found"
 
 #: app/buildings/floors/rooms/[slug].tsx:40
 msgid "seats"
-msgstr ""
+msgstr "seats"
 
 #: app/buildings/floors/rooms/[slug].tsx:62
 msgid "Show on Map"
-msgstr ""
+msgstr "Show on Map"
 

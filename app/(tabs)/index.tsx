@@ -156,7 +156,7 @@ export default function HomeScreen() {
             }}
           />
           <BottomSheetFlatList 
-            data={[{ name: 'Faru Yusufpov', id: '1' }, { name: 'Toivo Kallio', id: '2' }, { name: 'Wilmer von Harpe', id: '3' }, { name: 'Maximilian Bergström', id: '4' }]}
+            data={[{ name: 'Faru Yusupov', id: '1' }, { name: 'Toivo Kallio', id: '2' }, { name: 'Wilmer von Harpe', id: '3' }, { name: 'Maximilian Bergström', id: '4' }]}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <FriendItem {...item}/>

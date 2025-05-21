@@ -1,10 +1,24 @@
+import { i18n } from '@lingui/core';
+import { I18nProvider } from "@lingui/react";
 import { Stack } from 'expo-router';
 import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
+/*
+const locales = getLocales();
+const language = locales[0].languageCode;
 
+i18n.load({ en, fi, sv })
+
+if (language === "fi" || language === "sv" || language === "en") {
+  i18n.activate(language);
+} else {
+  i18n.activate("en");
+}
+*/
 export default function RootLayout() {
   return (
+    <I18nProvider i18n={i18n} language="en">
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar barStyle={'dark-content'}/>
       <Stack>
@@ -12,5 +26,6 @@ export default function RootLayout() {
         <Stack.Screen name="+not-found" />
       </Stack>
     </GestureHandlerRootView>
+    </I18nProvider>
   );
 }

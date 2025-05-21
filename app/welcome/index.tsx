@@ -5,6 +5,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 export default function WelcomeScreen() {
   const router = useRouter();
 
+
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Welcome' }} />

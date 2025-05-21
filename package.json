@@ -14,6 +14,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.1.4",
+    "@gorhom/paper-onboarding": "^1.2.0",
     "@lingui/cli": "^5.3.1",
     "@lingui/core": "^5.3.1",
     "@lingui/macro": "^5.3.1",

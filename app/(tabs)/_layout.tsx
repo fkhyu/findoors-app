@@ -1,11 +1,20 @@
+import en from "@/locales/en/messages.po";
+import fi from "@/locales/fi/messages.po";
+import sv from "@/locales/sv/messages.po";
 import { MaterialIcons } from '@expo/vector-icons';
+import { i18n } from '@lingui/core';
 import { t } from '@lingui/macro';
+import { I18nProvider } from "@lingui/react";
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
+i18n.load({ en, fi, sv })
+i18n.activate("en")
+
 export default function TabLayout() {
   return (
+    <I18nProvider i18n={i18n} language="en">
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -18,9 +27,18 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
+        name="find"
+        options={{
+          title: t`Find`,
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="search" size={24} color={color} />
+          ),
+        }}
+      />    
+      <Tabs.Screen
         name="debug"
         options={{
-          title: t`debug`,
+          title: t`Debug`,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="bug-report" size={24} color={color} />
           ),
@@ -29,7 +47,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: t`map`,
+          title: t`Map`,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="map" size={24} color={color} />
           ),
@@ -38,12 +56,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="buildings"
         options={{
-          title: t`buildings`,
+          title: t`Buildings`,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="business" size={24} color={color} />
           ),
         }}
-      />
+      />      
     </Tabs>
+    </I18nProvider>
   );
 }
