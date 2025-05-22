@@ -1,10 +1,19 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const Find = () => {
   const [ selectedCont, setSelectedCont ] = useState("starts");
+  const [ selectedDate, setSelectedDate ] = useState(new Date());
+  const [ selectedDuration, setSelectedDuration ] = useState(0);
+  const [ selectedPeople, setSelectedPeople ] = useState(2);
+  const [ selectedFeatures, setSelectedFeatures ] = useState([]);
+  
+  const handleDecrement = () => { if (selectedPeople > 1) setSelectedPeople(p => p - 1); };
+  const handleIncrement = () => { if (selectedPeople < 50) setSelectedPeople(p => p + 1); };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -17,7 +26,7 @@ const Find = () => {
             onPress={() => setSelectedCont("")}>
             <View style={styles.maxTopContainer}>
               <MaterialIcons name="people" size={28} color="black"  />
-              <Text style={styles.minLeftText}>People</Text>
+              <Text style={styles.minLeftText}>Date</Text>
             </View>
             <View style={styles.maxBottomContainer}>
               
@@ -32,11 +41,10 @@ const Find = () => {
             onPress={() => setSelectedCont("datetime")}
           >
             <View style={styles.minLeft}>
-              <MaterialIcons name="people" size={28} color="black"  />
-              <Text style={styles.minLeftText}>People🔥</Text>
+              <MaterialIcons name="calendar-month" size={28} color="black"  />
+              <Text style={styles.minLeftText}>Date</Text>
             </View>
             <View style={styles.minRight}>
-              {/* People Count */}
               <Text>1</Text>
             </View>
           </Pressable>
@@ -50,8 +58,8 @@ const Find = () => {
             ]}
             onPress={() => setSelectedCont("")}>
             <View style={styles.maxTopContainer}>
-              <MaterialIcons name="people" size={28} color="black"  />
-              <Text style={styles.minLeftText}>People</Text>
+              <MaterialIcons name="access-time" size={28} color="black"  />
+              <Text style={styles.minLeftText}>Duration</Text>
             </View>
             <View style={styles.maxBottomContainer}>
               
@@ -66,8 +74,8 @@ const Find = () => {
             onPress={() => setSelectedCont("duration")}
           >
             <View style={styles.minLeft}>
-              <MaterialIcons name="people" size={28} color="black"  />
-              <Text style={styles.minLeftText}>People</Text>
+              <MaterialIcons name="access-time" size={28} color="black"  />
+              <Text style={styles.minLeftText}>Duration</Text>
             </View>
             <View style={styles.minRight}>
               {/* People Count */}
@@ -88,7 +96,31 @@ const Find = () => {
               <Text style={styles.minLeftText}>People</Text>
             </View>
             <View style={styles.maxBottomContainer}>
-              
+              <Pressable 
+                onPress={handleDecrement}
+                style={{ 
+                  padding: 16, 
+                  backgroundColor: '#ebebeb', 
+                  borderRadius: 16,
+                  opacity: selectedPeople > 1 ? 1 : 0.5 
+                }}
+              >
+                <MaterialIcons name="remove" size={28} color="black"  />
+                </Pressable>
+              <View>
+                <TextInput style={{ fontSize: 28, fontWeight: 'semibold', paddingHorizontal: 24 }}>{selectedPeople}</TextInput>
+              </View>
+              <Pressable 
+                onPress={handleIncrement}
+                style={{ 
+                  padding: 16, 
+                  backgroundColor: '#ebebeb', 
+                  borderRadius: 16,
+                  opacity: selectedPeople >= 50 ? 0.5 : 1 
+                }}
+              >
+                <MaterialIcons name="add" size={28} color="black" />
+              </Pressable>
             </View>
           </Pressable>
         ) : (
@@ -105,7 +137,7 @@ const Find = () => {
             </View>
             <View style={styles.minRight}>
               {/* People Count */}
-              <Text>1</Text>
+              <Text>{selectedPeople}</Text>
             </View>
           </Pressable>
         )
@@ -118,8 +150,8 @@ const Find = () => {
             ]}
             onPress={() => setSelectedCont("")}>
             <View style={styles.maxTopContainer}>
-              <MaterialIcons name="people" size={28} color="black"  />
-              <Text style={styles.minLeftText}>People</Text>
+              <MaterialIcons name="fact-check" size={28} color="black"  />
+              <Text style={styles.minLeftText}>Features</Text>
             </View>
             <View style={styles.maxBottomContainer}>
               
@@ -134,8 +166,8 @@ const Find = () => {
             onPress={() => setSelectedCont("features")}
           >
             <View style={styles.minLeft}>
-              <MaterialIcons name="people" size={28} color="black"  />
-              <Text style={styles.minLeftText}>People</Text>
+              <MaterialIcons name="fact-check" size={28} color="black"  />
+              <Text style={styles.minLeftText}>Features</Text>
             </View>
             <View style={styles.minRight}>
               {/* People Count */}
@@ -163,25 +195,32 @@ const styles = StyleSheet.create({
   },
   peopleContainer: {
     width: '100%',
-    height: '16%',
+    height: SCREEN_HEIGHT * 0.16,
     backgroundColor: '#e0e0e0',
     marginVertical: 4,
     flexDirection: 'column',
-    padding: 16,
   },
   featuresContainer: {
 
   },
   maxTopContainer: {
     width: '100%',
-    height: '8%',
+    height: SCREEN_HEIGHT * 0.08,
     backgroundColor: '#e0e0e0',
     alignContent: 'center',
+    flexDirection: 'row',
+    padding: 16,
+    paddingBottom: 0,
   },
   maxBottomContainer: {
     width: '100%',
-    height: '8%',
+    height: SCREEN_HEIGHT * 0.08,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#e0e0e0',
+    flexDirection: 'row',
+    padding: 16,
+    paddingTop: 0,
   },
   minContainer: {
     width: '100%',
