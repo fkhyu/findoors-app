@@ -1,6 +1,7 @@
 import FeatureSelectButton from "@/components/featureSelectButton";
 import FindRoomView from "@/components/findRoomView";
 import Spacer from "@/components/Spacer";
+import { supabase } from "@/lib/supabase";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
@@ -16,12 +17,48 @@ const Find = () => {
   const [ selectedPeople, setSelectedPeople ] = useState(2);
   const [ selectedFeatures, setSelectedFeatures ] = useState([]);
   const [ showSearchBar, setShowSearchBar ] = useState(false); // New state for search bar visibility
+  const [ searchQuery, setSearchQuery ] = useState(""); // New state for search query
+  const [ searchResults, setSearchResults ] = useState([]); // New state for search results
   
   const handlePeopleDecrement = () => { if (selectedPeople > 1) setSelectedPeople(p => p - 1); };
   const handlePeopleIncrement = () => { if (selectedPeople < 30) setSelectedPeople(p => p + 1); };
   const handleDurationDecrement = () => { if (selectedDuration > 15) setSelectedDuration(p => p - 15); };
   const handleDurationIncrement = () => { if (selectedDuration < 90) setSelectedDuration(p => p + 15); };
   
+  const handleFindFilters = async () => {
+    // Implement search functionality here
+    console.log("Search initiated with:", {
+      date: selectedDate,
+      duration: selectedDuration,
+      people: selectedPeople,
+      features: selectedFeatures,
+    });
+
+    const { data, error } = await supabase
+      .from('rooms')
+      .select('*')
+      .gte('seats', selectedPeople) // Assuming 'people_capacity' is the column name for people count
+      //.contains('equipment', selectedFeatures); // Assuming 'features' is an array column
+
+    if (error) {
+      console.error("Error fetching rooms:", error);
+      return;
+    }
+
+    setSearchResults(data);
+
+    console.log("Found rooms:", data);
+    // Further processing of the found rooms
+  }
+
+  const handleClearFilters = () => {
+    setSelectedCont("");
+    setSelectedDate(new Date());
+    setSelectedDuration(15);
+    setSelectedPeople(2);
+    setSelectedFeatures([]);
+
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,7 +66,7 @@ const Find = () => {
         <Text style={styles.topBarText}>Find a Room</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', }}>
           <Pressable 
-            onPress={() => {}}
+            onPress={handleClearFilters}
             style={({ pressed }) => [
               { opacity: pressed ? 0.7 : 1 },
               { marginRight: 16, }
@@ -288,7 +325,7 @@ const Find = () => {
                   }} 
                   icon="blackboard" 
                   title="Board"
-                  selected={selectedFeatures.includes("wifi")}
+                  selected={selectedFeatures.includes("blackboard")}
                 />
                 <FeatureSelectButton 
                   feature="wifi" 
@@ -328,21 +365,39 @@ const Find = () => {
       <Pressable style={({ pressed }) => [
         { opacity: pressed ? 0.7 : 1 },
         styles.findContainer
-      ]}>
+      ]} onPress={handleFindFilters}>
         <Text style={styles.findText}>Find</Text>
       </Pressable>
       <Spacer/>
-      <View style={{ padding: 8, paddingBottom: 0, }}>
-        <Text>Favourites:</Text>
-      </View>
-      <FlatList
-        data={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
-        keyExtractor={(item) => item.toString()}
+      {searchResults.length > 0 ? (
+      <View>
+        <View style={{ padding: 8, paddingBottom: 0, }}>
+          <Text>Search Results:</Text>
+        </View>
+        <FlatList
+          data={searchResults}
+          keyExtractor={(item) => item.id}
 
-        renderItem={({ item }) => (
-          <FindRoomView/>
-        )}
-      />
+          renderItem={({ item }) => (
+            <FindRoomView room={item}/>
+          )}
+        />
+      </View> 
+      ) : (
+      <View>
+        <View style={{ padding: 8, paddingBottom: 0, }}>
+          <Text>Favourites:</Text>
+        </View>
+        <FlatList
+          data={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
+          keyExtractor={(item) => item.toString()}
+
+          renderItem={({ item }) => (
+            <FindRoomView/>
+          )}
+        />
+      </View> 
+      )}
       </ScrollView>
     </SafeAreaView>
   );

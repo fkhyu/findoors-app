@@ -13,7 +13,8 @@ const Debug = () => {
         data={[
           {id: 1, name: 'BLE debugging', screenURL: '/debug/ble'}, 
           {id: 2, name: 'Import debug GeoJSON', screenURL: '/debug/geoJsonImport'}, 
-          {id: 3, name: 'Language Options', screenURL: '/debug/lang'}
+          {id: 3, name: 'Language Options', screenURL: '/debug/lang'},
+          {id: 4, name: 'Supabase Debug', screenURL: '/debug/supabase'},
         ]} // Example data
         renderItem={({ item }) => (
           <Pressable style={styles.option} onPress={() => router.push(item.screenURL as any)}>

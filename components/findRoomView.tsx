@@ -1,29 +1,58 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-const FindRoomView = () => {
+type Room = {
+  id: string;
+  room_number?: number | null;
+  title?: string | null;
+  description?: string | null;
+  seats?: number | null;
+  type?: string | null;
+  equipment?: any | null; // Or a more specific type if the structure of equipment is known
+  wilma_id?: string | null;
+  bookable?: string | null;
+  image_url?: string | null;
+  created_at?: string | null; // Or Date
+  schedule?: string | null;
+  geometry?: any | null; // Or a more specific type for GeoJSON, for example
+  color: string;
+};
+
+interface FindRoomViewProps {
+  room?: Partial<Room>; // room is optional and can be an incomplete Room object
+}
+
+const FindRoomView = ({ room = {} }: FindRoomViewProps) => {
   return (
     <Pressable style={({pressed}) => [
       { opacity: pressed ? 0.7 : 1 },
       styles.container,
     ]}>
-      <View style={styles.leftContainer}> 
-        {/* Placeholder for room details */}
-        
+      <View style={styles.leftContainer}>
+        <View style={{ flexDirection: 'row', }}>
+          <Text style={{ color: 'black', fontSize: 20, fontWeight: 'bold' }}>{room.room_number || '2025'} </Text>
+          <Text style={{ color: 'black', fontSize: 20, fontWeight: 'bold' }}>{room.title || 'Room Name'}</Text>
+        </View>
+        <Text style={{ padding: 6, paddingLeft: 0, fontSize: 16, }}>{room.seats || '15'} seats</Text>
       </View>
       <View style={styles.rightContainer}>
-        <View style={styles.imagePlaceholder} />
+        { room.image_url ? (
+          <Image
+            source={{ uri: room.image_url }}
+            style={{ width: '100%', height: '75%', borderTopRightRadius: 10, backgroundColor: '#ccc' }}
+            resizeMode="cover"
+          />
+        ) : <View style={styles.imagePlaceholder} /> }
         <Pressable style={({pressed}) => [
           { opacity: pressed ? 0.7 : 1 },
           styles.bookButton
-        ]}>
+        ]} hitSlop={10}>
           <Text style={styles.bookText}>Book</Text>
         </Pressable>
       </View>
     </Pressable>
   );
 }
-
 export default FindRoomView;
 
 const styles = StyleSheet.create({
@@ -38,14 +67,14 @@ const styles = StyleSheet.create({
   },
   leftContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#99f',
-    padding: 20,
+    backgroundColor: '#e0e0e0',
+    padding: 12,
+    paddingLeft: 14,
+    paddingRight: 0,
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
     height: '100%',
-    width: '50%',
+    width: '60%',
   },
   rightContainer: {
     flex: 1,
@@ -55,7 +84,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 10,
     borderBottomRightRadius: 10,
     height: 180,
-    width: '50%',
+    width: '40%',
   },
   imagePlaceholder: {
     width: '100%',
@@ -70,7 +99,7 @@ const styles = StyleSheet.create({
     overflow: 'visible',
     justifyContent: 'center',
     borderBottomRightRadius: 10,
-    backgroundColor: '#ff6347',
+    backgroundColor: '#4A89EE',
   },
   bookText: {
     color: '#fff',
