@@ -166,7 +166,6 @@ const Find = () => {
               <Text style={styles.minLeftText}>Duration</Text>
             </View>
             <View style={styles.minRight}>
-              {/* People Count */}
               <Text>{selectedDuration} min</Text>
             </View>
           </Pressable>
@@ -181,8 +180,11 @@ const Find = () => {
             ]}
             onPress={() => setSelectedCont("")}>
             <View style={styles.maxTopContainer}>
-              <MaterialIcons name="people" size={28} color="black"  />
-              <Text style={styles.minLeftText}>People</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <MaterialIcons name="people" size={28} color="black"  />
+                <Text style={styles.minLeftText}>People</Text>
+              </View>
+              <Text>{selectedPeople}</Text>
             </View>
             <View style={styles.maxBottomContainer}>
               <Pressable 
@@ -247,7 +249,47 @@ const Find = () => {
               <Text>{selectedFeatures.length}</Text>
             </View>
             <View style={styles.featuresBottomContainer}>
+              {/*<View style={styles.featuresRowContainer}>
+                <FeatureSelectButton 
+                  feature="classroom" 
+                  onPress={() => {
+                    if (selectedFeatures.includes("classroom")) {
+                      setSelectedFeatures(selectedFeatures.filter(f => f !== "classroom"));
+                    } else {
+                      setSelectedFeatures([...selectedFeatures, "classroom"]);
+                    }
+                  }} 
+                  icon="tv" 
+                  title="Classroom"
+                />
+              </View>*/}
               <View style={styles.featuresRowContainer}>
+                <FeatureSelectButton 
+                  feature="display" 
+                  onPress={() => {
+                    if (selectedFeatures.includes("display")) {
+                      setSelectedFeatures(selectedFeatures.filter(f => f !== "display"));
+                    } else {
+                      setSelectedFeatures([...selectedFeatures, "display"]);
+                    }
+                  }} 
+                  icon="tv" 
+                  title="Display"
+                  selected={selectedFeatures.includes("display")}
+                />
+                <FeatureSelectButton 
+                  feature="blackboard" 
+                  onPress={() => {
+                    if (selectedFeatures.includes("blackboard")) {
+                      setSelectedFeatures(selectedFeatures.filter(f => f !== "blackboard"));
+                    } else {
+                      setSelectedFeatures([...selectedFeatures, "blackboard"]);
+                    }
+                  }} 
+                  icon="blackboard" 
+                  title="Board"
+                  selected={selectedFeatures.includes("wifi")}
+                />
                 <FeatureSelectButton 
                   feature="wifi" 
                   onPress={() => {
@@ -257,12 +299,10 @@ const Find = () => {
                       setSelectedFeatures([...selectedFeatures, "wifi"]);
                     }
                   }} 
-                  icon="wifi" 
-                  title="WiFi"
+                  icon="tv" 
+                  title="Display"
+                  selected={selectedFeatures.includes("wifi")}
                 />
-              </View>
-              <View style={styles.featuresRowContainer}>
-
               </View>
             </View>
           </Pressable>
@@ -279,7 +319,6 @@ const Find = () => {
               <Text style={styles.minLeftText}>Features</Text>
             </View>
             <View style={styles.minRight}>
-              {/* People Count */}
               <Text>{selectedFeatures.length}</Text>
             </View>
           </Pressable>
@@ -429,7 +468,7 @@ const styles = StyleSheet.create({
   featuresRowContainer: {
     width: '100%',
     height: SCREEN_HEIGHT * 0.10,
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
     flexDirection: 'row',
     padding: 8,

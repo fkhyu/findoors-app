@@ -1,14 +1,19 @@
-import { MaterialIcons } from '@expo/vector-icons';
+import { Entypo, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-const FeatureSelectButton = ({ feature, onPress, icon, title }) => {
+const FeatureSelectButton = ({ feature, onPress, icon, title, selected }) => {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [
       { opacity: pressed ? 0.7 : 1 },
       styles.container,
+      selected ? { backgroundColor: '#d1e7dd' } : { backgroundColor: '#f0f0f0' }
     ]}>
-      <MaterialIcons name={icon} size={28} color="black" />
+      { icon === 'blackboard' ? (
+        <Entypo name={icon} size={26} color="black" />
+      ) : (
+        <MaterialIcons name={icon} size={28} color="black" />
+      )}
       <Text style={styles.text}>{title}</Text>
     </Pressable>
   );
@@ -21,15 +26,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 8,
+    padding: 10,
     borderRadius: 10,
     flexDirection: 'row',
     width: '33%',
-    backgroundColor: '#f0f0f0',
+    margin: 4,
   },
   text: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
+    paddingLeft: 8,
   }
 })
