@@ -2,6 +2,8 @@ import { rooms } from '@/assets/placeholder/rooms';
 import FeatureIcon from '@/components/featureIcon';
 import Spacer from '@/components/Spacer';
 import { MaterialIcons } from '@expo/vector-icons';
+import { I18n } from '@lingui/core';
+import { I18nProvider } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -22,6 +24,7 @@ const RoomDetails = () => {
   }
   
   return (
+    <I18nProvider i18n={I18n}>
     <ScrollView style={styles.container}>
       {room.imageUrl && (
         <Image
@@ -163,6 +166,7 @@ const RoomDetails = () => {
         </Pressable>
       </View>
     </ScrollView>
+    </I18nProvider>
   );
 };
 

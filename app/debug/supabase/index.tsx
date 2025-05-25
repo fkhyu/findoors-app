@@ -27,6 +27,24 @@ const SupabaseDebug = () => {
       >
         <Text style={styles.text}>Sign In</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.text}
+        onPress={() => router.push('/debug/supabase/buildings')}
+      >
+        <Text style={styles.text}>Buildings</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.text}
+        onPress={() => router.push('/debug/supabase/floors')}
+      >
+        <Text style={styles.text}>Floors</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.text}
+        onPress={() => router.push('/debug/supabase/rooms')}
+      >
+        <Text style={styles.text}>Rooms</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

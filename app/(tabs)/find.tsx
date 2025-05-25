@@ -3,22 +3,44 @@ import FindRoomView from "@/components/findRoomView";
 import Spacer from "@/components/Spacer";
 import { supabase } from "@/lib/supabase";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
-import { Dimensions, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Dimensions, FlatList, LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, UIManager, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
+// Enable LayoutAnimation for Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+type Room = {
+  id: string;
+  room_number?: number | null;
+  title?: string | null;
+  description?: string | null;
+  seats?: number | null;
+  type?: string | null;
+  equipment?: any | null; // Or a more specific type if the structure of equipment is known
+  wilma_id?: string | null;
+  bookable?: string | null;
+  image_url?: string | null;
+  created_at?: string | null; // Or Date
+  schedule?: string | null;
+  geometry?: any | null; // Or a more specific type for GeoJSON, for example
+  color: string;
+};
+
 const Find = () => {
   const [ selectedCont, setSelectedCont ] = useState("starts");
-  const [ selectedDate, setSelectedDate ] = useState(new Date());
+  const [ selectedDate, setSelectedDate ] = useState<Date>(new Date());
   const [ selectedDuration, setSelectedDuration ] = useState(15);
   const [ selectedPeople, setSelectedPeople ] = useState(2);
-  const [ selectedFeatures, setSelectedFeatures ] = useState([]);
+  const [ selectedFeatures, setSelectedFeatures ] = useState<string[]>([]);
   const [ showSearchBar, setShowSearchBar ] = useState(false); // New state for search bar visibility
   const [ searchQuery, setSearchQuery ] = useState(""); // New state for search query
-  const [ searchResults, setSearchResults ] = useState([]); // New state for search results
+  const [ searchResults, setSearchResults ] = useState<Room[]>([]); // New state for search results
   
   const handlePeopleDecrement = () => { if (selectedPeople > 1) setSelectedPeople(p => p - 1); };
   const handlePeopleIncrement = () => { if (selectedPeople < 30) setSelectedPeople(p => p + 1); };
@@ -36,9 +58,10 @@ const Find = () => {
 
     const { data, error } = await supabase
       .from('rooms')
-      .select('*')
+      .select('id, room_number, title, description, seats, type, equipment, wilma_id, bookable, image_url, created_at, schedule, color')
+      .eq('bookable', 'true')
       .gte('seats', selectedPeople) // Assuming 'people_capacity' is the column name for people count
-      //.contains('equipment', selectedFeatures); // Assuming 'features' is an array column
+      .contains('equipment', selectedFeatures); // Assuming 'features' is an array column
 
     if (error) {
       console.error("Error fetching rooms:", error);
@@ -57,7 +80,7 @@ const Find = () => {
     setSelectedDuration(15);
     setSelectedPeople(2);
     setSelectedFeatures([]);
-
+    setSearchResults([]);
   };
 
   return (
@@ -93,7 +116,10 @@ const Find = () => {
               { opacity: pressed ? 0.7 : 1 },
               styles.startsContainer
             ]}
-            onPress={() => setSelectedCont("")}>
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSelectedCont("");
+            }}>
             <View style={styles.maxTopContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MaterialIcons name="calendar-month" size={28} color="black"  />
@@ -110,8 +136,8 @@ const Find = () => {
                 display="default"
                 minuteInterval={15}
                 textColor="black"
-                onChange={(event, date) => {
-                  setSelectedDate(date);
+                onChange={(event: DateTimePickerEvent, date?: Date) => {
+                  if (date) setSelectedDate(date);
                 }}
               />
               <DateTimePicker
@@ -123,8 +149,8 @@ const Find = () => {
                 textColor="black"
                 maximumDate={new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)}
                 minimumDate={new Date(Date.now())}
-                onChange={(event, date) => {
-                  setSelectedDate(date);
+                onChange={(event: DateTimePickerEvent, date?: Date) => {
+                  if (date) setSelectedDate(date);
                 }}
               />
             </View>
@@ -135,7 +161,10 @@ const Find = () => {
               { opacity: pressed ? 0.7 : 1 },
               styles.minContainer
             ]}
-            onPress={() => setSelectedCont("datetime")}
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSelectedCont("datetime");
+            }}
           >
             <View style={styles.minLeft}>
               <MaterialIcons name="calendar-month" size={28} color="black"  />
@@ -154,7 +183,10 @@ const Find = () => {
               { opacity: pressed ? 0.7 : 1 },
               styles.durationContainer
             ]}
-            onPress={() => setSelectedCont("")}>
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSelectedCont("");
+            }}>
             <View style={styles.maxTopContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MaterialIcons name="access-time" size={28} color="black"  />
@@ -196,7 +228,10 @@ const Find = () => {
               { opacity: pressed ? 0.7 : 1 },
               styles.minContainer
             ]}
-            onPress={() => setSelectedCont("duration")}
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSelectedCont("duration");
+            }}
           >
             <View style={styles.minLeft}>
               <MaterialIcons name="access-time" size={28} color="black"  />
@@ -215,7 +250,10 @@ const Find = () => {
               { opacity: pressed ? 0.7 : 1 },
               styles.peopleContainer
             ]}
-            onPress={() => setSelectedCont("")}>
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSelectedCont("");
+            }}>
             <View style={styles.maxTopContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MaterialIcons name="people" size={28} color="black"  />
@@ -257,7 +295,10 @@ const Find = () => {
               { opacity: pressed ? 0.7 : 1 },
               styles.minContainer
             ]}
-            onPress={() => setSelectedCont("people")}
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSelectedCont("people");
+            }}
           >
             <View style={styles.minLeft}>
               <MaterialIcons name="people" size={28} color="black"  />
@@ -277,7 +318,10 @@ const Find = () => {
               { opacity: pressed ? 0.7 : 1 },
               styles.featuresContainer
             ]}
-            onPress={() => setSelectedCont("")}>
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSelectedCont("");
+            }}>
             <View style={styles.maxTopContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <MaterialIcons name="fact-check" size={28} color="black"  />
@@ -349,7 +393,10 @@ const Find = () => {
               { opacity: pressed ? 0.7 : 1 },
               styles.minContainer
             ]}
-            onPress={() => setSelectedCont("features")}
+            onPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSelectedCont("features");
+            }}
           >
             <View style={styles.minLeft}>
               <MaterialIcons name="fact-check" size={28} color="black"  />
@@ -361,33 +408,33 @@ const Find = () => {
           </Pressable>
         )
       }
-      </View>
       <Pressable style={({ pressed }) => [
         { opacity: pressed ? 0.7 : 1 },
         styles.findContainer
       ]} onPress={handleFindFilters}>
         <Text style={styles.findText}>Find</Text>
       </Pressable>
-      <Spacer/>
+      </View>
+      <Spacer width={100} top={0} />
       {searchResults.length > 0 ? (
-      <View>
+      <View style={{ flex: 1, backgroundColor: "#fff" }}>
         <View style={{ padding: 8, paddingBottom: 0, }}>
           <Text>Search Results:</Text>
-        </View>
+        </View>     
         <FlatList
           data={searchResults}
           keyExtractor={(item) => item.id}
 
           renderItem={({ item }) => (
             <FindRoomView room={item}/>
-          )}
-        />
+          )}         
+        /> 
       </View> 
-      ) : (
+      ) : (      
       <View>
-        <View style={{ padding: 8, paddingBottom: 0, }}>
+        <View style={{ padding: 8, paddingBottom: 0, }}>  
           <Text>Favourites:</Text>
-        </View>
+        </View>  
         <FlatList
           data={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
           keyExtractor={(item) => item.toString()}
@@ -425,7 +472,7 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   searchOptionsContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f8f8',
     padding: 8,
     paddingBottom: 0,
   },
@@ -469,7 +516,7 @@ const styles = StyleSheet.create({
   },
   minContainer: {
     width: '100%',
-    height: SCREEN_HEIGHT * 0.07,
+    height: SCREEN_HEIGHT * 0.06,
     marginVertical: 0,
     flexDirection: 'row',
     padding: 8,
@@ -492,7 +539,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   findContainer: {
-    height: SCREEN_HEIGHT * 0.07,
+    height: SCREEN_HEIGHT * 0.06,
     backgroundColor: '#3478F5',
     marginVertical: 4,
     flexDirection: 'row',

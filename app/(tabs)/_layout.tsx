@@ -1,6 +1,3 @@
-import en from "@/locales/en/messages.po";
-import fi from "@/locales/fi/messages.po";
-import sv from "@/locales/sv/messages.po";
 import { MaterialIcons } from '@expo/vector-icons';
 import { i18n } from '@lingui/core';
 import { t } from '@lingui/macro';
@@ -9,12 +6,9 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
-i18n.load({ en, fi, sv })
-i18n.activate("en")
-
 export default function TabLayout() {
   return (
-    <I18nProvider i18n={i18n} language="en">
+    <I18nProvider i18n={i18n}>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -38,6 +32,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="debug"
         options={{
+          headerShown: false,
           title: t`Debug`,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="bug-report" size={24} color={color} />

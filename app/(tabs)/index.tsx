@@ -3,6 +3,8 @@ import FriendItem from "@/components/friendItem";
 import { getCachedGeoJSON } from "@/components/functions/geoJson";
 import MapBottomSheet from "@/components/mapBottomSheet";
 import { BottomSheetFlatList, BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { i18n } from "@lingui/core";
+import { t } from '@lingui/macro';
 import { Camera, CustomLocationProvider, FillExtrusionLayer, FillLayer, ImageSource, MapView, RasterLayer, setAccessToken, ShapeSource, UserLocation } from '@rnmapbox/maps';
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from 'react-native';
@@ -37,6 +39,8 @@ const eraser = {
     ]
   }
 }
+
+i18n.activate('en'); // Default to English
 
 export default function HomeScreen() {
   const styleUrlKey = process.env.EXPO_PUBLIC_MAPTILER_KEY as string
@@ -143,12 +147,12 @@ export default function HomeScreen() {
       >
         <View style={{ flex: 12, backgroundColor: 'white' }}>
           <BottomSheetTextInput
-            placeholder="Hae kaverisi tai paikka"
+            placeholder={t`Search for Friends`}
             placeholderTextColor="#B5B5B5"
             style={{
               color: '#000',
               height: 48,
-              borderRadius: 6,
+              borderRadius: 6, 
               paddingHorizontal: 10,
               margin: 16,
               marginTop: 0,

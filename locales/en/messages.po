@@ -54,3 +54,6 @@ msgstr "seats"
 msgid "Show on Map"
 msgstr "Show on Map"
 
+#: app/(tabs)/index.tsx:150
+msgid "Search for Friends"
+msgstr "Search for Friends"

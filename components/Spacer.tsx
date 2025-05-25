@@ -3,11 +3,12 @@ import { StyleSheet, View } from 'react-native';
 
 interface SpacerProps {
   width?: number;
+  top?: number;
 }
 
-const Spacer: React.FC<SpacerProps> = ({ width = 95 }) => {
+const Spacer: React.FC<SpacerProps> = ({ width = 95, top = 4 }) => {
   return (
-    <View style={[styles.spacer, { width: `${width}%` }]}/>
+    <View style={[styles.spacer, { width: `${width}%`, marginTop: top }]}/>
   );
 };
 

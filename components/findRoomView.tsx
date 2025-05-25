@@ -1,5 +1,6 @@
+import { Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 type Room = {
   id: string;
@@ -22,7 +23,12 @@ interface FindRoomViewProps {
   room?: Partial<Room>; // room is optional and can be an incomplete Room object
 }
 
-const FindRoomView = ({ room = {} }: FindRoomViewProps) => {
+interface FindRoomViewProps {
+  room?: Partial<Room>; // room is optional and can be an incomplete Room object
+  onBook?: () => void; // Add the onBook prop here
+}
+
+const FindRoomView = ({ room = {}, onBook }: FindRoomViewProps) => {
   return (
     <Pressable style={({pressed}) => [
       { opacity: pressed ? 0.7 : 1 },
@@ -34,6 +40,17 @@ const FindRoomView = ({ room = {} }: FindRoomViewProps) => {
           <Text style={{ color: 'black', fontSize: 20, fontWeight: 'bold' }}>{room.title || 'Room Name'}</Text>
         </View>
         <Text style={{ padding: 6, paddingLeft: 0, fontSize: 16, }}>{room.seats || '15'} seats</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 4 }}>
+          <FlatList
+            data={Array.isArray(room.equipment) ? room.equipment : []}
+            renderItem={({ item }) => (
+              <Icon name={item} />
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </View>
       </View>
       <View style={styles.rightContainer}>
         { room.image_url ? (
@@ -43,10 +60,14 @@ const FindRoomView = ({ room = {} }: FindRoomViewProps) => {
             resizeMode="cover"
           />
         ) : <View style={styles.imagePlaceholder} /> }
-        <Pressable style={({pressed}) => [
-          { opacity: pressed ? 0.7 : 1 },
-          styles.bookButton
-        ]} hitSlop={10}>
+        <Pressable 
+          style={({pressed}) => [
+            { opacity: pressed ? 0.7 : 1 },
+            styles.bookButton
+          ]} 
+          hitSlop={10}
+          onPress={onBook} // Call onBook when pressed
+        >
           <Text style={styles.bookText}>Book</Text>
         </Pressable>
       </View>
@@ -107,3 +128,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   }
 });
+
+const Icon = ({ name }: { name: string }) => {
+  switch (name) {
+    case 'blackboard':
+      return <Entypo name="blackboard" size={22} color="black" />;
+    case 'tv':
+      return <MaterialIcons name="tv" size={22} color="black" />;
+    case 'kitchen':
+      return <MaterialIcons name="kitchen" size={22} color="black" />;
+    case '3d':
+      return <MaterialCommunityIcons name="printer-3d" size={22} color="black" />;
+    case 'projector':
+      return <MaterialCommunityIcons name="projector" size={22} color="black" />;
+  }
+}

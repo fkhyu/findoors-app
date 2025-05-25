@@ -54,3 +54,6 @@ msgstr "paikkaa"
 msgid "Show on Map"
 msgstr "Näytä kartalla"
 
+#: app/(tabs)/index.tsx:150
+msgid "Search for Friends"
+msgstr "Hae Ystäviä"
