@@ -8,7 +8,7 @@ msgstr ""
 "Language: sv\n"
 "Project-Id-Version: otamaps-app\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2025-05-19 19:30\n"
+"PO-Revision-Date: 2025-05-21 11:12\n"
 "Last-Translator: \n"
 "Language-Team: Swedish\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -27,20 +27,20 @@ msgid "Booking Information"
 msgstr "Bokningsinformation"
 
 #: app/(tabs)/_layout.tsx:41
-msgid "buildings"
+msgid "Buildings"
 msgstr ""
 
 #: app/(tabs)/_layout.tsx:23
-msgid "debug"
-msgstr "Debug"
+msgid "Debug"
+msgstr ""
 
 #: app/buildings/floors/rooms/[slug].tsx:88
 msgid "Features"
 msgstr "Funktioner"
 
 #: app/(tabs)/_layout.tsx:32
-msgid "map"
-msgstr "Karta"
+msgid "Map"
+msgstr ""
 
 #: app/buildings/floors/rooms/[slug].tsx:19
 msgid "Room not found"
