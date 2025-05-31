@@ -12,18 +12,18 @@ const RoomItem: React.FC<Props> = ({ item, onPressRoom }) => (
     style={styles.container}
     onPress={() => onPressRoom(item)}
   >
-    {item.imageUrl
+    {item.image_url
       ? <Image
-          source={{ uri: item.imageUrl }}
+          source={{ uri: item.image_url }}
           resizeMode="cover"
           style={styles.image}
         />
-      : <View style={styles.placeholder} />
+      : <View style={styles.placeholder} /> 
     }
 
     <View style={styles.infoContainer}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.name}>{item.number}</Text>
+      <Text style={styles.name}>{item.title}</Text>
+      <Text style={styles.name}>{item.room_number}</Text>
     </View>
   </Pressable>
 )

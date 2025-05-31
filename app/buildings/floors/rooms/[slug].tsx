@@ -14,22 +14,22 @@ const RoomDetails = () => {
   const router = useRouter();
 
   // Find the building by slug
-  const room = rooms.find((r) => r.id === slug);
+  const room = rooms.find((r) => r.id === slug); 
   if (!room) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}><Trans>Room not found</Trans></Text>
       </View>
-    );
+    );  
   }
-  
-  return (
+   
+  return ( 
     <I18nProvider i18n={I18n}>
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container}>  
       {room.imageUrl && (
         <Image
           source={{ uri: room.imageUrl }}
-          style={{ width: '100%', height: '30%' }}
+          style={{ width: '100%', height: '30%' }} 
           resizeMode="cover"
         />
       )}

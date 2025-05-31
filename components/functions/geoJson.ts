@@ -19,7 +19,7 @@ export async function geoJsonPicker() {
   }
 }
 
-export async function loadGeoJSON(uri) {
+export async function loadGeoJSON(uri: string) {
   // Read the file’s contents as text
   const text = await readAsStringAsync(uri);
   // Parse into a JS object
@@ -27,7 +27,7 @@ export async function loadGeoJSON(uri) {
   return geojson;
 }
 
-export async function cacheGeoJSON(geojson) {
+export async function cacheGeoJSON(geojson: any) {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(geojson));
 }
 
