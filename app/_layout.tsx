@@ -35,6 +35,8 @@ export default function RootLayout() {
             <Stack.Screen name="welcome/index" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/where" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/when" options={{ headerShown: false }} />
+            <Stack.Screen name="welcome/fellows" options={{ headerShown: false }} />
+            <Stack.Screen name="welcome/intro" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </BottomSheetModalProvider>

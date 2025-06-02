@@ -37,11 +37,11 @@ const SFHomeScreen = () => {
 
   const openPoiModal = (poi: POI) => {
     setSelectedPoi(poi); // Set the selected POI
-    poiModalRef.current?.present(); // Open the modal
+    poiModalRef.current?.present(); // Open the modal 
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container}> 
       <MapView
         style={{ flex: 1, width: '100%' }}
         styleURL={`https://api.maptiler.com/maps/streets-v2/style.json?key=XSJRg4GXeLgDiZ98hfVp`}
@@ -60,8 +60,8 @@ const SFHomeScreen = () => {
             >
             <Pressable onPress={() => openPoiModal(poi)} hitSlop={15}>
             <Image
-              source={{ uri: poi.icon_url }}
-              style={{ width: 30, height: 30 }} // Adjust size as needed
+              source={require('@/assets/sight64.png')}
+              style={{ width: 30, height: 30 }}
             />
             </Pressable>
             </MarkerView>

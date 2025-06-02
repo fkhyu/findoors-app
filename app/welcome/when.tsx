@@ -184,8 +184,18 @@ export default function DateScreen() {
       </View>
 
       <View style={styles.statsContainer}>
-        <Text>
-          Wow you will be coding at least {40 * (departureDate && arrivalDate ? Math.ceil((departureDate.getTime() - arrivalDate.getTime()) / (1000 * 60 * 60 * 24 * 7)) : 0)} hours this summer!
+        <Text style={styles.statsText}>
+          Wow, you will be coding at least{' '}
+          <Text style={styles.statsNumber}>
+            {40 *
+              (departureDate && arrivalDate
+                ? Math.ceil(
+                    (departureDate.getTime() - arrivalDate.getTime()) /
+                      (1000 * 60 * 60 * 24 * 7)
+                  )
+                : 0)}
+          </Text>{' '}
+          hours this summer! Way to go!
         </Text>
       </View>
 
@@ -201,7 +211,7 @@ export default function DateScreen() {
         disabled={!(arrivalDate && departureDate)}
         onPress={() => {
           if (arrivalDate && departureDate) {
-            router.push('/welcome/where');
+            router.push('/welcome/fellows');
           }
         }}
       >
@@ -379,5 +389,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 24,
     alignItems: 'flex-start',
+  },
+  statsText: {
+    fontSize: 18,
+    color: mainText,
+    lineHeight: 24,
+    fontWeight: '500',
+  },
+  statsNumber: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: accent,
   },
 });

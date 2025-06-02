@@ -12,11 +12,12 @@ export type POIModalMethods = {
 interface POI {
   id: string; // Corrected from Text to string
   lat: number;
-  lon: number;
+  lon: number; 
   title: string;
   icon_url: string;
   address: string; // Assuming address is a string, adjust if necessary
-  // Add any other properties your POI object might have
+  type: string; // sight, food, view, event, gem
+  description?: string;
 }
 
 export interface POIModalProps {
@@ -71,7 +72,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
     const handlePresent = useCallback(() => {
       sheetRef.current?.present();
       sheetRef.current?.snapToIndex(initialIndex);
-    }, [initialIndex]);
+    }, [initialIndex]); 
 
     useImperativeHandle(ref, () => ({
       present: handlePresent,
@@ -85,19 +86,26 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
     }
 
     return (
-      <BottomSheetModal
-        ref={sheetRef}
-        index={initialIndex}
-        snapPoints={snapPoints}
-        enablePanDownToClose
-        backgroundStyle={styles.background}
-        handleIndicatorStyle={styles.handle}
-      >
-        <BottomSheetView style={styles.content}>
-          <Text style={styles.title}>{selectedPoiData.title}</Text>
-          <Text style={styles.address}>{selectedPoiData.address || "lol"}</Text>
-        </BottomSheetView>
-      </BottomSheetModal>
+      <BottomSheetView style={styles.content}>
+        <Text style={styles.title}>{selectedPoiData.title}</Text>
+        <Text style={styles.type}>
+          {selectedPoiData.type === 'event' ? '🎟️ Event' :
+          selectedPoiData.type === 'food' ? '🍽️ Food Spot' :
+          selectedPoiData.type === 'view' ? '🌆 Scenic View' :
+          selectedPoiData.type === 'hidden' ? '🕵️ Hidden Gem' :
+          '📍 Landmark'}
+        </Text>
+
+        {selectedPoiData.address ? (
+          <Text style={styles.address}>{selectedPoiData.address}</Text>
+        ) : null}
+
+        {selectedPoiData.description ? (
+          <Text style={styles.description}>{selectedPoiData.description}</Text>
+        ) : null}
+
+        {/* <TouchableOpacity style={styles.button}><Text>Navigate Here</Text></TouchableOpacity> */}
+      </BottomSheetView>
     )
   }
 )
@@ -112,23 +120,55 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
-  handle: {
+  handle: { 
     width: 40,
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#ccc',
     marginVertical: 8,
-  },
+  }, 
   content: {
-    padding: 16,
+    padding: 16, 
     paddingTop: 0,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 8, 
   },
   address: {
     fontSize: 14,
-  }
+  },
+  type: {
+    fontSize: 14,
+    color: '#6B7B78',
+    marginBottom: 4,
+    fontStyle: 'italic',
+  },
+  description: {
+    fontSize: 15,
+    color: '#444',
+    marginTop: 8,
+    marginBottom: 10,
+  },
+  hours: {
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 6,
+  },
+  visited: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  unvisited: {
+    color: '#FF9800',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  photos: {
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 8,
+  },
 })
