@@ -1,10 +1,20 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Animated, Dimensions, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const houses = [
   {
-    id: '1',
     name: 'Atelier',
     location: 'Lower Haight',
     color: '#F6F6D9',
@@ -12,7 +22,6 @@ const houses = [
     image: require('@/assets/houses/LowerHaight.png'),
   },
   {
-    id: '2',
     name: 'Casa',
     location: 'Mission',
     color: '#F9E5DC',
@@ -20,7 +29,6 @@ const houses = [
     image: require('@/assets/houses/Mission.png'),
   },
   {
-    id: '3',
     name: 'Jiā',
     location: 'Sunset',
     color: '#D4ECE8',
@@ -35,7 +43,7 @@ const accent = '#F4A261';
 const CARD_WIDTH = Math.min(340, Dimensions.get('window').width * 0.92);
 
 export default function WhereScreen() {
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [anim] = useState(new Animated.Value(0));
   const router = useRouter();
 
@@ -46,6 +54,14 @@ export default function WhereScreen() {
       useNativeDriver: true,
     }).start();
   }, []);
+
+  const handleNext = async () => {
+    const house = houses.find((h) => h.name === selected);
+    if (house) {
+      await AsyncStorage.setItem('@findoors:house', house.name);
+      router.push('/welcome/when');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -64,7 +80,7 @@ export default function WhereScreen() {
         <View style={styles.housesList}>
           {houses.map((house, idx) => (
             <Animated.View
-              key={house.id}
+              key={house.name}
               style={{
                 opacity: anim,
                 transform: [
@@ -84,13 +100,15 @@ export default function WhereScreen() {
                   styles.houseCard,
                   {
                     backgroundColor: house.color,
-                    borderColor: selected === house.id ? accent : 'transparent',
+                    borderColor: selected === house.name ? accent : 'transparent',
                     transform:
-                      selected === house.id ? [{ scale: 1.06 }] : [{ scale: 1 }],
-                    shadowOpacity: selected === house.id ? 0.19 : 0.11,
+                      selected === house.name
+                        ? [{ scale: 1.06 }]
+                        : [{ scale: 1 }],
+                    shadowOpacity: selected === house.name ? 0.19 : 0.11,
                   },
                 ]}
-                onPress={() => setSelected(house.id)}
+                onPress={() => setSelected(house.name)}
                 activeOpacity={0.88}
               >
                 <Image
@@ -102,7 +120,7 @@ export default function WhereScreen() {
                   {house.name} {house.emoji}
                 </Text>
                 <Text style={styles.houseLocation}>{house.location}</Text>
-                {selected === house.id && (
+                {selected === house.name && (
                   <Text style={styles.selectedText}>✓ Selected</Text>
                 )}
               </TouchableOpacity>
@@ -121,10 +139,7 @@ export default function WhereScreen() {
         ]}
         activeOpacity={selected ? 0.87 : 1}
         disabled={!selected}
-        onPress={() => {
-          const house = houses.find((h) => h.id === selected);
-          router.push("/welcome/when")
-        }}
+        onPress={handleNext}
       >
         <Text style={styles.nextButtonText}>When?</Text>
       </TouchableOpacity>
@@ -132,7 +147,7 @@ export default function WhereScreen() {
       <Text style={styles.footer}>🏡 Your house, your style!</Text>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

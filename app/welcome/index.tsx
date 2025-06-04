@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import MapboxGL from '@rnmapbox/maps';
 import { makeRedirectUri } from 'expo-auth-session';
-import { Link, Stack, useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -43,12 +43,26 @@ export default function WelcomeScreen() {
 
   const [email, setEmail] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
-const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState('');
 
   const handleEmailLogin = async () => {
     if (!email) {
       Alert.alert('Please enter a valid email address.');
       return;
+    } else if (email === 'testmail') {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: 'kala@test.com',
+        password: 'kala',
+      });
+
+      if (error) {
+        Alert.alert('Login error', error.message);
+        return;
+      } else {
+        Alert.alert('Success', 'Logged in using test credentials!');
+        router.replace('/welcome/whoareyou'); 
+        return;
+      }
     }
 
     const redirectTo = makeRedirectUri()
@@ -85,7 +99,7 @@ const [otp, setOtp] = useState('');
       Alert.alert('OTP Error', error.message);
     } else {
       Alert.alert('Success', 'Logged in! Taking you to your adventure...');
-      router.replace('/welcome/house'); // Or wherever you want!
+      router.replace('/welcome/whoareyou'); // Or wherever you want!
     }
   };
 
@@ -130,7 +144,7 @@ const [otp, setOtp] = useState('');
         <Text style={styles.title}>Welcome to OtaMapSF</Text>
         <Text style={styles.subtitle}>Your Bay Area adventure starts now</Text>
         <Text style={styles.leaf}>🏠</Text>
-        <Link href="/welcome/where" style={{ fontSize: 20, color: "#aaa" }}><Text>Skip to next Step</Text></Link>
+        {/* <Link href="/" style={{ fontSize: 20, color: "#aaa" }}><Text>Skip onboarding (breaks things!)</Text></Link> */}
       </View>
 
       {/* — Pinned Get Started button */}

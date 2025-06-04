@@ -1,6 +1,7 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
-import { Dimensions, StyleSheet, Text } from 'react-native';
+import { Dimensions, Linking, Platform, Pressable, StyleSheet, Text } from 'react-native';
 
 export type POIModalMethods = {
   snapToMax: () => void;
@@ -29,6 +30,20 @@ export interface POIModalProps {
 }
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const openMapWithDirections = (lat: number, lon: number) => {
+  let url = '';
+
+  if (Platform.OS === 'ios') {
+    // Apple Maps
+    url = `http://maps.apple.com/?daddr=${lat},${lon}&dirflg=d`;
+  } else {
+    // Google Maps
+    url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  }
+
+  Linking.openURL(url).catch(err => console.error('Error launching map:', err));
+};
 
 const POIModal = forwardRef<POIModalMethods, POIModalProps>(
   (
@@ -86,27 +101,44 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
     }
 
     return (
-      <BottomSheetView style={styles.content}>
-        <Text style={styles.title}>{selectedPoiData.title}</Text>
-        <Text style={styles.type}>
-          {selectedPoiData.type === 'event' ? '🎟️ Event' :
-          selectedPoiData.type === 'food' ? '🍽️ Food Spot' :
-          selectedPoiData.type === 'view' ? '🌆 Scenic View' :
-          selectedPoiData.type === 'hidden' ? '🕵️ Hidden Gem' :
-          '📍 Landmark'}
-        </Text>
+      <BottomSheetModal
+        ref={sheetRef}
+        index={initialIndex}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+        backgroundStyle={styles.background}
+        handleIndicatorStyle={styles.handle}
+      >
+        <BottomSheetView style={styles.content}>
+          <Text style={styles.title}>{selectedPoiData.title}</Text>
+          <Text style={styles.type}>
+            {selectedPoiData.type === 'event' ? '🎟️ Event' :
+            selectedPoiData.type === 'food' ? '🍽️ Food Spot' :
+            selectedPoiData.type === 'view' ? '🌆 Scenic View' :
+            selectedPoiData.type === 'hidden' ? '🕵️ Hidden Gem' :
+            '📍 Landmark'}
+          </Text>
 
-        {selectedPoiData.address ? (
-          <Text style={styles.address}>{selectedPoiData.address}</Text>
-        ) : null}
+          {selectedPoiData.address ? (
+            <Text style={styles.address}>{selectedPoiData.address}</Text>  
+          ) : null}
 
-        {selectedPoiData.description ? (
-          <Text style={styles.description}>{selectedPoiData.description}</Text>
-        ) : null}
+          <Pressable
+            onPress={() => openMapWithDirections(selectedPoiData.lat, selectedPoiData.lon)}
+            style={styles.directionsButton}
+          >
+            <MaterialIcons name="directions" size={24} color="#fff" />
+            <Text style={styles.directionsText}>Get Directions</Text>
+          </Pressable>
 
-        {/* <TouchableOpacity style={styles.button}><Text>Navigate Here</Text></TouchableOpacity> */}
-      </BottomSheetView>
-    )
+          {selectedPoiData.description ? (
+            <Text style={styles.description}>{selectedPoiData.description}</Text>
+          ) : null}
+
+          {/* Future buttons/interactions can go here */}
+        </BottomSheetView>
+      </BottomSheetModal>
+    );
   }
 )
 
@@ -144,7 +176,7 @@ const styles = StyleSheet.create({
     color: '#6B7B78',
     marginBottom: 4,
     fontStyle: 'italic',
-  },
+  }, 
   description: {
     fontSize: 15,
     color: '#444',
@@ -171,4 +203,20 @@ const styles = StyleSheet.create({
     color: '#888',
     marginBottom: 8,
   },
+  directionsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F4A261',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  directionsText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  }    
 })

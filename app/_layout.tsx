@@ -30,13 +30,15 @@ export default function RootLayout() {
         <BottomSheetModalProvider>{/* Wrap with BottomSheetModalProvider */}
           <StatusBar barStyle={'dark-content'}/>
           <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "App" }} />
             <Stack.Screen name="welcome" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/index" options={{ headerShown: false }} />
+            <Stack.Screen name="welcome/whoareyou" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/where" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/when" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/fellows" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/intro" options={{ headerShown: false }} />
+            <Stack.Screen name="friends/add" options={{ headerShown: true, title: "Add Neighbors" }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </BottomSheetModalProvider>

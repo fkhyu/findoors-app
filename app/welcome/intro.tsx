@@ -18,17 +18,17 @@ const slides = [
   {
     icon: '📸',
     title: 'Earn Stamps',
-    text: 'Get digital passport stamps for visiting places, doing challenges, and taking photos.',
+    text: 'Get digital passport stamps for visiting places, doing challenges, and taking photos. (WIP)',
   },
   {
     icon: '👥',
     title: 'Find Your Crew',
-    text: 'Check where your friends are, chat, or join spontaneous missions together.',
+    text: 'Check where your friends are, chat, or join spontaneous missions together. (WIP partially)',
   },
   {
     icon: '🎯',
     title: 'Daily Missions',
-    text: 'Complete fun challenges like selfies at landmarks or house competitions!',
+    text: 'Complete fun challenges like selfies at landmarks or house competitions! (WIP)',
   },
 ];
 
