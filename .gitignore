@@ -39,5 +39,6 @@ yarn-error.*
 app-example
 .env
 *.ipa
+*.apk
 
 maa11.py

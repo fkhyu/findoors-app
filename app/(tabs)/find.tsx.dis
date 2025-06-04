@@ -3,14 +3,13 @@ import FindRoomView from "@/components/findRoomView";
 import Spacer from "@/components/Spacer";
 import { supabase } from "@/lib/supabase";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import { Dimensions, FlatList, LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, UIManager, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -56,19 +55,29 @@ const Find = () => {
       features: selectedFeatures,
     });
 
-    const { data, error } = await supabase
+    let queryBuilder = supabase
       .from('rooms')
       .select('id, room_number, title, description, seats, type, equipment, wilma_id, bookable, image_url, created_at, schedule, color')
-      .eq('bookable', 'true')
-      .gte('seats', selectedPeople) // Assuming 'people_capacity' is the column name for people count
-      .contains('equipment', selectedFeatures); // Assuming 'features' is an array column
+      .eq('bookable', 'true') 
+      .gte('seats', selectedPeople);
+
+    if (selectedFeatures.length > 0) {
+      const featuresQueryObject = selectedFeatures.reduce((obj, feature) => {
+        obj[feature] = feature; // Assumes features in DB are stored like {"featureName": "featureName"}
+        return obj;
+      }, {} as Record<string, boolean>);
+      queryBuilder = queryBuilder.contains('equipment', featuresQueryObject);
+    }
+
+    const { data, error } = await queryBuilder;
 
     if (error) {
       console.error("Error fetching rooms:", error);
+      setSearchResults([]); // Clear results on error or set to an empty array
       return;
     }
 
-    setSearchResults(data);
+    setSearchResults(data || []); // Ensure data is not null
 
     console.log("Found rooms:", data);
     // Further processing of the found rooms
@@ -128,31 +137,65 @@ const Find = () => {
               <Text>{selectedDate.toDateString()}</Text>
             </View>
             <View style={styles.maxBottomContainer}>
-              <DateTimePicker
-                testID="dateTimePicker"
-                value={selectedDate}
-                mode="time"
-                is24Hour={true}
-                display="default"
-                minuteInterval={15}
-                textColor="black"
-                onChange={(event: DateTimePickerEvent, date?: Date) => {
-                  if (date) setSelectedDate(date);
-                }}
-              />
-              <DateTimePicker
-                testID="dateTimePicker"
-                value={selectedDate}
-                mode="date"
-                is24Hour={true}
-                display="default"
-                textColor="black"
-                maximumDate={new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)}
-                minimumDate={new Date(Date.now())}
-                onChange={(event: DateTimePickerEvent, date?: Date) => {
-                  if (date) setSelectedDate(date);
-                }}
-              />
+              { Platform.OS === 'android' ? (
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%' }}>
+                  <Pressable onPress={() => {
+                  DateTimePickerAndroid.open({
+                    value: selectedDate,
+                    onChange: (event: DateTimePickerEvent, date?: Date) => {
+                    if (date) setSelectedDate(date);
+                    },
+                    mode: 'date',
+                    is24Hour: true,
+                    minimumDate: new Date(Date.now()),
+                    maximumDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+                  });
+                  }}>
+                  <Text style={{ fontSize: 16, padding: 10 }}>{selectedDate.toLocaleDateString()}</Text>
+                  </Pressable>
+                  <Pressable onPress={() => {
+                  DateTimePickerAndroid.open({
+                    value: selectedDate,
+                    onChange: (event: DateTimePickerEvent, date?: Date) => {
+                    if (date) setSelectedDate(date);
+                    },
+                    mode: 'time',
+                    is24Hour: true,
+                    minuteInterval: 15,
+                  });
+                  }}>
+                  <Text style={{ fontSize: 16, padding: 10 }}>{selectedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <View>
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={selectedDate}
+                    mode="time"
+                    is24Hour={true}
+                    display="default"
+                    minuteInterval={15}
+                    textColor="black"
+                    onChange={(event: DateTimePickerEvent, date?: Date) => {
+                      if (date) setSelectedDate(date);
+                    }}
+                  />
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={selectedDate}
+                    mode="date"
+                    is24Hour={true}
+                    display="default"
+                    textColor="black" 
+                    maximumDate={new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)}
+                    minimumDate={new Date(Date.now())}
+                    onChange={(event: DateTimePickerEvent, date?: Date) => {
+                      if (date) setSelectedDate(date);
+                    }}
+                  />
+                </View> 
+              )}
             </View>
           </Pressable>
         ) : (
@@ -577,3 +620,33 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   }
 });
+
+/*
+
+<DateTimePicker
+                    testID="dateTimePicker"
+                    value={selectedDate}
+                    mode="time"
+                    is24Hour={true}
+                    display="default"
+                    minuteInterval={15}
+                    textColor="black"
+                    onChange={(event: DateTimePickerEvent, date?: Date) => {
+                      if (date) setSelectedDate(date);
+                    }}
+                  />
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={selectedDate}
+                    mode="date"
+                    is24Hour={true}
+                    display="default"
+                    textColor="black"
+                    maximumDate={new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)}
+                    minimumDate={new Date(Date.now())}
+                    onChange={(event: DateTimePickerEvent, date?: Date) => {
+                      if (date) setSelectedDate(date);
+                    }}
+                  />
+
+*/

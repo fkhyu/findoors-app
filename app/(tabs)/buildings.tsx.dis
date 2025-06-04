@@ -1,18 +1,73 @@
-import { buildings } from '@/assets/placeholder/buildings'
-import { floors } from '@/assets/placeholder/floors'
 import BuildingItem from '@/components/buildingItem'
 import FloorItem from '@/components/floorItem'
+import { getBuildings, getFloors } from '@/components/functions/tables'
 import FilterModal from '@/components/modal/filterModal'
 import { Building, Floor } from '@/types'
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { useRouter } from 'expo-router'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function TabTwoScreen() {
   const router = useRouter()
-  const [selectedFilters, setSelectedFilters] = React.useState({})
+  const [selectedFilters, setSelectedFilters] = useState({})
   const filterModalRef = useRef<BottomSheetModal>(null);
+  const [buildings, setBuildings] = useState<Building[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchBuildings = async () => {
+      try {
+        setLoading(true)
+        const fetchedBuildings = await getBuildings()
+        setBuildings(fetchedBuildings)
+      } catch (error) {
+        console.error("Failed to fetch buildings:", error)
+        // Optionally, set an error state here
+      } finally {  
+        setLoading(false)
+      }
+    }   
+  
+    fetchBuildings()
+  }, []) 
+  
+  const [floors, setFloors] = useState<Floor[]>([])
+       
+  useEffect(() => {
+    const fetchFloors = async () => {
+      try {  
+        setLoading(true) 
+        const fetchedFloors = await getFloors()
+        setFloors(fetchedFloors)
+      } catch (error) {
+        console.error("Failed to fetch floors:", error)
+        // Optionally, set an error state here
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFloors()
+  }, [])
+  
+  const filteredFloors = floors.filter((floor) => floor.building_id === buildings[0].id)
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Loading...</Text>
+      </View>
+    )
+  }
+
+  if (buildings.length === 0) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>No buildings found.</Text>
+      </View>
+    )
+  }
 
   const handlePressBuilding = (building: Building) => {
     router.push(`/buildings/${building.id}`)
@@ -21,9 +76,6 @@ export default function TabTwoScreen() {
   const handlePressFloor = (floor: Floor) => {
     router.push(`/buildings/floors/${floor.id}`)
   }
-  
-  const filteredFloors = floors.filter((floor) => floor.buildingId === buildings[0].id)
-  
 
   if (buildings.length === 1) {
     return (
