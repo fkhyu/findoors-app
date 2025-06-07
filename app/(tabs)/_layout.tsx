@@ -45,7 +45,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="events"
         options={{
-          title: t`Events`,
+          title: t`Happenings`,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="event" size={24} color={color} /> 
           ),

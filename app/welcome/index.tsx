@@ -4,7 +4,7 @@ import MapboxGL from '@rnmapbox/maps';
 import { makeRedirectUri } from 'expo-auth-session';
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // 🗝️ MapTiler style URL with key
 const MAP_STYLE =
@@ -49,14 +49,14 @@ export default function WelcomeScreen() {
     if (!email) {
       Alert.alert('Please enter a valid email address.');
       return;
-    } else if (email === 'testmail') {
+    } else if (email === 'testmail') { 
       const { error } = await supabase.auth.signInWithPassword({
         email: 'kala@test.com',
         password: 'kala',
       });
 
       if (error) {
-        Alert.alert('Login error', error.message);
+        Alert.alert('Login error', error.message); 
         return;
       } else {
         Alert.alert('Success', 'Logged in using test credentials!');
@@ -90,15 +90,19 @@ export default function WelcomeScreen() {
     }
 
     const { error } = await supabase.auth.verifyOtp({
-      email,
+      email,  
       token: otp,
-      type: 'email',
+      type: 'email', 
     });
 
     if (error) {
       Alert.alert('OTP Error', error.message);
     } else {
       Alert.alert('Success', 'Logged in! Taking you to your adventure...');
+      const { data: { user } } = await supabase.auth.getUser()
+      supabase.from('friend_code').insert({
+        code: Math.random().toString(36).substring(2, 8).toUpperCase(), user_id: user.id // Generate a random 6-character code
+      })
       router.replace('/welcome/whoareyou'); // Or wherever you want!
     }
   };
@@ -157,7 +161,7 @@ export default function WelcomeScreen() {
 
       <BottomSheet
         index={-1}
-        snapPoints={['85%']}
+        snapPoints={['92%']}
         enablePanDownToClose
         backgroundStyle={{
           backgroundColor: '#F0F8E8', // soft greenish-beige
@@ -224,6 +228,11 @@ export default function WelcomeScreen() {
                   autoCorrect={false}
                   value={otp}
                   onChangeText={setOtp}
+                  returnKeyType="done"
+                  onSubmitEditing={() => {
+                    handleOtpLogin();
+                    Keyboard.dismiss()
+                  }}
                 />
                 <TouchableOpacity
                   style={styles.sheetButton}

@@ -1,16 +1,17 @@
 {
   "expo": {
-    "name": "OtaMapSF",
-    "slug": "findoors",
-    "version": "1.0.0",
+    "name": "OtaMapSF",  
+    "slug": "findoors", 
+    "version": "0.1.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "findoors",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
-    "ios": {
+    "ios": { 
       "supportsTablet": true,
-      "bundleIdentifier": "fi.otamaps.app",
+      "bundleIdentifier": "fi.otamaps.beta",
+      "buildNumber": "101",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Show current location on map and scan for beacons.",
@@ -18,8 +19,9 @@
       }
     },
     "android": {
-      "edgeToEdgeEnabled": true,
-      "package": "fi.otamaps.app",
+      "edgeToEdgeEnabled": true, 
+      "versionCode": 11,
+      "package": "fi.otamaps.beta",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "BLUETOOTH_SCAN",

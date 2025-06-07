@@ -116,6 +116,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             selectedPoiData.type === 'food' ? '🍽️ Food Spot' :
             selectedPoiData.type === 'view' ? '🌆 Scenic View' :
             selectedPoiData.type === 'hidden' ? '🕵️ Hidden Gem' :
+            selectedPoiData.type === 'share' ? '📢 Shared Location' :
             '📍 Landmark'}
           </Text>
 
