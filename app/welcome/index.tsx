@@ -100,9 +100,13 @@ export default function WelcomeScreen() {
     } else {
       Alert.alert('Success', 'Logged in! Taking you to your adventure...');
       const { data: { user } } = await supabase.auth.getUser()
-      supabase.from('friend_code').insert({
+      const { error: insertError } = await supabase.from('friend_code').insert({
         code: Math.random().toString(36).substring(2, 8).toUpperCase(), user_id: user.id // Generate a random 6-character code
-      })
+      });
+      if (insertError) {
+        Alert.alert('Database Error', insertError.message);
+        return;
+      }
       router.replace('/welcome/whoareyou'); // Or wherever you want!
     }
   };
