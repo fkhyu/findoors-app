@@ -4,7 +4,7 @@ import MapboxGL from '@rnmapbox/maps';
 import { makeRedirectUri } from 'expo-auth-session';
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // 🗝️ MapTiler style URL with key
 const MAP_STYLE =
@@ -49,7 +49,7 @@ export default function WelcomeScreen() {
     if (!email) {
       Alert.alert('Please enter a valid email address.');
       return;
-    } else if (email === 'testmail') {
+    } else if (email === 'testmail') { 
       const { error } = await supabase.auth.signInWithPassword({
         email: 'kala@test.com',
         password: 'kala',
@@ -69,7 +69,7 @@ export default function WelcomeScreen() {
 
     console.log('Redirect URI:', redirectTo);
 
-    const { error } = await supabase.auth.signInWithOtp({  
+    const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {    
         emailRedirectTo: redirectTo,  
@@ -90,15 +90,23 @@ export default function WelcomeScreen() {
     }
 
     const { error } = await supabase.auth.verifyOtp({
-      email,
+      email,  
       token: otp,
-      type: 'email',
+      type: 'email', 
     });
 
     if (error) {
       Alert.alert('OTP Error', error.message);
     } else {
       Alert.alert('Success', 'Logged in! Taking you to your adventure...');
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error: insertError } = await supabase.from('friend_code').insert({
+        code: Math.random().toString(36).substring(2, 8).toUpperCase(), user_id: user.id // Generate a random 6-character code
+      });
+      if (insertError) {
+        Alert.alert('Database Error', insertError.message);
+        return;
+      }
       router.replace('/welcome/whoareyou'); // Or wherever you want!
     }
   };
@@ -157,14 +165,14 @@ export default function WelcomeScreen() {
 
       <BottomSheet
         index={-1}
-        snapPoints={['85%']}
+        snapPoints={['92%']}
         enablePanDownToClose
         backgroundStyle={{
-          backgroundColor: '#F0F8E8', // soft greenish-beige
+          backgroundColor: '#F0F8E8',
           borderTopLeftRadius: 36,
           borderTopRightRadius: 36,
           borderWidth: 3,
-          borderColor: '#B4CBA5', // muted leaf green border
+          borderColor: '#B4CBA5',
           shadowColor: '#7A8D7B',
           shadowOpacity: 0.2,
           shadowRadius: 18,
@@ -172,10 +180,8 @@ export default function WelcomeScreen() {
         }}
         ref={bottomSheetRef}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        <View
           style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -30} // tweak as needed
         >
           <BottomSheetScrollView 
             contentContainerStyle={styles.sheetView} 
@@ -224,6 +230,11 @@ export default function WelcomeScreen() {
                   autoCorrect={false}
                   value={otp}
                   onChangeText={setOtp}
+                  returnKeyType="done"
+                  onSubmitEditing={() => {
+                    handleOtpLogin();
+                    Keyboard.dismiss()
+                  }}
                 />
                 <TouchableOpacity
                   style={styles.sheetButton}
@@ -238,7 +249,7 @@ export default function WelcomeScreen() {
             )}
           </View>
         </BottomSheetScrollView>
-        </KeyboardAvoidingView>
+        </View>
       </BottomSheet>  
     </View>
   );

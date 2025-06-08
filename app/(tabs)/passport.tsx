@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -62,38 +63,26 @@ const PassportScreen = () => {
             </Text>
           </View>
         </View>
-        <View style={styles.progressBlock}>
+        {/*<View style={styles.progressBlock}>
           <View style={styles.circle}>
             <Text style={styles.progressText}>75%</Text>
             <Text style={styles.label}>Explored</Text>
           </View>
-        </View>
+        </View>*/}
       </View>
 
       {/* 🎒 Feature Buttons */}
-      <View style={styles.buttonGrid}>
+      <View style={styles.buttonList}>
         <Link href="/passport/badges" asChild>
-          <TouchableOpacity style={styles.gridButton}>
-            <Text style={styles.emoji}>🏅</Text>
-            <Text>Badges</Text>
-          </TouchableOpacity>
-        </Link>
-        <Link href="/passport/friends" asChild>
-          <TouchableOpacity style={styles.gridButton}>
-            <Text style={styles.emoji}>🧑‍🤝‍🧑</Text>
-            <Text>Friends</Text>
+          <TouchableOpacity style={styles.listButton}>
+          <MaterialCommunityIcons name="trophy-award" size={32} color="#546C5E" />
+          <Text style={styles.listButtonText}>Stamps</Text>
           </TouchableOpacity>
         </Link>
         <Link href="/passport/settings" asChild>
-          <TouchableOpacity style={styles.gridButton}>
-            <Text style={styles.emoji}>⚙️</Text>
-            <Text>Settings</Text>
-          </TouchableOpacity>
-        </Link>
-        <Link href="/explore" asChild>
-          <TouchableOpacity style={styles.gridButton}>
-            <Text style={styles.emoji}>🌍</Text>
-            <Text>Discover</Text>
+          <TouchableOpacity style={styles.listButton}>
+          <MaterialIcons name="settings" size={32} color="#546C5E" />
+          <Text style={styles.listButtonText}>Settings</Text>
           </TouchableOpacity>
         </Link>
       </View>
@@ -101,7 +90,7 @@ const PassportScreen = () => {
       {/* 🔐 Auth Status / Login Link */}
       {!isLoggedIn && (
         <Link style={styles.quote} href="/welcome">
-          “You're not logged in! Click me to login”
+          You're not logged in! Click me to login
         </Link>
       )}
 
@@ -214,5 +203,33 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textDecorationLine: 'underline',
     color: '#8FA49C',
+  },
+  buttonList: {
+    width: '90%',
+    marginBottom: 20,
+  },
+  listButton: {
+    backgroundColor: '#E6F3D8',
+    paddingVertical: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#B4CBA5',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    paddingHorizontal: 16,
+  },
+  listButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#546C5E',
+    marginLeft: 12,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#546C5E',
   },
 });

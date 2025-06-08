@@ -24,7 +24,8 @@ const AddFriendsScreen = () => {
         console.error('Error fetching friend ID:', error.message);
         Alert.alert('Error', 'Failed to fetch friend ID. Please try again.');
       } else if (data) {
-        return data.friend_id;
+        console.log('Fetched Friend ID:', data.user_id);
+        return data.user_id; 
       } else {
         Alert.alert('Not Found', 'No friend found with this code.');
         return null;
@@ -38,11 +39,14 @@ const AddFriendsScreen = () => {
 
   const handleAddFriend = () => {
     if (friendId.length === 6) {
-      fetchFriendId(friendId).then((fetchedFriendId) => {
+      console.log('Adding friend with ID:', friendId);
+      fetchFriendId(friendId).then(async (fetchedFriendId) => {
         if (fetchedFriendId) {
+          console.log('Fetched Friend ID:', fetchedFriendId);
+          const { data: { user } } = await supabase.auth.getUser()
           supabase
             .from('friends')
-            .insert([{ user_id: supabase.auth.getUser()?.id, friend_id: fetchedFriendId }])
+            .insert([{ user_id: user.id, friend_id: fetchedFriendId }])
             .then(({ error }) => {
               if (error) {
                 console.error('Error adding friend:', error.message);

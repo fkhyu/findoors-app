@@ -1,25 +1,27 @@
 {
   "expo": {
-    "name": "OtaMapSF",
+    "name": "OtaMapSF",  
     "slug": "findoors",
-    "version": "1.0.0",
+    "version": "0.1.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "findoors",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
-    "ios": {
+    "ios": { 
       "supportsTablet": true,
-      "bundleIdentifier": "fi.otamaps.app",
+      "bundleIdentifier": "fi.otamaps.sf",
+      "buildNumber": "103",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Show current location on map and scan for beacons.",
         "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to scan for beacons."
       }
-    },
+    }, 
     "android": {
-      "edgeToEdgeEnabled": true,
-      "package": "fi.otamaps.app",
+      "edgeToEdgeEnabled": true, 
+      "versionCode": 14,
+      "package": "fi.otamaps.sf",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "BLUETOOTH_SCAN",
@@ -40,6 +42,12 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your neighbors."
         }
       ],
       [

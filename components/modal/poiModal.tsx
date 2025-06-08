@@ -1,7 +1,8 @@
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { router } from 'expo-router';
 import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
-import { Dimensions, Linking, Platform, Pressable, StyleSheet, Text } from 'react-native';
+import { Dimensions, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export type POIModalMethods = {
   snapToMax: () => void;
@@ -116,6 +117,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             selectedPoiData.type === 'food' ? '🍽️ Food Spot' :
             selectedPoiData.type === 'view' ? '🌆 Scenic View' :
             selectedPoiData.type === 'hidden' ? '🕵️ Hidden Gem' :
+            selectedPoiData.type === 'share' ? '📢 Shared Location' :
             '📍 Landmark'}
           </Text>
 
@@ -123,13 +125,25 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             <Text style={styles.address}>{selectedPoiData.address}</Text>  
           ) : null}
 
-          <Pressable
-            onPress={() => openMapWithDirections(selectedPoiData.lat, selectedPoiData.lon)}
-            style={styles.directionsButton}
-          >
-            <MaterialIcons name="directions" size={24} color="#fff" />
-            <Text style={styles.directionsText}>Get Directions</Text>
-          </Pressable>
+          <View style={styles.CTAContainer}>
+            <Pressable
+              onPress={() => openMapWithDirections(selectedPoiData.lat, selectedPoiData.lon)}
+              style={styles.directionsButton}
+            >
+              <MaterialIcons name="directions" size={24} color="#fff" />
+              <Text style={styles.directionsText}>Get Directions</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                sheetRef.current?.close();
+                router.push(`/checkin/${selectedPoiData.id}`)
+              }}
+              style={styles.directionsButton}
+            >
+              <MaterialCommunityIcons name="location-enter" size={24} color="#fff" />
+              <Text style={styles.directionsText}>Check-In</Text>
+            </Pressable> 
+          </View>
 
           {selectedPoiData.description ? (
             <Text style={styles.description}>{selectedPoiData.description}</Text>
@@ -212,11 +226,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 12,
     marginTop: 8,
+    flex: 1,
   },
   directionsText: {
     marginLeft: 8,
     fontSize: 16,
     color: '#fff',
     fontWeight: 'bold',
-  }    
+  },
+  CTAContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
 })

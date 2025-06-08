@@ -5,12 +5,12 @@ const Loading = () => {
   return (
     <View style={styles.centered}>
       <ActivityIndicator size="large" color="#007AFF" />
-      <Text style={styles.loadingText}>Loading events...</Text>
+      <Text style={styles.loadingText}>Loading...</Text>
     </View>
   );
 };
 
-export default Loading;
+export default Loading; 
 
 const styles = StyleSheet.create({
   centered: {
