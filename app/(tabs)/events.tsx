@@ -1,9 +1,9 @@
 import Loading from '@/components/loading';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const EventsScreen = () => {
   const router = useRouter();
@@ -21,12 +21,12 @@ const EventsScreen = () => {
       else setEvents(eventsData || []);
 
       const { data: sharesData, error: sharesError } = await supabase
-        .from('shares')
+        .from('user_events')
         .select('*')
-        .order('begins', { ascending: true });
+        .order('start', { ascending: true });
       if (sharesError) console.error(sharesError);
       else setShares(sharesData || []);
-
+      console.log('Shares data:', sharesData);
       setLoading(false);
     };
     fetchData();
@@ -54,20 +54,41 @@ const EventsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
+      <Stack.Screen
+        options={{
+          title: 'Events & Shares',
+          headerShown: true,
+          headerStyle: { backgroundColor: '#f8f8f8' },
+          headerTitleStyle: { fontWeight: 'bold' },
+          headerTintColor: '#333',
+          headerRight: () => (
+            <Pressable onPress={() => router.push('/events/create')} style={{ marginRight: 15 }}>
+              <MaterialIcons name="add" size={24} color="#333" />
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView contentContainerStyle={styles.container}>
 
-        <Text style={styles.header}>Neighbor Shares</Text>
+        {shares
+          .filter(share => {
+          const startTime = new Date(share.start + 'Z');
+          const endTime = new Date(startTime.getTime() + share.duration * 60000);
+          return endTime > new Date();
+        }).length > 0 && (
+          <Text style={styles.header}>Neighbors Shares</Text>
+        )}
         {shares.length > 0 ? (
           shares
             .filter(share => {
-              const startTime = new Date(share.begins + 'Z');
+              const startTime = new Date(share.start + 'Z');
               const endTime = new Date(startTime.getTime() + share.duration * 60000); 
               return endTime > new Date();
             })
             .map(share => (
             <Pressable
-              key={share.id}
+              key={share.id} 
               style={styles.card}
               onPress={() => goToMap(share.lat, share.lon)}
             >
@@ -110,12 +131,14 @@ const EventsScreen = () => {
 
         <Text style={styles.header}>Upcoming Events</Text>
         {events.length > 0 ? (
-          events.map(event => (
+          events
+            .filter(event => new Date(event.end_time) > new Date())
+            .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+            .map(event => (
             <Pressable
               key={event.id}
               style={styles.card}
               onPress={() => {
-                /* if your events table also has lat/lon */
                 goToMap(event.poi_id);
               }}
             >
@@ -146,7 +169,7 @@ const EventsScreen = () => {
         )}
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -154,7 +177,7 @@ export default EventsScreen;
 
 const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 50 },
-  header: { fontSize: 26, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  header: { fontSize: 22, fontWeight: '500', marginBottom: 20, },
   card: {
     backgroundColor: '#fff',
     padding: 15,

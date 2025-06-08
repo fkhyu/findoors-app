@@ -118,7 +118,7 @@ const SFHomeScreen = () => {
     cameraRef.current?.flyTo([poi.lon, poi.lat], 1000);
     setSelectedPoi(poi);
     poiModalRef.current?.present();
-  };
+  }; 
 
   const centerOnUser = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
