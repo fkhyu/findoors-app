@@ -76,7 +76,7 @@ const PassportScreen = () => {
         <Link href="/passport/badges" asChild>
           <TouchableOpacity style={styles.listButton}>
           <MaterialCommunityIcons name="trophy-award" size={32} color="#546C5E" />
-          <Text style={styles.listButtonText}>Badges</Text>
+          <Text style={styles.listButtonText}>Stamps</Text>
           </TouchableOpacity>
         </Link>
         <Link href="/passport/settings" asChild>

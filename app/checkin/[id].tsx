@@ -127,7 +127,7 @@ const CheckinScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>📍 Cozy Check-In</Text>
+      <Text style={styles.header}>Check-In</Text>
       <Text style={styles.subtext}>Stamp a memory for location: {id}</Text>
 
       <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>

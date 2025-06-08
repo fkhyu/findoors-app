@@ -40,5 +40,6 @@ app-example
 .env
 *.ipa
 *.apk
+*.aab
 
 maa11.py

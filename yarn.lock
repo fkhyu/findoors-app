@@ -1250,10 +1250,10 @@
     semver "^7.6.2"
     zod "^3.23.8"
 
-"@expo/eas-json@16.7.0":
-  version "16.7.0"
-  resolved "https://registry.yarnpkg.com/@expo/eas-json/-/eas-json-16.7.0.tgz#1258188053780fcaf4cb188693bcbd5ce1daa031"
-  integrity sha512-wWG/M9i2adPahzqZKKBaEbb4ro++Wz8EOOHx5QXoF30PlatBbDP+vBmypb9rY6wAuoDhK5xc5t6hFAwFtjtpNw==
+"@expo/eas-json@16.9.0":
+  version "16.9.0"
+  resolved "https://registry.yarnpkg.com/@expo/eas-json/-/eas-json-16.9.0.tgz#b65be54bdbef08474b0b7c32961bed745a34bf89"
+  integrity sha512-EMm9OY/f3kR3A1Lcp5SF6WDeN4YppJe7XuYoR4sNnQ8sEskddXkp++o/mitAwRimvAdcP27F6oCzH/nDKQ7zlQ==
   dependencies:
     "@babel/code-frame" "7.23.5"
     "@expo/eas-build-job" "1.0.173"
@@ -2745,9 +2745,9 @@
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
 
 "@types/node@*":
-  version "22.15.29"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.15.29.tgz#c75999124a8224a3f79dd8b6ccfb37d74098f678"
-  integrity sha512-LNdjOkUDlU1RZb8e1kOIUpN1qQUlzGkEtbVNo53vbrwDg5om6oduhm4SiUaPW5ASTXhAiP0jInWG8Qx9fVlOeQ==
+  version "22.15.30"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.15.30.tgz#3a20431783e28dd0b0326f84ab386a2ec81d921d"
+  integrity sha512-6Q7lr06bEHdlfplU6YRbgG1SFBdlsfNC4/lX+SkhiTs0cpJkOElmWls8PxDFv4yY/xKb8Y6SO0OmSX4wgqTZbA==
   dependencies:
     undici-types "~6.21.0"
 
@@ -4369,16 +4369,16 @@ dunder-proto@^1.0.0, dunder-proto@^1.0.1:
     gopd "^1.2.0"
 
 eas-cli@^16.4.1:
-  version "16.7.0"
-  resolved "https://registry.yarnpkg.com/eas-cli/-/eas-cli-16.7.0.tgz#eb7041bb8141ecc5dfe2c9d36a6d49aa19a0f6c7"
-  integrity sha512-jhdBHY3h8BNhsUSTpAf9VAt2mNHGbMkuNJ3WZ2lqvb8nd0FQ4LKqszvYv8Olth+E57HkrZKeJm3Xv59tIhzODg==
+  version "16.9.0"
+  resolved "https://registry.yarnpkg.com/eas-cli/-/eas-cli-16.9.0.tgz#e31abff375b282ab3c734a167deebf30d3782ffb"
+  integrity sha512-oPO6zAbOjyP1akiSlz8FgYhfv8S79Yh0Pw1KCuV2pKqVftUTBy1exmrUH9KtptZvVLKBqCteDQGcHvlsg5QnZQ==
   dependencies:
     "@expo/apple-utils" "2.1.12"
     "@expo/code-signing-certificates" "0.0.5"
     "@expo/config" "10.0.6"
     "@expo/config-plugins" "9.0.12"
     "@expo/eas-build-job" "1.0.173"
-    "@expo/eas-json" "16.7.0"
+    "@expo/eas-json" "16.9.0"
     "@expo/env" "^1.0.0"
     "@expo/json-file" "8.3.3"
     "@expo/logger" "1.0.117"
@@ -5190,6 +5190,13 @@ expo-system-ui@~5.0.7:
   dependencies:
     "@react-native/normalize-colors" "0.79.2"
     debug "^4.3.2"
+
+expo-task-manager@~13.1.5:
+  version "13.1.5"
+  resolved "https://registry.yarnpkg.com/expo-task-manager/-/expo-task-manager-13.1.5.tgz#fc09bdc9562339aa71de4ed2e7ff17491e6b6ee2"
+  integrity sha512-9jspZZ6y6hwo6QBwmfsUUX6sY4Mnrw8170LnOqrVfRuClkGaMrqDeBa9YUFTDt/BNYZ/3/QlZZ5QUHT9ziROfQ==
+  dependencies:
+    unimodules-app-loader "~5.1.3"
 
 expo-updates-interface@~1.1.0:
   version "1.1.0"
@@ -8249,6 +8256,11 @@ react-native-is-edge-to-edge@1.1.7, react-native-is-edge-to-edge@^1.1.6:
   resolved "https://registry.yarnpkg.com/react-native-is-edge-to-edge/-/react-native-is-edge-to-edge-1.1.7.tgz#28947688f9fafd584e73a4f935ea9603bd9b1939"
   integrity sha512-EH6i7E8epJGIcu7KpfXYXiV2JFIYITtq+rVS8uEb+92naMRBdxhTuS8Wn2Q7j9sqyO0B+Xbaaf9VdipIAmGW4w==
 
+react-native-pager-view@^6.8.1:
+  version "6.8.1"
+  resolved "https://registry.yarnpkg.com/react-native-pager-view/-/react-native-pager-view-6.8.1.tgz#fa0ec09ea7c44190c7c013d75dd09fdc17b96100"
+  integrity sha512-XIyVEMhwq7sZqM7GobOJZXxFCfdFgVNq/CFB2rZIRNRSVPJqE1k1fsc8xfQKfdzsp6Rpt6I7VOIvhmP7/YHdVg==
+
 react-native-reanimated@~3.17.4:
   version "3.17.5"
   resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-3.17.5.tgz#09ebe3c9e3379c5c0c588b7ab30c131ea29b60f0"
@@ -9117,9 +9129,9 @@ stream-buffers@2.2.x:
   integrity sha512-uyQK/mx5QjHun80FLJTfaWE7JtwfRMKBLkMne6udYOmvH0CawotVa7TfgYHzAnpphn4+TweIx1QKMnRIbipmUg==
 
 streamx@^2.15.0:
-  version "2.22.0"
-  resolved "https://registry.yarnpkg.com/streamx/-/streamx-2.22.0.tgz#cd7b5e57c95aaef0ff9b2aef7905afa62ec6e4a7"
-  integrity sha512-sLh1evHOzBy/iWRiR6d1zRcLao4gGZr3C1kzNz4fopCOKJb6xD9ub8Mpi9Mr1R6id5o43S+d93fI48UC5uM9aw==
+  version "2.22.1"
+  resolved "https://registry.yarnpkg.com/streamx/-/streamx-2.22.1.tgz#c97cbb0ce18da4f4db5a971dc9ab68ff5dc7f5a5"
+  integrity sha512-znKXEBxfatz2GBNK02kRnCXjV+AA4kjZIUxeWSr3UGirZMJfTE9uiwKHobnbgxWyL/JWro8tTq+vOqAK1/qbSA==
   dependencies:
     fast-fifo "^1.3.2"
     text-decoder "^1.1.0"
@@ -9691,6 +9703,11 @@ unicode-property-aliases-ecmascript@^2.0.0:
   resolved "https://registry.yarnpkg.com/unicode-property-aliases-ecmascript/-/unicode-property-aliases-ecmascript-2.1.0.tgz#43d41e3be698bd493ef911077c9b131f827e8ccd"
   integrity sha512-6t3foTQI9qne+OZoVQB/8x8rk2k1eVy1gRXhV3oFQ5T6R1dqQ1xtin3XqSlx3+ATBkliTaR/hHyJBm+LVPNM8w==
 
+unimodules-app-loader@~5.1.3:
+  version "5.1.3"
+  resolved "https://registry.yarnpkg.com/unimodules-app-loader/-/unimodules-app-loader-5.1.3.tgz#c3be527cd36120fc77d6843253075c8a9246f622"
+  integrity sha512-nPUkwfkpJWvdOQrVvyQSUol93/UdmsCVd9Hkx9RgAevmKSVYdZI+S87W73NGKl6QbwK9L1BDSY5OrQuo8Oq15g==
+
 unique-string@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/unique-string/-/unique-string-2.0.0.tgz#39c6451f81afb2749de2b233e3f7c5e8843bd89d"
@@ -10144,9 +10161,9 @@ zod-to-json-schema@^3.24.1:
   integrity sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==
 
 zod@^3.23.8:
-  version "3.25.48"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.48.tgz#6c2b536fbb519905e8f4a4ac58743de4d5331bb2"
-  integrity sha512-0X1mz8FtgEIvaxGjdIImYpZEaZMrund9pGXm3M6vM7Reba0e2eI71KPjSCGXBfwKDPwPoywf6waUKc3/tFvX2Q==
+  version "3.25.56"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.56.tgz#4cff0340b7cd3778314dac1e74d6a663ffeef914"
+  integrity sha512-rd6eEF3BTNvQnR2e2wwolfTmUTnp70aUTqr0oaGbHifzC3BKJsoV+Gat8vxUMR1hwOKBs6El+qWehrHbCpW6SQ==
 
 zod@^3.24.2:
   version "3.24.4"
