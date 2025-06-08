@@ -9,7 +9,7 @@ import MapBox, {
 } from '@rnmapbox/maps';
 import circle from '@turf/circle';
 import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
@@ -43,6 +43,7 @@ const SFHomeScreen = () => {
   const router = useRouter();
   const [pois, setPois] = useState<POI[]>([]);
   const [shares, setShares] = useState<any[]>([]);
+  const [mapReady, setMapReady] = useState(false);
   const poiModalRef = useRef<POIModalMethods>(null);
   const [selectedPoi, setSelectedPoi] = useState<POI | null>(null);
   const shareModalRef = useRef<ShareLocationModalMethods>(null);
@@ -50,6 +51,22 @@ const SFHomeScreen = () => {
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
   const cameraRef = useRef<Camera>(null);
+  const { poi: poiId } = useGlobalSearchParams<{ poi?: string }>();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!mapReady || !poiId || pois.length === 0) return;
+      const target = pois.find(p => p.id === poiId);
+      if (target) {
+        cameraRef.current?.flyTo([target.lon, target.lat], 1000);
+        setSelectedPoi(target);
+        poiModalRef.current?.present();
+
+        // clear the query-param so on refresh it won't trigger again
+        router.replace('/'); 
+      }
+    }, [mapReady, poiId, pois])
+  );
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -60,26 +77,45 @@ const SFHomeScreen = () => {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      const { data: poiData, error: poiError } = await supabase.from<POI>('poi').select('*');
-      if (poiError) {
-        console.error('Error fetching POIs:', poiError.message);
-        setPois([]);
-      } else {
-        setPois(poiData || []);
-      }
+    console.log('POI ID from params:', poiId);
+    if (!poiId || pois.length === 0) return;
 
-      const { data: shareData, error: shareError } = await supabase.from<any>('shares').select('*');
-      if (shareError) {
-        console.error('Error fetching shares:', shareError.message);
-        setShares([]);
-      } else {
-        setShares(shareData || []);
-      }
-    })();
+    const targetPoi = pois.find(p => p.id === poiId);
+    console.log(`Trying to center on POI "${poiId}". Found:`, !!targetPoi);
+    // poi lat lon
+    console.log('Target POI coordinates:', targetPoi ? `(${targetPoi.lon}, ${targetPoi.lat})` : 'Not found');
+
+    if (targetPoi) {
+      cameraRef.current?.flyTo([targetPoi.lon, targetPoi.lat], 1000);
+      setSelectedPoi(pois.find(p => p.id === poiId) || null);
+      poiModalRef.current?.present();
+    }
+  }, [poiId, pois]);
+
+  const fetchData = async () => {
+    const { data: poiData, error: poiError } = await supabase.from('poi').select('*');
+    if (poiError) {
+    console.error('Error fetching POIs:', poiError.message);
+    setPois([]);
+    } else {
+    setPois(poiData as POI[] || []);
+    }
+
+    const { data: shareData, error: shareError } = await supabase.from('shares').select('*');
+    if (shareError) {
+    console.error('Error fetching shares:', shareError.message);
+    setShares([]);
+    } else {
+    setShares(shareData || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const openPoiModal = (poi: POI) => {
+    cameraRef.current?.flyTo([poi.lon, poi.lat], 1000);
     setSelectedPoi(poi);
     poiModalRef.current?.present();
   };
@@ -142,6 +178,8 @@ const SFHomeScreen = () => {
       console.log('Location published!');
     }
 
+    fetchData();
+
     setIsSelectingLocation(false);
     setSelectedLocation(null);
   };
@@ -155,6 +193,7 @@ const SFHomeScreen = () => {
       <MapView
         style={{ flex: 1, width: '100%' }}
         styleURL="https://api.maptiler.com/maps/basic-v2/style.json?key=XSJRg4GXeLgDiZ98hfVp"
+        onDidFinishLoadingMap={() => setMapReady(true)}
         onPress={e => {
           if (isSelectingLocation && e.geometry?.coordinates) {
             setSelectedLocation(e.geometry.coordinates as [number, number]);
@@ -197,58 +236,64 @@ const SFHomeScreen = () => {
           </MarkerView>
         ))}
 
-        {shares.map(share => {
-          // generate a GeoJSON polygon approximating the accuracy circle
-          const polygon = circle(
-            [share.lon, share.lat],
-            share.accuracy / 1000,        // turf.circle expects kilometers
-            { steps: 16, units: 'kilometers' }
-          );
+        {shares
+          .filter(share => {
+            const startTime = new Date(share.begins + 'Z');
+            const endTime = new Date(startTime.getTime() + share.duration * 60000); 
+            return endTime > new Date();
+          })
+          .map(share => {
+            // generate a GeoJSON polygon approximating the accuracy circle
+            const polygon = circle(
+              [share.lon, share.lat],
+              share.accuracy / 1000, // turf.circle expects kilometers
+              { steps: 16, units: 'kilometers' }
+            );
 
-          return (
-            <React.Fragment key={share.id}>
-              {/* fill polygon under the marker */}
-              <ShapeSource
-                id={`sharePolygonSource-${share.id}`}
-                shape={polygon}
-              >
-                <FillLayer
-                  id={`sharePolygonFill-${share.id}`}
-                  style={{
-                    fillColor: '#007AFF',
-                    fillOpacity: 0.15,
-                  }}
-                />
-              </ShapeSource>
+            return (
+              <React.Fragment key={share.id}>
+          {/* fill polygon under the marker */}
+          <ShapeSource
+            id={`sharePolygonSource-${share.id}`}
+            shape={polygon}
+          >
+            <FillLayer
+              id={`sharePolygonFill-${share.id}`}
+              style={{
+                fillColor: '#007AFF',
+                fillOpacity: 0.15,
+              }}
+            />
+          </ShapeSource>
 
-              {/* the share marker on top */}
-              <MarkerView
-                coordinate={[share.lon, share.lat]}
-                anchor={{ x: 0.5, y: 0.5 }}
-              >
-                <Pressable
-                  onPress={() => {
-                    setSelectedPoi({
-                      id: share.id,
-                      lat: share.lat,
-                      lon: share.lon,
-                      title: share.title,
-                      icon_url: '',
-                      type: 'share',
-                    });
-                    poiModalRef.current?.present();
-                  }}
-                  hitSlop={15}
-                >
-                  <Image
-                    source={require('@/assets/share64.png')}
-                    style={{ width: 30, height: 30 }}
-                  />
-                </Pressable>
-              </MarkerView>
-            </React.Fragment>
-          );
-        })}
+          {/* the share marker on top */}
+          <MarkerView
+            coordinate={[share.lon, share.lat]}
+            anchor={{ x: 0.5, y: 0.5 }}
+          >
+            <Pressable
+              onPress={() => {
+                setSelectedPoi({
+            id: share.id,
+            lat: share.lat,
+            lon: share.lon,
+            title: share.title,
+            icon_url: '',
+            type: 'share',
+                });
+                poiModalRef.current?.present();
+              }}
+              hitSlop={15}
+            >
+              <Image
+                source={require('@/assets/share64.png')}
+                style={{ width: 30, height: 30 }}
+              />
+            </Pressable>
+          </MarkerView>
+              </React.Fragment>
+            );
+          })}
 
         {isSelectingLocation && selectedLocation && (
           <MarkerView
@@ -278,6 +323,7 @@ const SFHomeScreen = () => {
           ]}
           onPress={() => {
             setIsSelectingLocation(true);
+            poiModalRef.current?.close();
             shareModalRef.current?.present();
           }}
         >

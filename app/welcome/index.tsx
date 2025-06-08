@@ -4,7 +4,7 @@ import MapboxGL from '@rnmapbox/maps';
 import { makeRedirectUri } from 'expo-auth-session';
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // 🗝️ MapTiler style URL with key
 const MAP_STYLE =
@@ -56,7 +56,7 @@ export default function WelcomeScreen() {
       });
 
       if (error) {
-        Alert.alert('Login error', error.message); 
+        Alert.alert('Login error', error.message);
         return;
       } else {
         Alert.alert('Success', 'Logged in using test credentials!');
@@ -69,7 +69,7 @@ export default function WelcomeScreen() {
 
     console.log('Redirect URI:', redirectTo);
 
-    const { error } = await supabase.auth.signInWithOtp({  
+    const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {    
         emailRedirectTo: redirectTo,  
@@ -164,11 +164,11 @@ export default function WelcomeScreen() {
         snapPoints={['92%']}
         enablePanDownToClose
         backgroundStyle={{
-          backgroundColor: '#F0F8E8', // soft greenish-beige
+          backgroundColor: '#F0F8E8',
           borderTopLeftRadius: 36,
           borderTopRightRadius: 36,
           borderWidth: 3,
-          borderColor: '#B4CBA5', // muted leaf green border
+          borderColor: '#B4CBA5',
           shadowColor: '#7A8D7B',
           shadowOpacity: 0.2,
           shadowRadius: 18,
@@ -176,10 +176,8 @@ export default function WelcomeScreen() {
         }}
         ref={bottomSheetRef}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        <View
           style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -30} // tweak as needed
         >
           <BottomSheetScrollView 
             contentContainerStyle={styles.sheetView} 
@@ -247,7 +245,7 @@ export default function WelcomeScreen() {
             )}
           </View>
         </BottomSheetScrollView>
-        </KeyboardAvoidingView>
+        </View>
       </BottomSheet>  
     </View>
   );

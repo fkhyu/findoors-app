@@ -1,6 +1,5 @@
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { i18n } from '@lingui/core';
-import { t } from '@lingui/macro';
 import { I18nProvider } from "@lingui/react";
 import { router, Tabs } from 'expo-router';
 import React from 'react';
@@ -23,7 +22,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="neighbors"
         options={{
-          title: t`Neighbors`,
+          title: `Neighbors`,
           headerShown: true,
           headerRight: () => (
             <Pressable
@@ -45,16 +44,16 @@ export default function TabLayout() {
       <Tabs.Screen
         name="events"
         options={{
-          title: t`Happenings`,
+          title: `Happenings`,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="event" size={24} color={color} /> 
           ),
         }} 
       />  
-      <Tabs.Screen 
+      <Tabs.Screen
         name="index"
         options={{
-          title: t`Map`,
+          title: `Map`,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="map" size={24} color={color} />
           ),
@@ -63,7 +62,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="passport"
         options={{
-          title: t`Passport`,
+          title: `Passport`,
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="passport" size={24} color={color} />
           ),
