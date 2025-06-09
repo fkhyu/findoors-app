@@ -1,13 +1,10 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import MapBox, {
   Camera,
-  FillLayer,
   MapView,
   MarkerView,
-  ShapeSource,
-  UserLocation,
+  UserLocation
 } from '@rnmapbox/maps';
-import circle from '@turf/circle';
 import * as Location from 'expo-location';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -43,6 +40,7 @@ const SFHomeScreen = () => {
   const router = useRouter();
   const [pois, setPois] = useState<POI[]>([]);
   const [shares, setShares] = useState<any[]>([]);
+  const [userEvents, setUserEvents] = useState<any[]>([]);
   const [mapReady, setMapReady] = useState(false);
   const poiModalRef = useRef<POIModalMethods>(null);
   const [selectedPoi, setSelectedPoi] = useState<POI | null>(null);
@@ -95,18 +93,18 @@ const SFHomeScreen = () => {
   const fetchData = async () => {
     const { data: poiData, error: poiError } = await supabase.from('poi').select('*');
     if (poiError) {
-    console.error('Error fetching POIs:', poiError.message);
-    setPois([]);
+      console.error('Error fetching POIs:', poiError.message);
+      setPois([]);
     } else {
-    setPois(poiData as POI[] || []);
+      setPois(poiData as POI[] || []);
     }
 
-    const { data: shareData, error: shareError } = await supabase.from('shares').select('*');
+    const { data: shareData, error: shareError } = await supabase.from('user_events').select('*');
     if (shareError) {
-    console.error('Error fetching shares:', shareError.message);
-    setShares([]);
+      console.error('Error fetching shares:', shareError.message);
+      setUserEvents([]);
     } else {
-    setShares(shareData || []);
+      setUserEvents(shareData || []);
     }
   };
 
@@ -236,50 +234,27 @@ const SFHomeScreen = () => {
           </MarkerView>
         ))}
 
-        {shares
-          .filter(share => {
-            const startTime = new Date(share.begins + 'Z');
-            const endTime = new Date(startTime.getTime() + share.duration * 60000); 
+        {userEvents
+          .filter(event => {
+            const endTime = new Date(event.end + 'Z'); 
             return endTime > new Date();
           })
-          .map(share => {
-            // generate a GeoJSON polygon approximating the accuracy circle
-            const polygon = circle(
-              [share.lon, share.lat],
-              share.accuracy / 1000, // turf.circle expects kilometers
-              { steps: 16, units: 'kilometers' }
-            );
-
+          .map(event => {
             return (
-              <React.Fragment key={share.id}>
-          {/* fill polygon under the marker */}
-          <ShapeSource
-            id={`sharePolygonSource-${share.id}`}
-            shape={polygon}
-          >
-            <FillLayer
-              id={`sharePolygonFill-${share.id}`}
-              style={{
-                fillColor: '#007AFF',
-                fillOpacity: 0.15,
-              }}
-            />
-          </ShapeSource>
-
-          {/* the share marker on top */}
+              <React.Fragment key={event.id}>
           <MarkerView
-            coordinate={[share.lon, share.lat]}
+            coordinate={[event.lon, event.lat]}
             anchor={{ x: 0.5, y: 0.5 }}
           >
             <Pressable
               onPress={() => {
                 setSelectedPoi({
-            id: share.id,
-            lat: share.lat,
-            lon: share.lon,
-            title: share.title,
-            icon_url: '',
-            type: 'share',
+                  id: event.id,
+                  lat: event.lat,
+                  lon: event.lon,
+                  title: event.name,
+                  icon_url: '',
+                  type: 'uevent',
                 });
                 poiModalRef.current?.present();
               }}

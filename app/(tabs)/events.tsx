@@ -66,15 +66,15 @@ const EventsScreen = () => {
             <Pressable onPress={() => router.push('/events/create')} style={{ marginRight: 15 }}>
               <MaterialIcons name="add" size={24} color="#333" />
             </Pressable>
-          ),
+          ), 
         }}
       />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}> 
 
         {shares
           .filter(share => {
-          const startTime = new Date(share.start + 'Z');
-          const endTime = new Date(startTime.getTime() + share.duration * 60000);
+          const endTime = new Date(share.end + 'Z');
+          console.log('Share end time:', endTime, 'Current time:', new Date());
           return endTime > new Date();
         }).length > 0 && (
           <Text style={styles.header}>Neighbors Shares</Text>
@@ -82,8 +82,7 @@ const EventsScreen = () => {
         {shares.length > 0 ? (
           shares
             .filter(share => {
-              const startTime = new Date(share.start + 'Z');
-              const endTime = new Date(startTime.getTime() + share.duration * 60000); 
+              const endTime = new Date(share.end + 'Z'); 
               return endTime > new Date();
             })
             .map(share => (
@@ -92,16 +91,16 @@ const EventsScreen = () => {
               style={styles.card}
               onPress={() => goToMap(share.lat, share.lon)}
             >
-              <Text style={styles.name}>{share.title}</Text>
+              <Text style={styles.name}>{share.name}</Text>
               <View style={{ flexDirection: 'row', gap: 4 }}>
                 <Text style={[styles.time, { paddingRight: 8 }]}>
-                  {new Date(share.begins + 'Z').toLocaleDateString([], {
+                  {new Date(share.start + 'Z').toLocaleDateString([], {
                     day: 'numeric',
                     month: 'long',
                   })}
                 </Text>
                 <Text style={styles.time}>
-                  {new Date(share.begins + 'Z').toLocaleTimeString([], {
+                  {new Date(share.start + 'Z').toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: false,
@@ -109,9 +108,8 @@ const EventsScreen = () => {
                 </Text>
                 <Text style={styles.time}>-</Text>
                 <Text style={styles.time}>
-                    {new Date(
-                      new Date(share.begins + 'Z').getTime() + share.duration * 60000
-                      ).toLocaleTimeString([], {
+                    {new Date(share.end + 'Z')
+                      .toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
                       hour12: false,

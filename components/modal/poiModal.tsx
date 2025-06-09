@@ -118,11 +118,12 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             selectedPoiData.type === 'view' ? '🌆 Scenic View' :
             selectedPoiData.type === 'hidden' ? '🕵️ Hidden Gem' :
             selectedPoiData.type === 'share' ? '📢 Shared Location' :
+            selectedPoiData.type === 'uevent' ? '🎉 User Event' :
             '📍 Landmark'}
           </Text>
 
           {selectedPoiData.address ? (
-            <Text style={styles.address}>{selectedPoiData.address}</Text>  
+            <Text style={styles.address}>{selectedPoiData.address}</Text> 
           ) : null}
 
           <View style={styles.CTAContainer}>
@@ -135,7 +136,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             </Pressable>
             <Pressable
               onPress={() => {
-                sheetRef.current?.close();
+                sheetRef.current?.close();s
                 router.push(`/checkin/${selectedPoiData.id}`)
               }}
               style={styles.directionsButton}
