@@ -93,6 +93,9 @@ const PassportScreen = () => {
           You're not logged in! Click me to login
         </Link>
       )}
+      <Link style={styles.quote} href="/welcome/fellows">
+          debug permissions
+      </Link>
 
       {isLoggedIn && (
         <TouchableOpacity

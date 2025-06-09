@@ -136,7 +136,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             </Pressable>
             <Pressable
               onPress={() => {
-                sheetRef.current?.close();s
+                sheetRef.current?.close(); 
                 router.push(`/checkin/${selectedPoiData.id}`)
               }}
               style={styles.directionsButton}

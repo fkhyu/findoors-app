@@ -37,6 +37,7 @@ export default function RootLayout() {
             <Stack.Screen name="welcome/where" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/when" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/fellows" options={{ headerShown: false }} />
+            <Stack.Screen name="welcome/permissions" options={{ headerShown: false }} />
             <Stack.Screen name="welcome/intro" options={{ headerShown: false }} />
             <Stack.Screen name="friends/add" options={{ headerShown: true, title: "Add Neighbors" }} />
             <Stack.Screen name="+not-found" />

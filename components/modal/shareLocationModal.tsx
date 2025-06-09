@@ -1,8 +1,8 @@
+import { supabase } from '@/lib/supabase';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Slider from '@react-native-community/slider';
 import React, {
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -10,14 +10,13 @@ import React, {
 } from 'react';
 import {
   Keyboard,
-  Platform,
   Pressable,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import SelectFriendsModal from './selectFriendsModal';
 
 export type ShareLocationModalMethods = {
   present: () => void;
@@ -25,186 +24,227 @@ export type ShareLocationModalMethods = {
 };
 
 interface Props {
+  /**
+   * Called when the user taps "Share Location".
+   * Always provides the list of friend IDs to share with.
+   */
   onSubmit: (data: {
     isPrecise: boolean;
-    accuracy: number;
-    visibility: 'everyone' | 'friends';
-    locationName: string;
-    description: string;
-    startTime: Date;
-    duration: number;
-    manualLocation: [number, number] | null;
+    radiusMeters?: number;
+    friendUserIds: string[];
+    durationHours: number;
+    description?: string;
   }) => void;
   onClose: () => void;
-  manualLocation: [number, number] | null;
-  setManualLocation: (loc: [number, number] | null) => void;
 }
 
-const ShareLocationModal = forwardRef<
-  ShareLocationModalMethods,
-  Props
->(({ onSubmit, onClose, manualLocation, setManualLocation }, ref) => {
-  const sheetRef = useRef<BottomSheetModal>(null);
+const RADIUS_PRESETS = [50, 100, 500, 1000] as const;
+const DURATION_PRESETS: { label: string; value: number | 'until_off' }[] = [
+  { label: '1 hour', value: 1 },
+  { label: '3 hours', value: 3 },
+  { label: '6 hours', value: 6 },
+  { label: 'Until off', value: 'until_off' },
+];
 
-  // form state
-  const [isPrecise, setIsPrecise] = useState(true);
-  const [accuracy, setAccuracy] = useState(50);
-  const [visibility, setVisibility] = useState<'everyone' | 'friends'>('everyone');
-  const [locationName, setLocationName] = useState('');
-  const [description, setDescription] = useState('');
-  const [startNow, setStartNow] = useState(true);
-  const [startTime, setStartTime] = useState(new Date());
-  const [duration, setDuration] = useState(60);
+const ShareLocationModal = forwardRef<ShareLocationModalMethods, Props>(
+  ({ onSubmit, onClose }, ref) => {
+    const sheetRef = useRef<BottomSheetModal>(null);
+    const snapPoints = useMemo(() => ['60%', '90%'], []);
 
-  // bottom-sheet sizes
-  const snapPoints = useMemo(() => ['60%', '90%'], []);
+    // UI state
+    const [isPrecise, setIsPrecise] = useState(true);
+    const [selectedRadius, setSelectedRadius] = useState<number>(RADIUS_PRESETS[1]);
+    const [visibility, setVisibility] = useState<'friends' | 'specific'>('friends');
+    const [specificFriendIds, setSpecificFriendIds] = useState<string[]>([]);
+    const [allFriendIds, setAllFriendIds] = useState<string[]>([]);
+    const [duration, setDuration] = useState<number | 'until_off'>(1);
+    const [description, setDescription] = useState<string>('');
+    const [friendModalVisible, setFriendModalVisible] = useState(false);
 
-  useImperativeHandle(ref, () => ({
-    present: () => {
-      sheetRef.current?.present();
-      sheetRef.current?.snapToIndex(0);
-    },
-    close: () => {
+    // Fetch all friends once on mount
+    useEffect(() => {
+      (async () => {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+        if (authError || !user) return;
+
+        const { data: friendRecords, error: friendsError } = await supabase
+          .from('friends')
+          .select('*')
+          .eq('user_id', user.id);
+        if (friendsError || !friendRecords) return;
+
+        setAllFriendIds(friendRecords.map((r) => r.friend_id));
+      })();
+    }, []);
+
+    useImperativeHandle(ref, () => ({
+      present: () => {
+        sheetRef.current?.present();
+        sheetRef.current?.snapToIndex(0);
+      },
+      close: () => sheetRef.current?.close(),
+    }));
+
+    const handleShare = () => {
+      // Determine target IDs based on visibility
+      const friendUserIds =
+        visibility === 'specific' ? specificFriendIds : allFriendIds;
+
+      if (duration === 'until_off') {
+        setDuration(0);
+      }
+
+      onSubmit({
+        isPrecise,
+        radiusMeters: isPrecise ? undefined : selectedRadius,
+        visibility,
+        friendUserIds,
+        durationHours: duration,
+        description: description.trim() || undefined,
+      });
       sheetRef.current?.close();
-    },
-  }));
+    };
 
-  const handleSubmit = () => {
-    onSubmit({
-      isPrecise,
-      accuracy,
-      visibility,
-      locationName,
-      description,
-      startTime: startNow ? new Date() : startTime,
-      duration,
-      manualLocation,
-    });
-    setManualLocation(null);
-    onClose();
-  };
-
-  return (
-    <BottomSheetModal
-      ref={sheetRef}
-      index={0}
-      snapPoints={snapPoints}
-      enablePanDownToClose
-      backgroundStyle={styles.background}
-      handleIndicatorStyle={styles.handle}
-      onDismiss={onClose}
-    >
-      <BottomSheetScrollView
-        contentContainerStyle={styles.contentContainer}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.headerRow}>
-          <Text style={styles.header}>Share Your Location</Text>
-          <Pressable onPress={() => Keyboard.dismiss()} style={styles.doneButton}>
-            <Text style={styles.doneText}>Close Keyboard</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.row}>
-          <Text>Share Live Location:</Text>
-          <Switch value={isPrecise} onValueChange={setIsPrecise} />
-        </View>
-
-        {!isPrecise && manualLocation && (
-          <View style={styles.row}>
-            <Text>
-              Chosen coords: {manualLocation[1].toFixed(5)},{' '}
-              {manualLocation[0].toFixed(5)}
-            </Text>
-            <Pressable onPress={() => setManualLocation(null)}>
-              <Text style={styles.clearText}>Clear</Text>
+    const renderOptionGroup = <T extends string | number>(
+      label: string,
+      options: { label: string; value: T }[],
+      selected: T,
+      onSelect: (val: T) => void
+    ) => (
+      <View style={styles.group}>
+        <Text style={styles.groupLabel}>{label}</Text>
+        <View style={styles.optionsRow}>
+          {options.map((opt) => (
+            <Pressable
+              key={String(opt.value)}
+              style={[
+                styles.optionButton,
+                selected === opt.value && styles.optionButtonSelected,
+              ]}
+              onPress={() => onSelect(opt.value as any)}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  selected === opt.value && styles.optionTextSelected,
+                ]}
+              >
+                {opt.label}
+              </Text>
             </Pressable>
-          </View>
-        )}
-
-        <View style={styles.row}>
-          <Text>Accuracy (meters):</Text>
-          <Text>{accuracy.toFixed(0)}m</Text>
+          ))}
         </View>
-        <Slider
-          minimumValue={10}
-          maximumValue={1000}
-          step={10}
-          value={accuracy}
-          onValueChange={setAccuracy}
+      </View>
+    );
+
+    return (
+      <>  
+        <BottomSheetModal
+          ref={sheetRef}
+          index={0}
+          snapPoints={snapPoints}
+          enablePanDownToClose
+          backgroundStyle={styles.background}
+          handleIndicatorStyle={styles.handle}
+          onDismiss={onClose}
+        >
+          <BottomSheetScrollView
+            contentContainerStyle={styles.contentContainer}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.headerRow}>
+              <Text style={styles.header}>Share Your Location</Text>
+              <Pressable
+                onPress={() => Keyboard.dismiss()}
+                style={styles.closeKeyboard}
+              >
+                <Text style={styles.closeText}>Close Keyboard</Text>
+              </Pressable>
+            </View>
+
+            {renderOptionGroup(
+              'Precision',
+              [
+                { label: 'Precise', value: true },
+                { label: 'Radius', value: false },
+              ],
+              isPrecise,
+              setIsPrecise
+            )}
+
+            {!isPrecise &&
+              renderOptionGroup(
+                'Radius',
+                RADIUS_PRESETS.map((r) => ({ label: r >= 1000 ? `${r / 1000} km` : `${r} m`, value: r })),
+                selectedRadius,
+                setSelectedRadius
+              )}
+
+            {renderOptionGroup(
+              'Who can see',
+              [
+                { label: 'Friends', value: 'friends' },
+                { label: 'Specific...', value: 'specific' },
+              ],
+              visibility,
+              setVisibility as any
+            )}
+
+            {visibility === 'specific' && (
+              <Pressable
+                style={styles.selectButton}
+                onPress={() => setFriendModalVisible(true)}
+              >
+                <Text style={styles.selectText}>
+                  {specificFriendIds.length > 0
+                    ? `Selected (${specificFriendIds.length})`
+                    : 'Select Friends'}
+                </Text>
+              </Pressable>
+            )}
+
+            {renderOptionGroup(
+              'Duration',
+              DURATION_PRESETS,
+              duration,
+              setDuration as any
+            )}
+
+            <View style={styles.group}>
+              <Text style={styles.groupLabel}>
+                Note <Text style={{ fontWeight: '300', fontSize: 12 }}>(optional)</Text>
+              </Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Where or why are you going..."
+                value={description}
+                onChangeText={setDescription}
+                multiline
+              />
+            </View>
+
+            <Pressable style={styles.submitButton} onPress={handleShare}>
+              <Text style={styles.submitText}>Share Location</Text>
+            </Pressable>
+          </BottomSheetScrollView>
+        </BottomSheetModal>
+
+        <SelectFriendsModal
+          visible={friendModalVisible}
+          initialSelected={specificFriendIds}
+          onClose={() => setFriendModalVisible(false)}
+          onSubmit={(ids) => {
+            setSpecificFriendIds(ids);
+            setFriendModalVisible(false);
+          }}
         />
-
-        <View style={styles.row}>
-          <Text>Share With:</Text>
-          <Pressable onPress={() => setVisibility('everyone')}>
-            <Text style={visibility === 'everyone' ? styles.selected : undefined}>
-              Everyone
-            </Text>
-          </Pressable>
-          <Pressable onPress={() => setVisibility('friends')}>
-            <Text style={visibility === 'friends' ? styles.selected : undefined}>
-              Friends Only
-            </Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text>Location Name:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. Cafe Meeting Spot"
-            value={locationName}
-            onChangeText={setLocationName}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
-        </View>
-
-        {/* new */}
-        <View style={styles.inputContainer}>
-          <Text>Description:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Some details…"
-            value={description}
-            onChangeText={setDescription}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
-        </View>
-
-        <View style={styles.row}>
-          <Text>Start Now:</Text>
-          <Switch value={startNow} onValueChange={setStartNow} />
-        </View>
-        {!startNow && (
-          <DateTimePicker
-            value={startTime}
-            mode="time"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={(_, date) => date && setStartTime(date)}
-          />
-        )}
-
-        <View style={styles.inputContainer}>
-          <Text>Duration (minutes):</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={duration.toString()}
-            onChangeText={text => setDuration(Number(text))}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
-        </View>
-
-        <Pressable style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitText}>Share Location</Text>
-        </Pressable>
-      </BottomSheetScrollView>
-    </BottomSheetModal>
-  );
-});
+      </>  
+    );
+  }
+);
 
 ShareLocationModal.displayName = 'ShareLocationModal';
 export default ShareLocationModal;
@@ -225,60 +265,63 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 20,
     flexGrow: 1,
-    gap: 16,
+    gap: 20,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  header: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  doneButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  doneText: {
-    fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  inputContainer: {
-    marginTop: 10,
-  },
-  input: {
+  header: { fontSize: 20, fontWeight: '700' },
+  closeKeyboard: { paddingHorizontal: 8, paddingVertical: 4 },
+  closeText: { fontSize: 14, color: '#007AFF', fontWeight: '500' },
+
+  // Option groups
+  group: { marginVertical: 8 },
+  groupLabel: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
+  optionsRow: { flexDirection: 'row', flexWrap: 'wrap' },
+  optionButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
-    marginTop: 5,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  optionButtonSelected: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  optionText: { fontSize: 14, color: '#333' },
+  optionTextSelected: { color: '#fff', fontWeight: '600' },
+
+  selectButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 8,
+    backgroundColor: '#EFEFF4',
+    alignSelf: 'flex-start',
+    marginTop: 4,
   },
-  selected: {
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-    marginHorizontal: 8,
+  selectText: { fontSize: 14, color: '#007AFF', fontWeight: '500' },
+
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    minHeight: 60,
+    textAlignVertical: 'top',
   },
-  clearText: {
-    color: '#FF3B30',
-    fontWeight: '600',
-  },
+
   submitButton: {
     backgroundColor: '#007AFF',
-    padding: 15,
+    paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 24,
     marginBottom: 40,
   },
-  submitText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+  submitText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });

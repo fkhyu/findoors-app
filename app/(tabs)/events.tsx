@@ -59,12 +59,12 @@ const EventsScreen = () => {
         options={{
           title: 'Events & Shares',
           headerShown: true,
-          headerStyle: { backgroundColor: '#f8f8f8' },
+          headerStyle: { backgroundColor: '#fff' },
           headerTitleStyle: { fontWeight: 'bold' },
           headerTintColor: '#333',
           headerRight: () => (
             <Pressable onPress={() => router.push('/events/create')} style={{ marginRight: 15 }}>
-              <MaterialIcons name="add" size={24} color="#333" />
+              <MaterialIcons name="add-circle-outline" size={24} color="#333" />
             </Pressable>
           ), 
         }}

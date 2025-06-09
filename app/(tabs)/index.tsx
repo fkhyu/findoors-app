@@ -25,17 +25,6 @@ interface POI {
   type: string;
 }
 
-interface LocationShareData {
-  isPrecise: boolean;
-  accuracy: number;
-  visibility: 'everyone' | 'friends';
-  locationName: string;
-  description: string;
-  startTime: Date;
-  duration: number;
-  manualLocation: [number, number] | null;
-}
-
 const SFHomeScreen = () => {
   const router = useRouter();
   const [pois, setPois] = useState<POI[]>([]);
@@ -128,7 +117,7 @@ const SFHomeScreen = () => {
     cameraRef.current?.moveTo([loc.coords.longitude, loc.coords.latitude], 1000);
   };
 
-  const handleLocationShare = async (data: LocationShareData) => {
+  const handleLocationShare = async (data: any) => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       alert('Permission to access location was denied');
@@ -136,44 +125,38 @@ const SFHomeScreen = () => {
     }
 
     let longitude: number, latitude: number;
-    if (data.isPrecise) {
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
-      longitude = loc.coords.longitude;
-      latitude  = loc.coords.latitude;
-    } else if (data.manualLocation) {
-      [longitude, latitude] = data.manualLocation;
-    } else {
-      alert('Please tap the map to pick a location');
-      return;
-    }
+
+    const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
+    longitude = loc.coords.longitude;
+    latitude  = loc.coords.latitude;
 
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
       alert('Not logged in');
-      return; 
+      return;
     }
 
     const row = {
-      begins:      data.startTime.toISOString(),
-      organizer:   user.id,
-      duration:    data.duration,
-      title:       data.locationName,
-      public:      data.visibility === 'everyone',
-      description: data.description,
-      accuracy:    data.accuracy,
+      start:       new Date().toISOString(),
+      sharer_id:   user.id,
+      durationh:   data.durationHours,
+      note:        data.description,
       isPrecise:   data.isPrecise,
       lat:         latitude,
       lon:         longitude,
+      radius:      data.radiusMeters, 
+      shared_to:   data.friendUserIds
     };
 
-    const { error } = await supabase.from('shares').insert([row]);
+    const { error } = await supabase.from('location_share').insert([row]);
     if (error) {
       console.error('Error sharing location:', error.message);
       alert('Could not share location');
     } else {
       console.log('Location published!');
+      alert('Location shared successfully!');
     }
 
     fetchData();
