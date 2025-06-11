@@ -5,7 +5,10 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from '@lingui/react';
 import { getLocales } from 'expo-localization';
+import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
+import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
@@ -24,6 +27,23 @@ if (language === "fi" || language === "sv" || language === "en") {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    (async () => {
+      // Location: foreground & background
+      const { status: fg } = await Location.requestForegroundPermissionsAsync();
+      const { status: bg } = await Location.requestBackgroundPermissionsAsync();
+      if (fg !== 'granted' || bg !== 'granted') {
+        console.warn('Location permissions not fully granted');
+      }
+
+      // Notifications
+      const { status: notif } = await Notifications.requestPermissionsAsync();
+      if (notif.status !== 'granted') {
+        console.warn('Notifications permission not granted');
+      }
+    })();
+  }, []);
+
   return (
     <I18nProvider i18n={i18n}>  
       <GestureHandlerRootView style={{ flex: 1 }}>

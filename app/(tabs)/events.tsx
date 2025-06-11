@@ -66,7 +66,7 @@ const EventsScreen = () => {
             <Pressable onPress={() => router.push('/events/create')} style={{ marginRight: 15 }}>
               <MaterialIcons name="add-circle-outline" size={24} color="#333" />
             </Pressable>
-          ), 
+          ),
         }}
       />
       <ScrollView contentContainerStyle={styles.container}> 
@@ -75,7 +75,7 @@ const EventsScreen = () => {
           .filter(share => {
           const endTime = new Date(share.end + 'Z');
           console.log('Share end time:', endTime, 'Current time:', new Date());
-          return endTime > new Date();
+          return endTime > new Date(); 
         }).length > 0 && (
           <Text style={styles.header}>Neighbors Shares</Text>
         )}

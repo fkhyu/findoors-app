@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
 import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
 import { Dimensions, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -88,7 +88,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
     const handlePresent = useCallback(() => {
       sheetRef.current?.present();
       sheetRef.current?.snapToIndex(initialIndex);
-    }, [initialIndex]); 
+    }, [initialIndex]);
 
     useImperativeHandle(ref, () => ({
       present: handlePresent,
@@ -98,7 +98,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
     }));
 
     if (!selectedPoiData || !selectedPoiData.id) {
-      return null; // Return null if no POI data is provided
+      return null; 
     }
 
     return (
@@ -151,6 +151,10 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
           ) : null}
 
           {/* Future buttons/interactions can go here */}
+          <BottomSheetScrollView style={styles.chatContainer}>
+            <Text style={styles.photos}>Photos and Comments</Text>
+            
+          </BottomSheetScrollView>
         </BottomSheetView>
       </BottomSheetModal>
     );
@@ -241,5 +245,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     gap: 8,
+  },
+  chatContainer: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
 })
