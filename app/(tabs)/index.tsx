@@ -40,6 +40,7 @@ const SFHomeScreen = () => {
   const cameraRef = useRef<Camera>(null);
   const { poi: poiId } = useGlobalSearchParams<{ poi?: string }>();
   const [shareRowId, setShareRowId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -115,7 +116,7 @@ const SFHomeScreen = () => {
     cameraRef.current?.flyTo([poi.lon, poi.lat], 1000);
     setSelectedPoi(poi);
     poiModalRef.current?.present();
-  }; 
+  };
 
   const centerOnUser = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -235,6 +236,50 @@ const SFHomeScreen = () => {
     setIsSelectingLocation(false);
     setSelectedLocation(null);
   };
+
+  useEffect(() => {
+    const subscription = supabase
+      .channel('public:messages')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages',
+          /*filter: `thingy_id=eq.${selectedPoi?.id}`*/ },
+        payload => {
+          console.log('New message received:', payload.new);
+          setMessages((msgs) => [...msgs, payload.new]);
+        }
+      )
+      .subscribe();
+
+    console.log('Subscribed to messages for POI:', selectedPoi?.id);
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [selectedPoi]);
+
+  // request old messages when a POI is selected
+  useEffect(() => {
+    if (!selectedPoi) return;
+
+    const fetchMessages = async () => {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('thingy_id', selectedPoi.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error('Error fetching messages:', error.message);
+      } else {
+        console.log('Fetched messages for POI:', selectedPoi.id, data);
+        setMessages(data || []);
+      }
+    };
+
+    fetchMessages();
+  }, [selectedPoi]);
 
   MapBox.setAccessToken(
     'sk.eyJ1Ijoib25yZWMiLCJhIjoiY21hcjk0dWJxMDljZjJpc2ZpNTBmYzJlaSJ9.g9Gtb_MLi1v916-lt7ZrWg'
@@ -391,8 +436,9 @@ const SFHomeScreen = () => {
         initialSnap="mid"
         minHeight={200}
         midHeight={400}
-        maxHeight={600}
+        maxHeight={800}
         selectedPoiData={selectedPoi}
+        messages={messages}
       />
     </View>
   );
