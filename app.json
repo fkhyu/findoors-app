@@ -2,7 +2,7 @@
   "expo": {
     "name": "OtaMapSF",  
     "slug": "findoors",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "findoors",
@@ -11,21 +11,27 @@
     "ios": { 
       "supportsTablet": true,
       "bundleIdentifier": "fi.otamaps.sf",
-      "buildNumber": "103",
+      "buildNumber": "104",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "BackgroundModes": [
+          "location"
+        ],
         "NSLocationWhenInUseUsageDescription": "Show current location on map and scan for beacons.",
-        "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to scan for beacons."
+        "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to scan for beacons.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location services to show your current location on the map and scan for beacons even when the app is in the background."
       }
     }, 
     "android": {
       "edgeToEdgeEnabled": true, 
-      "versionCode": 14,
+      "versionCode": 15,
       "package": "fi.otamaps.sf",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "BLUETOOTH_SCAN",
-        "BLUETOOTH_CONNECT"
+        "BLUETOOTH_CONNECT",
+        "ACCESS_BACKGROUND_LOCATION",
+        "ACCESS_COARSE_LOCATION"
       ]
     },
     "web": {
@@ -73,10 +79,31 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Show current location on map and scan for beacons."
+          "locationWhenInUsePermission": "Show current location on map and share to others when you so wish.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#000000",
+          "iosDisplayInForeground": true,
+          "notificationCategories": [
+            {
+              "identifier": "findoors",
+              "actions": [
+                {
+                  "identifier": "open",
+                  "buttonTitle": "Open",
+                  "foreground": true
+                }
+              ]
+            }
+          ]
         }
       ]
-      
     ],
     "experiments": {
       "typedRoutes": true

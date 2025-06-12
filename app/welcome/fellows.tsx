@@ -179,7 +179,7 @@ export default function FellowsScreen() {
         <Switch value={showProfile} onValueChange={togglePublicProfile} />
       </View>
 
-      <Link href="/welcome/intro" asChild>
+      <Link href="/welcome/permissions" asChild>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Continue →</Text>
         </TouchableOpacity>

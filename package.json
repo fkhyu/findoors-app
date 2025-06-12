@@ -1,7 +1,7 @@
 {
   "name": "findoors",
   "main": "expo-router/entry",
-  "version": "0.0.1",
+  "version": "0.1.5",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -40,12 +40,13 @@
     "expo-file-system": "~18.1.10",
     "expo-font": "~13.3.1",
     "expo-haptics": "~14.1.4",
-    "expo-image": "~2.1.7",
+    "expo-image": "~2.3.0",
     "expo-image-picker": "~16.1.4",
     "expo-linear-gradient": "~14.1.4",
     "expo-linking": "~7.1.5",
     "expo-localization": "~16.1.5",
     "expo-location": "~18.1.5",
+    "expo-notifications": "~0.31.3",
     "expo-router": "~5.0.6",
     "expo-splash-screen": "~0.30.8",
     "expo-status-bar": "~2.2.3",

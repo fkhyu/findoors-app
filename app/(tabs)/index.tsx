@@ -1,23 +1,20 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import MapBox, {
-  Camera,
-  FillLayer,
-  MapView,
-  MarkerView,
-  ShapeSource,
-  UserLocation,
-} from '@rnmapbox/maps';
-import circle from '@turf/circle';
-import * as Location from 'expo-location';
-import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
-
 import POIModal, { POIModalMethods } from '@/components/modal/poiModal';
 import ShareLocationModal, {
   ShareLocationModalMethods,
 } from '@/components/modal/shareLocationModal';
+import { startBackgroundLocation, stopBackgroundLocation } from '@/lib/bg/backgroundLocation';
 import { supabase } from '@/lib/supabase';
+import { MaterialIcons } from '@expo/vector-icons';
+import MapBox, {
+  Camera,
+  MapView,
+  MarkerView,
+  UserLocation
+} from '@rnmapbox/maps';
+import * as Location from 'expo-location';
+import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 interface POI {
   id: string;
@@ -28,21 +25,11 @@ interface POI {
   type: string;
 }
 
-interface LocationShareData {
-  isPrecise: boolean;
-  accuracy: number;
-  visibility: 'everyone' | 'friends';
-  locationName: string;
-  description: string;
-  startTime: Date;
-  duration: number;
-  manualLocation: [number, number] | null;
-}
-
 const SFHomeScreen = () => {
   const router = useRouter();
   const [pois, setPois] = useState<POI[]>([]);
-  const [shares, setShares] = useState<any[]>([]);
+  const [locationShares, setLocationShares] = useState<any[]>([]);
+  const [userEvents, setUserEvents] = useState<any[]>([]);
   const [mapReady, setMapReady] = useState(false);
   const poiModalRef = useRef<POIModalMethods>(null);
   const [selectedPoi, setSelectedPoi] = useState<POI | null>(null);
@@ -52,6 +39,8 @@ const SFHomeScreen = () => {
   const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
   const cameraRef = useRef<Camera>(null);
   const { poi: poiId } = useGlobalSearchParams<{ poi?: string }>();
+  const [shareRowId, setShareRowId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -95,18 +84,27 @@ const SFHomeScreen = () => {
   const fetchData = async () => {
     const { data: poiData, error: poiError } = await supabase.from('poi').select('*');
     if (poiError) {
-    console.error('Error fetching POIs:', poiError.message);
-    setPois([]);
+      console.error('Error fetching POIs:', poiError.message);
+      setPois([]);
     } else {
-    setPois(poiData as POI[] || []);
+      setPois(poiData as POI[] || []);
     }
 
-    const { data: shareData, error: shareError } = await supabase.from('shares').select('*');
+    const { data: shareData, error: shareError } = await supabase.from('user_events').select('*');
     if (shareError) {
-    console.error('Error fetching shares:', shareError.message);
-    setShares([]);
+      console.error('Error fetching shares:', shareError.message);
+      setUserEvents([]);
     } else {
-    setShares(shareData || []);
+      setUserEvents(shareData || []);
+    }
+
+    const { data: locationShareData, error: LSError } = await supabase.from("location_share").select('*');
+    if (LSError) {
+      console.error('Error fetching locations:', LSError.message)
+      setLocationShares([])
+    } else {
+      console.log('Fetched location shares:', locationShareData);
+      setLocationShares(locationShareData)
     }
   };
 
@@ -130,59 +128,158 @@ const SFHomeScreen = () => {
     cameraRef.current?.moveTo([loc.coords.longitude, loc.coords.latitude], 1000);
   };
 
-  const handleLocationShare = async (data: LocationShareData) => {
+  useEffect(() => {
+    let subscription: Location.LocationSubscription | null = null;
+
+    if (!shareRowId) return;  // nothing to update yet
+
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission to access location was denied');
+        return;
+      }
+
+      subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Highest,
+          timeInterval: 10000, 
+          distanceInterval: 5,
+        },
+        async loc => {
+          // push the update 
+          const { error } = await supabase
+            .from('location_share')
+            .update({
+              lat:  loc.coords.latitude,
+              lon:  loc.coords.longitude,
+            })
+            .eq('id', shareRowId);
+
+          if (error) {
+            console.error('Error updating location share:', error.message);
+          } else {
+            console.log('Location updated on server');
+          }
+        }
+      );
+    })();
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [shareRowId]);
+
+  const handleLocationShare = async (data: any) => {
+    // 1. Permissions & current pos
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       alert('Permission to access location was denied');
       return;
     }
+    const loc = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Highest,
+    });
 
-    let longitude: number, latitude: number;
-    if (data.isPrecise) {
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
-      longitude = loc.coords.longitude;
-      latitude  = loc.coords.latitude;
-    } else if (data.manualLocation) {
-      [longitude, latitude] = data.manualLocation;
-    } else {
-      alert('Please tap the map to pick a location');
+    // 2. Auth check
+    const { data: { user }, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !user) {
+      alert('Not logged in');
       return;
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      alert('Not logged in');
-      return; 
-    }
-
+    // 3. Prepare row
     const row = {
-      begins:      data.startTime.toISOString(),
-      organizer:   user.id,
-      duration:    data.duration,
-      title:       data.locationName,
-      public:      data.visibility === 'everyone',
-      description: data.description,
-      accuracy:    data.accuracy,
-      isPrecise:   data.isPrecise,
-      lat:         latitude,
-      lon:         longitude,
+      start:     new Date().toISOString(),
+      sharer_id: user.id,
+      durationh: data.durationHours,
+      note:      data.description,
+      isPrecise: data.isPrecise,
+      lat:       loc.coords.latitude,
+      lon:       loc.coords.longitude,
+      radius:    data.radiusMeters,
+      shared_to: data.friendUserIds,
     };
 
-    const { error } = await supabase.from('shares').insert([row]);
-    if (error) {
-      console.error('Error sharing location:', error.message);
+    // 4. Insert & grab ID
+    const insertRes = await supabase
+      .from('location_share')
+      .insert([row])
+      .select('id')
+      .single();
+
+    // 5. Handle insert error
+    if (insertRes.error || !insertRes.data?.id) {
+      console.error('Error sharing location:', insertRes.error?.message);
       alert('Could not share location');
-    } else {
-      console.log('Location published!');
+      return;
     }
 
-    fetchData();
+    // 6. Success: alert + store ID
+    const newId = insertRes.data.id;
+    alert('Location shared successfully!');
+    setShareRowId(newId);
 
+    // 7. Start background tracking (safely)
+    try {
+      await startBackgroundLocation(newId);
+    } catch (err) {
+      console.error('Background tracking failed:', err);
+    }
+
+    // 8. Schedule stop & refresh UI
+    setTimeout(
+      () => stopBackgroundLocation(),
+      data.durationHours * 3600 * 1000
+    );
+    fetchData();
     setIsSelectingLocation(false);
     setSelectedLocation(null);
   };
+
+  useEffect(() => {
+    const subscription = supabase
+      .channel('public:messages')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages',
+          /*filter: `thingy_id=eq.${selectedPoi?.id}`*/ },
+        payload => {
+          console.log('New message received:', payload.new);
+          setMessages((msgs) => [...msgs, payload.new]);
+        }
+      )
+      .subscribe();
+
+    console.log('Subscribed to messages for POI:', selectedPoi?.id);
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [selectedPoi]);
+
+  // request old messages when a POI is selected
+  useEffect(() => {
+    if (!selectedPoi) return;
+
+    const fetchMessages = async () => {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('thingy_id', selectedPoi.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error('Error fetching messages:', error.message);
+      } else {
+        console.log('Fetched messages for POI:', selectedPoi.id, data);
+        setMessages(data || []);
+      }
+    };
+
+    fetchMessages();
+  }, [selectedPoi]);
 
   MapBox.setAccessToken(
     'sk.eyJ1Ijoib25yZWMiLCJhIjoiY21hcjk0dWJxMDljZjJpc2ZpNTBmYzJlaSJ9.g9Gtb_MLi1v916-lt7ZrWg'
@@ -236,50 +333,44 @@ const SFHomeScreen = () => {
           </MarkerView>
         ))}
 
-        {shares
-          .filter(share => {
-            const startTime = new Date(share.begins + 'Z');
-            const endTime = new Date(startTime.getTime() + share.duration * 60000); 
+        {locationShares.map(share => {
+          return (
+            <MarkerView
+            key={share.id}
+            coordinate={[share.lon, share.lat]}
+            anchor={{ x: 0.5, y: 0.5 }}
+            >
+              <View>
+              <Image
+                source={{ uri: `https://ui-avatars.com/api/?name=${share.user_name || 'Anonymous'}&background=random&size=60` }}
+                style={{ width: 30, height: 30, borderRadius: 15 }}
+              />
+              </View>
+            </MarkerView>
+          )
+        })}
+
+        {userEvents
+          .filter(event => {
+            const endTime = new Date(event.end + 'Z'); 
             return endTime > new Date();
           })
-          .map(share => {
-            // generate a GeoJSON polygon approximating the accuracy circle
-            const polygon = circle(
-              [share.lon, share.lat],
-              share.accuracy / 1000, // turf.circle expects kilometers
-              { steps: 16, units: 'kilometers' }
-            );
-
+          .map(event => {
             return (
-              <React.Fragment key={share.id}>
-          {/* fill polygon under the marker */}
-          <ShapeSource
-            id={`sharePolygonSource-${share.id}`}
-            shape={polygon}
-          >
-            <FillLayer
-              id={`sharePolygonFill-${share.id}`}
-              style={{
-                fillColor: '#007AFF',
-                fillOpacity: 0.15,
-              }}
-            />
-          </ShapeSource>
-
-          {/* the share marker on top */}
+              <React.Fragment key={event.id}>
           <MarkerView
-            coordinate={[share.lon, share.lat]}
+            coordinate={[event.lon, event.lat]}
             anchor={{ x: 0.5, y: 0.5 }}
           >
             <Pressable
               onPress={() => {
                 setSelectedPoi({
-            id: share.id,
-            lat: share.lat,
-            lon: share.lon,
-            title: share.title,
-            icon_url: '',
-            type: 'share',
+                  id: event.id,
+                  lat: event.lat,
+                  lon: event.lon,
+                  title: event.name,
+                  icon_url: '',
+                  type: 'uevent',
                 });
                 poiModalRef.current?.present();
               }}
@@ -345,8 +436,9 @@ const SFHomeScreen = () => {
         initialSnap="mid"
         minHeight={200}
         midHeight={400}
-        maxHeight={600}
+        maxHeight={800}
         selectedPoiData={selectedPoi}
+        messages={messages}
       />
     </View>
   );

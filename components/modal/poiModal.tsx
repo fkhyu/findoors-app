@@ -1,8 +1,10 @@
+import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
-import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Dimensions, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { TextInput } from 'react-native-gesture-handler';
 
 export type POIModalMethods = {
   snapToMax: () => void;
@@ -28,6 +30,7 @@ export interface POIModalProps {
   midHeight?: number;
   minHeight?: number;
   selectedPoiData?: POI;
+  messages?: [];
 }
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -50,7 +53,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
   (
     {
       initialSnap = 'mid',
-      maxHeight = SCREEN_HEIGHT * 0.85,
+      maxHeight = SCREEN_HEIGHT * 0.95,
       midHeight = SCREEN_HEIGHT * 0.5,
       minHeight = SCREEN_HEIGHT * 0.3,
       selectedPoiData = {
@@ -60,6 +63,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
         title: '',
         icon_url: '',
       } as POI, 
+      messages = [],
     },
     ref
   ) => {
@@ -88,7 +92,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
     const handlePresent = useCallback(() => {
       sheetRef.current?.present();
       sheetRef.current?.snapToIndex(initialIndex);
-    }, [initialIndex]); 
+    }, [initialIndex]);
 
     useImperativeHandle(ref, () => ({
       present: handlePresent,
@@ -97,8 +101,66 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
       close: () => sheetRef.current?.close(),
     }));
 
+
+    // Map of user_id to user name
+    const [userMap, setUserMap] = useState<Record<string, string>>({});
+    const [comment, setComment] = useState<string>('');
+
+    useEffect(() => {
+      if (messages.length > 0) {
+        const fetchUsers = async () => {
+          // Extract unique, non-null user IDs
+          const userIds = Array.from(new Set(
+            messages
+              .map((m: any) => m.user_id)
+              .filter((id: string | null): id is string => id !== null && id !== undefined)
+          ));
+          if (userIds.length === 0) {
+            return;
+          }
+          const { data, error } = await supabase
+            .from('users')
+            .select('id, name')
+            .in('id', userIds);
+          if (error) {
+            console.error('Error fetching user data:', error);
+          } else if (data) {
+            const map: Record<string, string> = {};
+            data.forEach((u: any) => { map[u.id] = u.name; });
+            setUserMap(map);
+          }
+        };
+        fetchUsers();
+      }
+    }, [messages]);
+
+    const sendComment = async (content: string) => {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !userData.user) {
+        console.error('Error fetching user for comment:', userError);
+        return;
+      }
+
+      supabase
+        .from('messages')
+        .insert({
+          thingy_id: selectedPoiData.id,
+          user_id: userData.user.id,
+          content: content,
+        })
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('Error sending comment:', error);
+          } else {
+            console.log('Comment sent successfully:', data);
+            setComment(''); // Clear the input after sending
+          }
+        });
+    };
+
     if (!selectedPoiData || !selectedPoiData.id) {
-      return null; // Return null if no POI data is provided
+      return null; 
     }
 
     return (
@@ -116,13 +178,14 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             {selectedPoiData.type === 'event' ? '🎟️ Event' :
             selectedPoiData.type === 'food' ? '🍽️ Food Spot' :
             selectedPoiData.type === 'view' ? '🌆 Scenic View' :
-            selectedPoiData.type === 'hidden' ? '🕵️ Hidden Gem' :
+            selectedPoiData.type === 'hidden' ? '🕵️ Hidden Gem' : 
             selectedPoiData.type === 'share' ? '📢 Shared Location' :
+            selectedPoiData.type === 'uevent' ? '🎉 User Event' :
             '📍 Landmark'}
           </Text>
 
           {selectedPoiData.address ? (
-            <Text style={styles.address}>{selectedPoiData.address}</Text>  
+            <Text style={styles.address}>{selectedPoiData.address}</Text> 
           ) : null}
 
           <View style={styles.CTAContainer}>
@@ -135,7 +198,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             </Pressable>
             <Pressable
               onPress={() => {
-                sheetRef.current?.close();
+                sheetRef.current?.close(); 
                 router.push(`/checkin/${selectedPoiData.id}`)
               }}
               style={styles.directionsButton}
@@ -150,6 +213,53 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
           ) : null}
 
           {/* Future buttons/interactions can go here */}
+          <BottomSheetScrollView style={styles.chatContainer}>
+            <Text style={styles.photos}>Photos and Comments</Text>
+
+            {messages.length > 0 ? (
+              messages.map((message: any) => (
+                <View key={message.id} style={{ marginBottom: 10 }}>
+                  <Text style={{ fontWeight: 'bold' }}>{userMap[message.user_id] || message.user_id}</Text>
+                  <Text>{message.content}</Text>
+                </View>
+              ))
+            ) : (
+              <Text>No comments yet. Be the first to share!</Text>
+            )}
+            
+            <TextInput
+              placeholder="Add a comment..."
+              style={{ 
+                height: 40, 
+                borderColor: '#ccc', 
+                borderWidth: 1, 
+                borderRadius: 8, 
+                paddingHorizontal: 10,
+                marginBottom: 10,
+              }}
+              value={comment}
+              onChangeText={(text) => {
+                setComment(text);
+              }}
+              onSubmitEditing={(e) => {
+                sendComment(e.nativeEvent.text);
+              }}
+            />
+            <Pressable
+              onPress={() => {
+                sendComment(comment);
+                setComment('');
+              }}
+              style={{ 
+                backgroundColor: '#4CAF50', 
+                padding: 10, 
+                borderRadius: 8, 
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Send Comment</Text>
+            </Pressable>
+          </BottomSheetScrollView>
         </BottomSheetView>
       </BottomSheetModal>
     );
@@ -240,5 +350,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     gap: 8,
+  },
+  chatContainer: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
 })

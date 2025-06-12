@@ -89,7 +89,7 @@ export default function UserInfoScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Age</Text>
+        <Text style={styles.label}>Age</Text> 
         <TextInput
           placeholder="e.g. 17"
           keyboardType="numeric"
@@ -108,7 +108,7 @@ export default function UserInfoScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, 
     backgroundColor: pastelGreen,
     paddingHorizontal: 24,
     paddingTop: 80,

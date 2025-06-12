@@ -79,6 +79,12 @@ const PassportScreen = () => {
           <Text style={styles.listButtonText}>Stamps</Text>
           </TouchableOpacity>
         </Link>
+        <Link href="/passport/checkins" asChild>
+          <TouchableOpacity style={styles.listButton}>
+          <MaterialCommunityIcons name="map-marker-check" size={32} color="#546C5E" />
+          <Text style={styles.listButtonText}>Check-Ins</Text>
+          </TouchableOpacity>
+        </Link>
         <Link href="/passport/settings" asChild>
           <TouchableOpacity style={styles.listButton}>
           <MaterialIcons name="settings" size={32} color="#546C5E" />

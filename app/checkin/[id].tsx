@@ -47,25 +47,73 @@ const CheckinScreen = () => {
     })();
   }, []);
 
-  const s3api =
-    'https://341668e4ddc3fc8087067598f9a78e63.r2.cloudflarestorage.com/otamapsf-images';
+  async function getPresignedUrl(filename: string, contentType: string) {
+    console.debug('[getPresignedUrl] filename:', filename, 'contentType:', contentType);
+    const start = Date.now();
 
-  const uploadImageToR2 = async (uri: string) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const fileName = `checkin-${id}-${Date.now()}.jpg`;
-    const uploadUrl = `${s3api}/${fileName}`;
-    const uploadResponse = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'image/jpeg' },
-      body: blob,
+    const res = await supabase.functions.invoke("r2-upload", {
+      body: JSON.stringify({ filename, contentType }),
     });
-    if (!uploadResponse.ok) { 
-      console.error('Failed to upload image:', uploadResponse);
-      throw new Error('Failed to upload image to R2');
+
+    console.debug(`[getPresignedUrl] invoke() took ${Date.now() - start}ms`, res);
+    if (res.error) {
+      console.error('[getPresignedUrl] supabase.functions.invoke error:', res.error);
+      throw res.error;
     }
-    return uploadUrl;
-  };
+
+    const url = (res.data as { url: string }).url;
+    console.debug('[getPresignedUrl] received URL:', url);
+    return url;
+  }
+
+  async function uploadImageToR2(uri: string) {
+    console.debug('[uploadImageToR2] start uri:', uri);
+    let response: Response;
+    try {
+      response = await fetch(uri);
+    } catch (e) {
+      console.error('[uploadImageToR2] fetch(uri) failed:', e);
+      throw new Error(`Could not fetch local image: ${e.message}`);
+    }
+
+    console.debug('[uploadImageToR2] local fetch status:', response.status);
+    const blob = await response.blob();
+    console.debug('[uploadImageToR2] blob size:', blob.size, 'type:', blob.type);
+
+    const fileName = `checkin-${id}-${Date.now()}.png`;
+
+    let presignedUrl: string;
+    try {
+      presignedUrl = await getPresignedUrl(fileName, blob.type);
+    } catch (e) {
+      console.error('[uploadImageToR2] getPresignedUrl error:', e);
+      throw e;
+    }
+
+    console.debug('[uploadImageToR2] uploading to:', presignedUrl);
+    let uploadRes: Response;
+    try {
+      uploadRes = await fetch(presignedUrl, {
+        method: "PUT",
+        body: blob,
+        headers: { "Content-Type": blob.type },
+      });
+    } catch (e) {
+      console.error('[uploadImageToR2] fetch(presignedUrl) failed:', e);
+      throw new Error(`Network error during upload: ${e.message}`);
+    }
+
+    console.debug('[uploadImageToR2] upload status:', uploadRes.status, uploadRes.statusText);
+    if (!uploadRes.ok) {
+      const text = await uploadRes.text().catch(() => '<could not read body>');
+      console.error('[uploadImageToR2] upload failed body:', text);
+      throw new Error(`R2 upload failed with ${uploadRes.status}`);
+    }
+
+    const publicUrl = `https://341668e4ddc3fc8087067598f9a78e63.r2.cloudflarestorage.com/otamapsf-images/${fileName}`;
+    console.debug('[uploadImageToR2] success, public URL:', publicUrl);
+    return publicUrl;
+  }
 
   const requestCameraPermissions = async () => {
     if (Platform.OS !== 'web') {
@@ -100,16 +148,45 @@ const CheckinScreen = () => {
   };
 
   const handleCheckin = async () => {
+    console.debug('[handleCheckin] start');
     try {
       setUploading(true);
-      if (!imageUri) return;
+      if (!imageUri) {
+        console.warn('[handleCheckin] no imageUri');
+        return;
+      }
       const uploadedUrl = await uploadImageToR2(imageUri);
-      console.log('✅ Uploaded!', uploadedUrl);
-      // TODO: send uploadedUrl, caption, selectedFriends, and location ID to backend
-    } catch (err) {
-      console.error(err);
+      console.debug('[handleCheckin] Uploaded URL:', uploadedUrl);
+
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        console.error('[handleCheckin] auth.getUser error:', userError);
+        throw userError || new Error('No user');
+      }
+
+      const { data, error } = await supabase
+        .from('check_ins')
+        .insert({
+          poster_id: user.id,
+          thingy_id: id,
+          caption,
+          image_url: uploadedUrl,
+          tagged_ids: selectedFriends.map((f) => f.id),
+        })
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('[handleCheckin] insert error:', error);
+        throw error;
+      }
+      console.debug('[handleCheckin] database insert success:', data);
+    } catch (err: any) {
+      console.error('[handleCheckin] caught error:', err.message, err);
+      alert(`Error: ${err.message}`);
     } finally {
       setUploading(false);
+      console.debug('[handleCheckin] end');
     }
   };
 
