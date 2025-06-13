@@ -1,7 +1,7 @@
 import Loading from '@/components/loading';
 import { supabase } from '@/lib/supabase';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Friend {
   age: number;
@@ -72,7 +72,7 @@ const NeighborsScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {friendsData.length > 0 ? (
         <View style={styles.friendsList}>
           {friendsData.map((friend) => (
@@ -88,7 +88,7 @@ const NeighborsScreen = () => {
           <Text style={styles.text}>You can add neighbors from top right of the screen</Text>
         </View>
       )}
-    </View>
+    </ScrollView>
   ); 
 };
 
@@ -97,7 +97,6 @@ export default NeighborsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#f0f0f0',
   },
   friendsList: {

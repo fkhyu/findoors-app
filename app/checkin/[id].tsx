@@ -110,7 +110,7 @@ const CheckinScreen = () => {
       throw new Error(`R2 upload failed with ${uploadRes.status}`);
     }
 
-    const publicUrl = `https://341668e4ddc3fc8087067598f9a78e63.r2.cloudflarestorage.com/otamapsf-images/${fileName}`;
+    const publicUrl = `https://media.brickks.dev/${fileName}`;
     console.debug('[uploadImageToR2] success, public URL:', publicUrl);
     return publicUrl;
   }

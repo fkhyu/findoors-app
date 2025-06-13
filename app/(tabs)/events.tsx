@@ -20,12 +20,15 @@ const EventsScreen = () => {
       if (eventsError) console.error(eventsError);
       else setEvents(eventsData || []);
 
-      const { data: sharesData, error: sharesError } = await supabase
+      const nowIso = new Date().toISOString();
+      const { data: sharesData, error } = await supabase
         .from('user_events')
         .select('*')
+        .gt('end', nowIso)
         .order('start', { ascending: true });
-      if (sharesError) console.error(sharesError);
-      else setShares(sharesData || []);
+
+      if (error) console.error(error);
+      else setShares(sharesData);
       console.log('Shares data:', sharesData);
       setLoading(false);
     };
@@ -73,6 +76,7 @@ const EventsScreen = () => {
 
         {shares
           .filter(share => {
+          console.log(typeof share.end, share.end);
           const endTime = new Date(share.end + 'Z');
           console.log('Share end time:', endTime, 'Current time:', new Date());
           return endTime > new Date(); 
