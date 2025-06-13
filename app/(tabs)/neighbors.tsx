@@ -20,6 +20,15 @@ const NeighborsScreen = () => {
   const [neighbors, setNeighbors] = useState<Neighbor[]>([]);
   const [friendsData, setFriendsData] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
 
   const fetchNeighbors = async () => {
     try {
@@ -40,14 +49,14 @@ const NeighborsScreen = () => {
     fetchNeighbors();
   }, []);
 
-  // get friends user data:
   useEffect(() => {
     const fetchFriendsData = async () => {
       try {
         const { data, error } = await supabase
           .from('users')
           .select('*')
-          .in('id', neighbors.map(n => n.friend_id));
+          .in('id', neighbors.map(n => n.friend_id))
+          .neq('id', currentUserId); 
         if (error) {
           console.error('Error fetching friends data:', error.message);
         } else {
@@ -60,14 +69,14 @@ const NeighborsScreen = () => {
       }
     };
 
-    if (neighbors.length > 0) {
+    if (neighbors.length > 0 && currentUserId) {
       fetchFriendsData();
     } else {
       setLoading(false);
     }
-  }, [neighbors]);
+  }, [neighbors, currentUserId]);
 
-  if (loading) { 
+  if (loading) {
     return <Loading />;
   }
 

@@ -1,11 +1,13 @@
 import { supabase } from '@/lib/supabase';
 import * as ImagePicker from 'expo-image-picker';
-import { useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   Image,
+  KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,33 +18,32 @@ import {
 const CheckinScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [caption, setCaption] = useState('');
-  const [selectedFriends, setSelectedFriends] = useState<{ id: string; username: string }[]>([]);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [allFriends, setAllFriends] = useState<{ id: string; username: string }[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFriends, setSelectedFriends] = useState<{ id: string; name: string }[]>([]);
+  const [allFriends, setAllFriends] = useState<{ id: string; name: string }[]>([]);  const [searchQuery, setSearchQuery] = useState('');
 
   // Load friend list on mount
   useEffect(() => {
     (async () => {
-      // get current user
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return;
-      // fetch friend relations
+
       const { data: friendLinks, error: linkError } = await supabase
         .from('friends')
-        .select('friend_id')
+        .select('*')
         .eq('user_id', user.id);
       if (linkError || !friendLinks) return;
       const friendIds = friendLinks.map((link) => link.friend_id);
-      // fetch user info for those friends
+
       const { data: friendUsers, error: userError } = await supabase
         .from('users')
-        .select('id, username')
-        .in('id', friendIds);
+        .select('*')
+        .in('id', friendIds); 
       if (userError || !friendUsers) return;
+      console.debug('[CheckinScreen] Loaded friends:', friendUsers);
       setAllFriends(friendUsers);
     })();
   }, []);
@@ -192,10 +193,10 @@ const CheckinScreen = () => {
 
   // Filter friends by search query
   const filteredFriends = allFriends.filter((f) =>
-    f.username.toLowerCase().includes(searchQuery.toLowerCase())
+    f.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const addFriendTag = (friend: { id: string; username: string }) => {
+  const addFriendTag = (friend: { id: string; name: string }) => {
     if (!selectedFriends.find((f) => f.id === friend.id)) {
       setSelectedFriends((prev) => [...prev, friend]);
     }
@@ -203,8 +204,16 @@ const CheckinScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Check-In</Text>
+    <KeyboardAvoidingView style={styles.rootContainer} behavior="padding" enabled keyboardVerticalOffset={100}>      
+      <ScrollView style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: 'Check In',
+          headerTitleStyle: { fontSize: 20, color: '#5C4B51' },
+          headerStyle: { backgroundColor: '#FAF3E0' },
+          headerTintColor: '#5C4B51',
+        }}
+      />
       <Text style={styles.subtext}>Stamp a memory for location: {id}</Text>
 
       <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
@@ -239,7 +248,7 @@ const CheckinScreen = () => {
                 onPress={() => addFriendTag(item)}
                 style={styles.suggestionItem}
               >
-                <Text>{item.username}</Text>
+                <Text>{item.name}</Text>
               </TouchableOpacity>
             )}
           />
@@ -247,7 +256,7 @@ const CheckinScreen = () => {
         <View style={styles.tagsContainer}>
           {selectedFriends.map((f) => (
             <View key={f.id} style={styles.tag}>
-              <Text style={styles.tagText}>@{f.username}</Text>
+              <Text style={styles.tagText}>{f.name}</Text>
             </View>
           ))}
         </View>
@@ -256,18 +265,26 @@ const CheckinScreen = () => {
       <TouchableOpacity style={styles.button} onPress={handleCheckin} disabled={uploading}>
         <Text style={styles.buttonText}>{uploading ? 'Checking in...' : '✨ Check In'}</Text>
       </TouchableOpacity>
-    </View>
+
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 export default CheckinScreen;
 
 const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
+    width: '100%',
     backgroundColor: '#FAF3E0',
     padding: 20,
-    alignItems: 'center',
+    paddingBottom: 0,
+    alignContent: 'center',
   },
   header: {
     fontSize: 26,

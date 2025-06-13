@@ -113,7 +113,7 @@ const SFHomeScreen = () => {
   }, []);
 
   const openPoiModal = (poi: POI) => {
-    cameraRef.current?.flyTo([poi.lon, poi.lat], 1000);
+    cameraRef.current?.flyTo([poi.lon, poi.lat], 250);
     setSelectedPoi(poi);
     poiModalRef.current?.present();
   };
@@ -171,7 +171,6 @@ const SFHomeScreen = () => {
   }, [shareRowId]);
 
   const handleLocationShare = async (data: any) => {
-    // 1. Permissions & current pos
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       alert('Permission to access location was denied');
@@ -181,14 +180,12 @@ const SFHomeScreen = () => {
       accuracy: Location.Accuracy.Highest,
     });
 
-    // 2. Auth check
     const { data: { user }, error: userErr } = await supabase.auth.getUser();
     if (userErr || !user) {
       alert('Not logged in');
       return;
     }
 
-    // 3. Prepare row
     const row = {
       start:     new Date().toISOString(),
       sharer_id: user.id,
@@ -201,33 +198,28 @@ const SFHomeScreen = () => {
       shared_to: data.friendUserIds,
     };
 
-    // 4. Insert & grab ID
     const insertRes = await supabase
       .from('location_share')
       .insert([row])
       .select('id')
       .single();
 
-    // 5. Handle insert error
     if (insertRes.error || !insertRes.data?.id) {
       console.error('Error sharing location:', insertRes.error?.message);
       alert('Could not share location');
       return;
     }
 
-    // 6. Success: alert + store ID
     const newId = insertRes.data.id;
     alert('Location shared successfully!');
     setShareRowId(newId);
 
-    // 7. Start background tracking (safely)
     try {
       await startBackgroundLocation(newId);
     } catch (err) {
       console.error('Background tracking failed:', err);
     }
 
-    // 8. Schedule stop & refresh UI
     setTimeout(
       () => stopBackgroundLocation(),
       data.durationHours * 3600 * 1000

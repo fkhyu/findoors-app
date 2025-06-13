@@ -1,152 +1,245 @@
 import { supabase } from '@/lib/supabase';
 import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-const CheckinsScreen = () => {
-  const [checkins, setCheckins] = useState<any[]>([]);
-  const [pois, setPois] = useState<any[]>([]);
-  const [taggedUsernames, setTaggedUsernames] = useState<any[]>([]);
+type Checkin = {
+  id: string;
+  caption: string;
+  image_url: string | null;
+  created_at: string;
+  posterId: string;
+  tagged_ids: string[];
+  thingy_id: string | null;
+};
+
+type User = { id: string; name: string };
+type POI = { id: string; title: string };
+
+function useCheckins(mode: 'my' | 'tagged') {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string|null>(null);
 
   useEffect(() => {
-    const fetchCheckins = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+    let active = true;
 
+    async function load() {
+      setLoading(true);
+      setError(null);
+
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth?.user;
       if (!user) {
-        console.error('User not found');
+        setError('Not signed in');
+        setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase
-        .from('check_ins')
+      let q = supabase
+        .from<Checkin>('check_ins')
         .select('*')
-        .eq('poster_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching checkins:', error);
+      if (mode === 'my') {
+        q = q.eq('poster_id', user.id);
       } else {
-        setCheckins(data || []);
+        q = q.contains('tagged_ids', [user.id]);
       }
-    };
 
-    fetchCheckins();
-  }, []);
+      const { data: checkins, error: ciErr } = await q;
+      if (!active) return;
 
-  useEffect(() => {
-    const fetchUsernames = async () => {
-      console.log('Fetching usernames for checkins:', checkins);
+      if (ciErr) {
+        setError(ciErr.message);
+        setLoading(false);
+        return;
+      }
+      if (!checkins || checkins.length === 0) {
+        setItems([]);
+        setLoading(false);
+        return;
+      }
 
-      const { data, error } = await supabase
-        .from('users')
+      const userIdSet = new Set<string>();
+      checkins.forEach(ci => {
+        userIdSet.add(ci.poster_id);
+        ci.tagged_ids.forEach(id => userIdSet.add(id));
+      });
+      const allUserIds = Array.from(userIdSet);
+
+      const { data: users, error: uErr } = await supabase
+        .from<User>('users')
         .select('id, name')
-        .in('id', checkins.map(checkin => checkin.tagged_ids).flat());
+        .in('id', allUserIds);
 
-      if (error) {
-        console.error('Error fetching usernames:', error);
-      } else {
-        setTaggedUsernames(data || []);
+      if (!active) return;
+      if (uErr) {
+        setError(uErr.message);
+        setLoading(false);
+        return;
       }
-    };
 
-    if (checkins.length > 0) {
-      fetchUsernames();
-    }
-  }, [checkins]);
+      const poiIds = Array.from(
+        new Set(checkins.map(ci => ci.thingy_id).filter(Boolean) as string[])
+      );
 
-  useEffect(() => {
-    const fetchPOIs = async () => {
-      const { data, error } = await supabase
-        .from('poi')
-        .select('*')
-        .in('id', checkins.map(checkin => checkin.thingy_id));
+      const { data: pois, error: pErr } = await supabase
+        .from<POI>('poi')
+        .select('id, title')
+        .in('id', poiIds);
 
-      if (error) {
-        console.error('Error fetching POIs:', error);
-      } else {
-        setPois(data || []);
+      if (!active) return;
+      if (pErr) {
+        setError(pErr.message);
+        setLoading(false);
+        return;
       }
-    };
 
-    if (checkins.length > 0) {
-      fetchPOIs();
+      const nameById = new Map(users?.map(u => [u.id, u.name]));
+      const poiById  = new Map(pois?.map(p => [p.id, p.title]));
+
+      const formatted = checkins.map(ci => ({
+        id:         ci.id,
+        caption:    ci.caption,
+        image_url:  ci.image_url,
+        created_at: ci.created_at,
+        poster:     nameById.get(ci.poster_id) || 'Unknown',
+        tagged:     ci.tagged_ids.map(id => nameById.get(id) || 'Unknown'),
+        poiTitle:   ci.thingy_id ? poiById.get(ci.thingy_id) : null,
+      }));
+
+      setItems(formatted);
+      setLoading(false);
     }
-  }, [checkins]);
+
+    load();
+    return () => { active = false; };
+  }, [mode]);
+
+  return { items, loading, error };
+}
+
+export default function CheckinsScreen() {
+  const [tab, setTab] = useState<'my' | 'tagged'>('my');
+  const { items, loading, error } = useCheckins(tab);
 
   return (
     <ScrollView style={styles.container}>
-      <Stack.Screen
-      options={{
-        title: 'My Check-ins',
-        headerTitleStyle: { fontSize: 24, fontWeight: 'bold' },
-        headerStyle: { backgroundColor: '#f8f8f8' },
-        headerTintColor: '#333',
-      }}
-      />
-      {checkins.length === 0 ? (
-        <Text style={styles.noCheckins}>No check-ins yet.</Text>
-      ) : (
-        checkins.map((checkin) => (
-          <Pressable key={checkin.id} style={styles.checkinCard} onPress={() => {router.push(`/passport/checkins/${checkin.id}`)}}>
-          <Text style={styles.checkinText}>"{checkin.caption}"</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {checkin.tagged_ids.length > 0 && (
-              <Text>
-                w/ {checkin.tagged_ids.map(id => {
-                  const user = taggedUsernames.find(user => user.id === id);
-                  return user ? user.name : 'Unknown User';
-                }).join(', ')}
-              </Text>
-            )}
-            {checkin.thingy_id && <Text> @ {pois.find(poi => poi.id === checkin.thingy_id)?.title}</Text>}
-          </View>
-          {checkin.image_url && (
-            <Image source={{ uri: checkin.image_url }} style={styles.checkinImage} />
-          )}
+      <Stack.Screen options={{ title: 'Check-ins' }} />
+
+      <View style={styles.subHeader}>
+        {(['my','tagged'] as const).map(t => (
+          <Pressable
+            key={t}
+            onPress={() => setTab(t)}
+            style={[
+              styles.tabButton,
+              tab === t && styles.tabActive
+            ]}
+          >
+            <Text style={styles.tabText}>
+              {t === 'my' ? 'My Check-ins' : 'Tagged Check-ins'}
+            </Text>
           </Pressable>
-        )) 
+        ))}
+      </View>
+
+      {loading && <ActivityIndicator size="large" color="#888" />}
+      {error && <Text style={styles.error}>{error}</Text>}
+      {!loading && !error && items.length === 0 && (
+        <Text style={styles.empty}>No check-ins here.</Text>
       )}
+
+      {!loading && !error && items.map(ci => (
+        <Pressable
+          key={ci.id}
+          style={styles.card}
+          onPress={() => router.push(`/passport/checkins/${ci.id}`)}
+        >
+          <Text style={styles.caption}>{ci.caption}</Text>
+          <Text style={styles.meta}>
+            {tab === 'tagged' && `By ${ci.poster} `}
+            {ci.tagged.length > 0 && `With ${ci.tagged.join(', ')} `}
+            {ci.poiTitle && `@ ${ci.poiTitle}`}
+          </Text>
+          {ci.image_url && (
+            <Image
+              source={{ uri: ci.image_url }}
+              style={styles.image}
+            />
+          )}
+        </Pressable>
+      ))}
     </ScrollView>
   );
-};
-
-export default CheckinsScreen;
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
+  container: { 
+    flex: 1, 
+    padding: 16, 
+    backgroundColor: '#fff', 
+    paddingBottom: 60 
+  },
+  subHeader: { 
+    flexDirection: 'row', 
+    marginBottom: 16 
+  },
+  tabButton: {
+    flex: 1, 
+    alignItems: 'center', 
+    padding: 10, 
     backgroundColor: '#fff',
-    paddingBottom: 60,
+    borderRadius: 8,
+    marginHorizontal: 4,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+  tabActive: { 
+    backgroundColor: '#ddd' 
   },
-  noCheckins: {
-    fontSize: 16,
-    color: '#888',
+  tabText: { 
+    fontSize: 18 
   },
-  checkinCard: {
-    marginBottom: 16,
-    padding: 12,
+  error: { 
+    color: 'red', 
+    textAlign: 'center', 
+    marginVertical: 20 
+  },
+  empty: { 
+    color: '#888', 
+    textAlign: 'center', 
+    marginVertical: 20 
+  },
+  card: {
+    marginBottom: 16, 
+    padding: 12, 
     borderRadius: 8,
     backgroundColor: '#f9f9f9',
-    shadowColor: '#000',
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.1, 
     shadowRadius: 2,
   },
-  checkinText: {
-    fontSize: 16,
-    marginBottom: 8,
+  caption: { 
+    fontSize: 16, 
+    marginBottom: 8 
   },
-  checkinImage: {
-    marginTop: 8,
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-    resizeMode: 'cover',
+  meta: { 
+    fontSize: 14, 
+    color: '#555' 
+  },
+  image: { 
+    width: '100%', 
+    height: 200, 
+    borderRadius: 8, 
+    resizeMode: 'cover' 
   },
 });

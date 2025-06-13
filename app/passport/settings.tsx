@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import { MaterialIcons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
@@ -51,10 +50,6 @@ const SettingsScreen = () => {
           headerTintColor: '#333',
         }}
       />
-      <View style={styles.header}>
-        <MaterialIcons name="settings" size={24} color="#333" />
-        <Text style={styles.title}>Settings</Text>
-      </View>
       <View style={styles.content}>
         <Text style={styles.subtitle}>My Information</Text>
         <Text style={styles.label}>Name:</Text>
