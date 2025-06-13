@@ -71,7 +71,9 @@ export default function UserInfoScreen() {
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Your Name</Text>
         <TextInput
-          placeholder="e.g. Jamie"
+          autoCapitalize="words"
+          maxLength={35}
+          placeholder="e.g. Rene"
           style={styles.input}
           value={name}
           onChangeText={setName}
@@ -79,9 +81,11 @@ export default function UserInfoScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Country</Text>
+        <Text style={styles.label}>Country (or state)</Text>
         <TextInput
-          placeholder="e.g. Canada"
+          autoCapitalize="words"
+          maxLength={24}
+          placeholder="e.g. Finland or California, USA"
           style={styles.input}
           value={country}
           onChangeText={setCountry}
@@ -91,6 +95,7 @@ export default function UserInfoScreen() {
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Age</Text> 
         <TextInput
+          maxLength={2}
           placeholder="e.g. 17"
           keyboardType="numeric"
           style={styles.input}

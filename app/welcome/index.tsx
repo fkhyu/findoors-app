@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import MapboxGL from '@rnmapbox/maps';
 import { makeRedirectUri } from 'expo-auth-session';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -113,7 +113,6 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* — Faint, non-interactive map backdrop */}
       <MapboxGL.MapView
         style={[StyleSheet.absoluteFill, styles.mapFaint]}
         styleURL={MAP_STYLE}
@@ -144,18 +143,12 @@ export default function WelcomeScreen() {
         ))}
       </MapboxGL.MapView>
 
-      {/* — Expo Router header */}
-      <Stack.Screen options={{ title: 'Welcome!' }} />
-
-      {/* — Overlayed UI */}
       <View style={styles.overlay}>
         <Text style={styles.title}>Welcome to OtaMapSF</Text>
         <Text style={styles.subtitle}>Your Bay Area adventure starts now</Text>
         <Text style={styles.leaf}>🏠</Text>
-        {/* <Link href="/" style={{ fontSize: 20, color: "#aaa" }}><Text>Skip onboarding (breaks things!)</Text></Link> */}
       </View>
 
-      {/* — Pinned Get Started button */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => bottomSheetRef.current?.snapToIndex(0)}
@@ -206,7 +199,6 @@ export default function WelcomeScreen() {
             <Text style={styles.sheetButtonText}>Send Login Email</Text>
           </TouchableOpacity>
 
-          {/* OTP toggle and input */}
           <View style={{ marginTop: 8, alignItems: 'center', width: '100%', padding: 10, paddingTop: 0, }}>
             <Text style={styles.orText}>or</Text>
             <TouchableOpacity

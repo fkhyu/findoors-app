@@ -1,7 +1,7 @@
 import Loading from '@/components/loading';
 import { supabase } from '@/lib/supabase';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Friend {
   age: number;
@@ -20,6 +20,15 @@ const NeighborsScreen = () => {
   const [neighbors, setNeighbors] = useState<Neighbor[]>([]);
   const [friendsData, setFriendsData] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
 
   const fetchNeighbors = async () => {
     try {
@@ -40,14 +49,14 @@ const NeighborsScreen = () => {
     fetchNeighbors();
   }, []);
 
-  // get friends user data:
   useEffect(() => {
     const fetchFriendsData = async () => {
       try {
         const { data, error } = await supabase
           .from('users')
           .select('*')
-          .in('id', neighbors.map(n => n.friend_id));
+          .in('id', neighbors.map(n => n.friend_id))
+          .neq('id', currentUserId); 
         if (error) {
           console.error('Error fetching friends data:', error.message);
         } else {
@@ -60,19 +69,19 @@ const NeighborsScreen = () => {
       }
     };
 
-    if (neighbors.length > 0) {
+    if (neighbors.length > 0 && currentUserId) {
       fetchFriendsData();
     } else {
       setLoading(false);
     }
-  }, [neighbors]);
+  }, [neighbors, currentUserId]);
 
-  if (loading) { 
+  if (loading) {
     return <Loading />;
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {friendsData.length > 0 ? (
         <View style={styles.friendsList}>
           {friendsData.map((friend) => (
@@ -88,7 +97,7 @@ const NeighborsScreen = () => {
           <Text style={styles.text}>You can add neighbors from top right of the screen</Text>
         </View>
       )}
-    </View>
+    </ScrollView>
   ); 
 };
 
@@ -97,7 +106,6 @@ export default NeighborsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#f0f0f0',
   },
   friendsList: {
