@@ -1,113 +1,78 @@
 import { supabase } from '@/lib/supabase';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import MapboxGL from '@rnmapbox/maps';
-import { makeRedirectUri } from 'expo-auth-session';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// 🗝️ MapTiler style URL with key
-const MAP_STYLE =
-  'https://api.maptiler.com/maps/019717fd-a8fc-78fa-afaf-c660bbb6b406/style.json?key=XSJRg4GXeLgDiZ98hfVp';
-
-// Starting center on SF
+const MAP_STYLE = 'https://api.maptiler.com/maps/019717fd-a8fc-78fa-afaf-c660bbb6b406/style.json?key=XSJRg4GXeLgDiZ98hfVp';
 const START_COORD: [number, number] = [-122.401297, 37.773972];
-
 const houses = [
   { id: 1, lat: 37.7626, lon: -122.4172 },
   { id: 2, lat: 37.7705, lon: -122.4456 },
   { id: 3, lat: 37.7486, lon: -122.4869 },
-]
+];
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const cameraRef = useRef<MapboxGL.Camera>(null);
-
-  // Tiny circular drift
-  useEffect(() => {
-    let theta = 0;
-    const radius = 0.003; // smaller radius for subtler motion
-    const interval = setInterval(() => {
-      theta += 0.015;
-      const lon = START_COORD[0] + Math.cos(theta) * radius;
-      const lat = START_COORD[1] + Math.sin(theta) * radius;
-      cameraRef.current?.setCamera({
-        centerCoordinate: [lon, lat],
-        animationDuration: 12000,
-      });
-    }, 12000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   const [email, setEmail] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState('');
 
+  useEffect(() => {
+    let theta = 0;
+    const radius = 0.003;
+    const interval = setInterval(() => {
+      theta += 0.015;
+      const lon = START_COORD[0] + Math.cos(theta) * radius;
+      const lat = START_COORD[1] + Math.sin(theta) * radius;
+      cameraRef.current?.setCamera({ centerCoordinate: [lon, lat], animationDuration: 12000 });
+    }, 12000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleEmailLogin = async () => {
-    if (!email) {
-      Alert.alert('Please enter a valid email address.');
-      return;
-    } else if (email === 'testmail') { 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: 'kala@test.com',
-        password: 'kala',
-      });
-
-      if (error) {
-        Alert.alert('Login error', error.message);
-        return;
-      } else {
-        Alert.alert('Success', 'Logged in using test credentials!');
-        router.replace('/welcome/whoareyou'); 
-        return;
-      }
-    }
-
-    const redirectTo = makeRedirectUri()
-
-    console.log('Redirect URI:', redirectTo);
+    if (!email) return Alert.alert('Please enter a valid email address.');
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {    
-        emailRedirectTo: redirectTo,  
-      },
+      options: { shouldCreateUser: true },
     });
 
     if (error) {
       Alert.alert('Login error', error.message);
     } else {
-      Alert.alert('Success', 'A login link has been sent to your email.');
+      setShowOtpInput(true);
+      Alert.alert('Success', 'A one-time code has been sent to your email.');
     }
   };
 
   const handleOtpLogin = async () => {
-    if (!email || !otp) {
-      Alert.alert('Please enter your email and the code you received.');
-      return;
-    }
+    if (!email || !otp) return Alert.alert('Please enter your email and the code you received.');
 
-    const { error } = await supabase.auth.verifyOtp({
-      email,  
-      token: otp,
-      type: 'email', 
-    });
+    const { error: otpError } = await supabase.auth.verifyOtp({ email, token: otp, type: 'email' });
+    if (otpError) return Alert.alert('OTP Error', otpError.message);
 
-    if (error) {
-      Alert.alert('OTP Error', error.message);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { data: existing, error: selErr } = await supabase
+      .from('friend_code')
+      .select('code')
+      .eq('user_id', user.id)
+      .limit(1)
+      .single();
+
+    if (selErr) return Alert.alert('Database error', selErr.message);
+
+    if (existing) {
+      router.replace('/');
     } else {
-      Alert.alert('Success', 'Logged in! Taking you to your adventure...');
-      const { data: { user } } = await supabase.auth.getUser()
-      const { error: insertError } = await supabase.from('friend_code').insert({
-        code: Math.random().toString(36).substring(2, 8).toUpperCase(), user_id: user.id // Generate a random 6-character code
-      });
-      if (insertError) {
-        Alert.alert('Database Error', insertError.message);
-        return;
-      }
-      router.replace('/welcome/whoareyou'); // Or wherever you want!
+      const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const { error: insErr } = await supabase.from('friend_code').insert({ user_id: user.id, code: newCode });
+      if (insErr) return Alert.alert('Database Error', insErr.message);
+      router.replace('/welcome/whoareyou');
     }
   };
 
@@ -125,18 +90,10 @@ export default function WelcomeScreen() {
         pitchEnabled={false}
         rotateEnabled={false}
       >
-        <MapboxGL.Camera
-          ref={cameraRef}
-          centerCoordinate={START_COORD}
-          zoomLevel={10}
-        />
-        {houses.map((house) => (
-          <MapboxGL.MarkerView
-            key={house.id}
-            coordinate={[house.lon, house.lat]}
-            anchor={{ x: 0.5, y: 0.5 }}
-          >
-            <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: '#F4A261', justifyContent: 'center', alignItems: 'center' }}>
+        <MapboxGL.Camera ref={cameraRef} centerCoordinate={START_COORD} zoomLevel={10} />
+        {houses.map(h => (
+          <MapboxGL.MarkerView key={h.id} coordinate={[h.lon, h.lat]} anchor={{ x: 0.5, y: 0.5 }}>
+            <View style={styles.houseMarker}>
               <Text style={{ fontSize: 15 }}>🏠</Text>
             </View>
           </MapboxGL.MarkerView>
@@ -149,10 +106,7 @@ export default function WelcomeScreen() {
         <Text style={styles.leaf}>🏠</Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => bottomSheetRef.current?.snapToIndex(0)}
-      >
+      <TouchableOpacity style={styles.button} onPress={() => bottomSheetRef.current?.snapToIndex(0)}>
         <Text style={styles.buttonText}>Get Started!</Text>
       </TouchableOpacity>
 
@@ -160,28 +114,13 @@ export default function WelcomeScreen() {
         index={-1}
         snapPoints={['92%']}
         enablePanDownToClose
-        backgroundStyle={{
-          backgroundColor: '#F0F8E8',
-          borderTopLeftRadius: 36,
-          borderTopRightRadius: 36,
-          borderWidth: 3,
-          borderColor: '#B4CBA5',
-          shadowColor: '#7A8D7B',
-          shadowOpacity: 0.2,
-          shadowRadius: 18,
-          elevation: 10,
-        }}
         ref={bottomSheetRef}
+        backgroundStyle={styles.sheetBackground}
       >
-        <View
-          style={{ flex: 1 }}
-        >
-          <BottomSheetScrollView 
-            contentContainerStyle={styles.sheetView} 
-            keyboardShouldPersistTaps="handled"
-          >
-          <Text style={{ fontSize: 48, marginBottom: 6 }}>🏠</Text>
+        <BottomSheetScrollView contentContainerStyle={styles.sheetView} keyboardShouldPersistTaps="handled">
+          <Text style={styles.emoji}>🏠</Text>
           <Text style={styles.sheetText}>Login to OtaMapSF</Text>
+
           <TextInput
             style={styles.input}
             placeholder="Your email address"
@@ -192,67 +131,52 @@ export default function WelcomeScreen() {
             value={email}
             onChangeText={setEmail}
           />
-          <TouchableOpacity
-            style={styles.sheetButton}
-            onPress={handleEmailLogin}
-          >
-            <Text style={styles.sheetButtonText}>Send Login Email</Text>
+
+          <TouchableOpacity style={styles.sheetButton} onPress={handleEmailLogin}>
+            <Text style={styles.sheetButtonText}>Send OTP Code</Text>
           </TouchableOpacity>
 
-          <View style={{ marginTop: 8, alignItems: 'center', width: '100%', padding: 10, paddingTop: 0, }}>
-            <Text style={styles.orText}>or</Text>
-            <TouchableOpacity
-              onPress={() => setShowOtpInput((v) => !v)}
-              style={styles.otpToggle}
-            >
-              <Text style={styles.otpToggleText}>
-                {showOtpInput ? 'Hide OTP login' : "Having trouble? Enter a code instead"}
-              </Text>
-            </TouchableOpacity>
-
-            {showOtpInput && (
-              <View style={styles.otpBox}>
-                <Text style={styles.sheetTextSm}>Enter the code from your email:</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="One-Time Password"
-                  placeholderTextColor="#B4CBA5"
-                  keyboardType="number-pad"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  value={otp}
-                  onChangeText={setOtp}
-                  returnKeyType="done"
-                  onSubmitEditing={() => {
-                    handleOtpLogin();
-                    Keyboard.dismiss()
-                  }}
-                />
-                <TouchableOpacity
-                  style={styles.sheetButton}
-                  onPress={handleOtpLogin}
-                >
-                  <Text style={styles.sheetButtonText}>Log in with Code</Text>
-                </TouchableOpacity>
-                <Text style={styles.otpHint}>
-                  (Check the same email for both the link and the code!) 
-                </Text>
-              </View>
-            )}
-          </View>
+          {showOtpInput && (
+            <View style={styles.otpSection}>
+              <Text style={styles.sheetTextSm}>Enter the code from your email:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="One-Time Password"
+                placeholderTextColor="#B4CBA5"
+                keyboardType="number-pad"
+                autoCapitalize="none"
+                autoCorrect={false}
+                value={otp}
+                onChangeText={setOtp}
+                returnKeyType="done"
+                onSubmitEditing={() => {
+                  handleOtpLogin();
+                  Keyboard.dismiss();
+                }}
+              />
+              <TouchableOpacity style={styles.sheetButton} onPress={handleOtpLogin}>
+                <Text style={styles.sheetButtonText}>Log in with Code</Text>
+              </TouchableOpacity>
+              <Text style={styles.otpHint}>(Check your spam folder if you don't see it.)</Text>
+            </View>
+          )}
+          <View style={{ height: 200, }}/>
         </BottomSheetScrollView>
-        </View>
-      </BottomSheet>  
+      </BottomSheet>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1 
-  },
-  mapFaint: {
-    opacity: 0.3,
+  container: { flex: 1 },
+  mapFaint: { opacity: 0.3 },
+  houseMarker: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#F4A261',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   overlay: {
     position: 'absolute',
@@ -262,23 +186,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: '900',
-    color: '#5C7C6E',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#7A8D7B',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  leaf: {
-    fontSize: 64,
-    marginVertical: 20,
-  },
+  title: { fontSize: 36, fontWeight: '900', color: '#5C7C6E', textAlign: 'center', marginBottom: 8 },
+  subtitle: { fontSize: 18, color: '#7A8D7B', textAlign: 'center', marginBottom: 30 },
+  leaf: { fontSize: 64, marginVertical: 20 },
   button: {
     position: 'absolute',
     bottom: 40,
@@ -293,25 +203,30 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-  buttonText: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: '700',
+  buttonText: { color: '#FFF', fontSize: 20, fontWeight: '700' },
+  sheetBackground: {
+    backgroundColor: '#F0F8E8',
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    borderWidth: 3,
+    borderColor: '#B4CBA5',
+    shadowColor: '#7A8D7B',
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    elevation: 10,
   },
   sheetView: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 0,
-    backgroundColor: 'transparent', // parent handles bg
     paddingBottom: 98,
   },
+  emoji: { fontSize: 48, marginBottom: 6 },
   sheetText: {
     fontSize: 26,
     fontWeight: '800',
     color: '#5C7C6E',
     marginBottom: 18,
-    fontFamily: 'System', // swap for something rounder if you import it!
     letterSpacing: 1,
     textShadowColor: '#E1EDD6',
     textShadowOffset: { width: 1, height: 2 },
@@ -348,60 +263,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#82A57A',
   },
-  sheetButtonText: {
-    color: '#FFF',
-    fontSize: 19,
-    fontWeight: '700',
-    letterSpacing: 0.7,
-  },
-  orText: {
-    marginBottom: 8,
-    color: '#B4CBA5',
-    fontSize: 18,
-    letterSpacing: 1,
-    fontWeight: 'bold',
-  },
-  otpToggle: {
-    paddingVertical: 6,
-    paddingHorizontal: 18,
-    backgroundColor: '#E1EDD6',
-    borderRadius: 20,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#B4CBA5',
-  },
-  otpToggleText: {
-    color: '#5C7C6E',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  otpBox: {
-    marginTop: 8,
-    width: '100%',
-    alignItems: 'center',
-    backgroundColor: '#FAFDF7',
-    borderRadius: 22,
-    paddingVertical: 18,
-    borderWidth: 2,
-    borderColor: '#B4CBA5',
-    shadowColor: '#B4CBA5',
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  sheetTextSm: {
-    fontSize: 17,
-    color: '#5C7C6E',
-    marginBottom: 8,
-    fontWeight: '700',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  otpHint: {
-    fontSize: 13,
-    color: '#B4CBA5',
-    marginTop: 10,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
+  sheetButtonText: { color: '#FFF', fontSize: 19, fontWeight: '700', letterSpacing: 0.7 },
+  otpSection: { marginTop: 20, width: '100%', alignItems: 'center' },
+  sheetTextSm: { fontSize: 17, color: '#5C7C6E', marginBottom: 8, fontWeight: '700', textAlign: 'center', letterSpacing: 0.5 },
+  otpHint: { fontSize: 13, color: '#B4CBA5', marginTop: 10, textAlign: 'center', fontStyle: 'italic' },
 });

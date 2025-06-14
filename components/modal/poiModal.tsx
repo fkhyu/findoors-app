@@ -105,6 +105,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
     // Map of user_id to user name
     const [userMap, setUserMap] = useState<Record<string, string>>({});
     const [comment, setComment] = useState<string>('');
+    const [wantToVisit, setWantToVisit] = useState<boolean>(false);
 
     useEffect(() => {
       if (messages.length > 0) {
@@ -129,6 +130,10 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             data.forEach((u: any) => { map[u.id] = u.name; });
             setUserMap(map);
           }
+          
+          // Get want to visit status and set state
+          const status = await getWantToVisitStatus(selectedPoiData.id);
+          setWantToVisit(status);
         };
         fetchUsers();
       }
@@ -159,6 +164,116 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
         });
     };
 
+    async function getWantToVisitStatus(poiId: string): Promise<boolean> {
+      try {
+        const {
+          data: { user },
+          error: authError
+        } = await supabase.auth.getUser();
+        if (authError || !user) {
+          console.error('Error fetching auth user:', authError);
+          return false;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from('want_to_visit')
+          .select('*')
+          .eq('uid', user.id)
+        if (profileError) {
+          console.error('Error fetching want_to_visit:', profileError);
+          return false;
+        }
+
+        console.log('Fetched profile:', profile);
+
+        return Array.isArray(profile.want_to_visit)
+          ? profile.want_to_visit.includes(poiId)
+          : false;
+
+      } catch (unexpected) {
+        console.error('Unexpected error in getWantToVisitStatus:', unexpected);
+        return false;
+      }
+    }
+
+  const handleAddToVisit = async () => {
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return;
+    }
+
+    // 2) fetch their current array
+    const { data: profile, error: fetchError } = await supabase
+      .from('want_to_visit')
+      .select('*')
+      .eq('uid', user.id)
+      .single();
+    if (fetchError) {
+      console.error('Fetch want_to_visit error:', fetchError);
+      return;
+    }
+
+    const existing = Array.isArray(profile.thingy_id)
+      ? profile.thingy_id
+      : [];
+    if (existing.includes(selectedPoiData.id)) {
+      return setWantToVisit(true);
+    }
+    const updated = [...existing, selectedPoiData.id];
+
+    // 4) write it back
+    const { error: updateError } = await supabase
+      .from('want_to_visit')
+      .update({ thingy_id: updated })
+      .eq('uid', user.id);
+    if (updateError) {
+      console.error('Update want_to_visit error:', updateError);
+    } else {
+      setWantToVisit(true);
+    }
+  };
+
+  // Removes the POI from want_to_visit
+  const handleRemoveFromVisit = async () => {
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      return;
+    }
+
+    const { data: profile, error: fetchError } = await supabase
+      .from('want_to_visit')
+      .select('*')
+      .eq('uid', user.id)
+      .single();
+    if (fetchError) {
+      console.error('Fetch want_to_visit error:', fetchError);
+      return;
+    }
+
+    const existing = Array.isArray(profile.thingy_id)
+      ? profile.thingy_id
+      : [];
+    const updated = existing.filter((id) => id !== selectedPoiData.id);
+
+    const { error: updateError } = await supabase
+      .from('want_to_visit')
+      .update({ thingy_id: updated })
+      .eq('uid', user.id);
+    if (updateError) {
+      console.error('Update want_to_visit error:', updateError);
+    } else {
+      setWantToVisit(false);
+    }
+  };
+
     if (!selectedPoiData || !selectedPoiData.id) {
       return null; 
     }
@@ -188,6 +303,19 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             <Text style={styles.address}>{selectedPoiData.address}</Text> 
           ) : null}
 
+
+          {wantToVisit ? (
+            <Pressable style={styles.visitedContainer} onPress={handleRemoveFromVisit}>
+              <MaterialIcons name="bookmark" size={24} color="#fff" />
+              <Text style={styles.visitedText}>Want to visit</Text>
+            </Pressable>
+          ) : (
+            <Pressable style={styles.wantToVisitContainer} onPress={handleAddToVisit}> 
+              <MaterialIcons name="bookmark-border" size={24} color="#F4A261" />
+              <Text style={styles.wantToVisitText}>Want to visit</Text>
+            </Pressable>
+          )} 
+          
           <View style={styles.CTAContainer}>
             <Pressable
               onPress={() => openMapWithDirections(selectedPoiData.lat, selectedPoiData.lon)}
@@ -212,7 +340,6 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             <Text style={styles.description}>{selectedPoiData.description}</Text>
           ) : null}
 
-          {/* Future buttons/interactions can go here */}
           <BottomSheetScrollView style={styles.chatContainer}>
             <Text style={styles.photos}>Photos and Comments</Text>
 
@@ -358,5 +485,41 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
+  },
+  visitedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F4A261',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    marginTop: 8,
+    flex: 1,
+  },
+  wantToVisitText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#F4A261',
+    fontWeight: 'bold',
+  },
+  visitedText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  wantToVisitContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    marginTop: 8,
+    flex: 1,
+    borderWidth: 2,
+    borderColor: '#F4A261',
   },
 })

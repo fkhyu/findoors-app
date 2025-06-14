@@ -40,8 +40,6 @@ TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
       .eq('id', shareRowId);
     if (supaErr) console.error('[BG] supabase update failed:', supaErr);
   }
-  
-  // NO notification here!
 });
 
 ///////////////////////

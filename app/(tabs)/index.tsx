@@ -14,7 +14,7 @@ import MapBox, {
 import * as Location from 'expo-location';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Easing, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface POI {
   id: string;
@@ -40,6 +40,7 @@ const SFHomeScreen = () => {
   const cameraRef = useRef<Camera>(null);
   const { poi: poiId } = useGlobalSearchParams<{ poi?: string }>();
   const [shareRowId, setShareRowId] = useState<string | null>(null);
+  const [showStopModal, setShowStopModal] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
 
   useFocusEffect(
@@ -80,6 +81,35 @@ const SFHomeScreen = () => {
       poiModalRef.current?.present();
     }
   }, [poiId, pois]);
+
+  const blinkAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!shareRowId) return;
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(blinkAnim, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(blinkAnim, {
+          toValue: 0,
+          duration: 500,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [shareRowId]);
+
+  const handleStopShare = async () => {
+    await stopBackgroundLocation();
+    setShareRowId(null);
+    setShowStopModal(false);
+    alert('Location sharing stopped');
+    fetchData();
+  };
 
   const fetchData = async () => {
     const { data: poiData, error: poiError } = await supabase.from('poi').select('*');
@@ -230,23 +260,34 @@ const SFHomeScreen = () => {
   };
 
   useEffect(() => {
-    const subscription = supabase
-      .channel('public:messages')
+    if (!selectedPoi) {
+      return;
+    }
+
+    const channelName = `messages-poi-${selectedPoi.id}`;
+    const channel = supabase
+      .channel(channelName)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages',
-          /*filter: `thingy_id=eq.${selectedPoi?.id}`*/ },
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `thingy_id=eq.${selectedPoi.id}`,
+        },
         payload => {
-          console.log('New message received:', payload.new);
-          setMessages((msgs) => [...msgs, payload.new]);
+          setMessages(msgs => [...msgs, payload.new]);
         }
-      )
-      .subscribe();
+      );
 
-    console.log('Subscribed to messages for POI:', selectedPoi?.id);
+    channel.subscribe((status, err) => {
+      if (err) console.error('subscribe error', err);
+      else console.log(`subscribed to ${channelName}`);
+    });
 
     return () => {
-      supabase.removeChannel(subscription);
+      channel.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, [selectedPoi]);
 
@@ -399,7 +440,20 @@ const SFHomeScreen = () => {
           <MaterialIcons name="my-location" size={28} color="black" />
         </Pressable>
 
-        <Pressable
+        {shareRowId ? (
+          <Pressable
+            style={({ pressed }) => [
+              styles.mapButton,
+              { opacity: pressed ? 0.6 : 1 },
+            ]}
+            onPress={() => setShowStopModal(true)}
+          >
+            <Animated.View style={{ opacity: blinkAnim }}>
+              <MaterialIcons name="location-on" size={28} color="red" />
+            </Animated.View>
+          </Pressable>
+        ) : (
+          <Pressable
           style={({ pressed }) => [
             styles.mapButton,
             { opacity: pressed ? 0.6 : 1 },
@@ -412,7 +466,7 @@ const SFHomeScreen = () => {
         >
           <MaterialIcons name="share-location" size={28} color="black" />
         </Pressable>
-
+        )}
       </View>
 
       <ShareLocationModal
@@ -432,6 +486,26 @@ const SFHomeScreen = () => {
         selectedPoiData={selectedPoi}
         messages={messages}
       />
+      
+      <Modal
+        transparent
+        visible={showStopModal}
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Stop sharing your location?</Text>
+            <View style={styles.modalButtons}>
+              <Pressable onPress={() => setShowStopModal(false)}>
+                <Text style={styles.modalCancel}>Cancel</Text>
+              </Pressable>
+              <Pressable onPress={handleStopShare}>
+                <Text style={styles.modalConfirm}>Stop</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -456,5 +530,39 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 12,
     borderRadius: 16,
+  },
+  trackingIndicator: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 24,
+    borderRadius: 12,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  modalCancel: {
+    fontSize: 16,
+    color: 'gray',
+  },
+  modalConfirm: {
+    fontSize: 16,
+    color: 'red',
   },
 });
