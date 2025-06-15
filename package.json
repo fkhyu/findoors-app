@@ -26,7 +26,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
-    "@rnmapbox/maps": "^10.1.38",
+    "@rnmapbox/maps": "10.1.36",
     "@supabase/supabase-js": "2.49.5-next.1",
     "@turf/circle": "^7.2.0",
     "eas-cli": "^16.4.1",
@@ -84,5 +84,6 @@
     "postinstall-postinstall": "^2.1.0",
     "typescript": "~5.8.3"
   },
-  "private": true
+  "private": true,
+  "packageManager": "yarn@4.9.2"
 }

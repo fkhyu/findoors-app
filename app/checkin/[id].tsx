@@ -12,7 +12,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 const CheckinScreen = () => {
@@ -71,7 +71,7 @@ const CheckinScreen = () => {
     console.debug('[uploadImageToR2] start uri:', uri);
     let response: Response;
     try {
-      response = await fetch(uri);
+      response = await fetch(uri); 
     } catch (e) {
       console.error('[uploadImageToR2] fetch(uri) failed:', e);
       throw new Error(`Could not fetch local image: ${e.message}`);

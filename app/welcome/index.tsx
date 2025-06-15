@@ -56,22 +56,33 @@ export default function WelcomeScreen() {
     if (otpError) return Alert.alert('OTP Error', otpError.message);
 
     const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return Alert.alert('Authentication Error', 'Could not retrieve user information');
+    }
+
+    const { error } = await supabase.from('users').upsert({
+      id: user.id,
+      email: user.email,
+      role: 'user',
+    });
 
     const { data: existing, error: selErr } = await supabase
       .from('friend_code')
       .select('code')
       .eq('user_id', user.id)
-      .limit(1)
-      .single();
+      .limit(1);
 
+    console.log(selErr)
     if (selErr) return Alert.alert('Database error', selErr.message);
 
-    if (existing) {
+    if (existing.length > 0) {
       router.replace('/');
     } else {
       const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       const { error: insErr } = await supabase.from('friend_code').insert({ user_id: user.id, code: newCode });
       if (insErr) return Alert.alert('Database Error', insErr.message);
+      console.log('New friend code created:', newCode);
       router.replace('/welcome/whoareyou');
     }
   };
