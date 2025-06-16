@@ -18,5 +18,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "plugins/ibeacons-config.js", "app/(tabs)/index.tsx.dis", "app/(tabs)/find.tsx.dis", "app/(tabs)/debug.tsx.dis", "app/(tabs)/buildings.tsx.dis", "app/(tabs)/_layout_om.tsx.dis"  ]
+, "plugins/ibeacons-config.js", "app/(tabs)/index.tsx.dis", "app/(tabs)/find.tsx.dis", "app/(tabs)/debug.tsx.dis", "app/(tabs)/buildings.tsx.dis", "app/(tabs)/_layout_om.tsx.dis", "lib/AchievementContext.js"  ]
 }

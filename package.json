@@ -29,6 +29,8 @@
     "@rnmapbox/maps": "10.1.36",
     "@supabase/supabase-js": "2.49.5-next.1",
     "@turf/circle": "^7.2.0",
+    "@turf/distance": "^7.2.0",
+    "@turf/turf": "^7.2.0",
     "eas-cli": "^16.4.1",
     "expo": "^53.0.2",
     "expo-auth-session": "~6.1.5",
@@ -68,6 +70,7 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
     "react-native-svg": "^15.12.0",
+    "react-native-toast-message": "^2.3.0",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5"

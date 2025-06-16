@@ -2,6 +2,7 @@ import POIModal, { POIModalMethods } from '@/components/modal/poiModal';
 import ShareLocationModal, {
   ShareLocationModalMethods,
 } from '@/components/modal/shareLocationModal';
+import { useAchievements } from '@/lib/AchievementContext';
 import { startBackgroundLocation, stopBackgroundLocation } from '@/lib/bg/backgroundLocation';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -11,6 +12,7 @@ import MapBox, {
   MarkerView,
   UserLocation
 } from '@rnmapbox/maps';
+import * as turf from '@turf/turf';
 import * as Location from 'expo-location';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -42,6 +44,7 @@ const SFHomeScreen = () => {
   const [shareRowId, setShareRowId] = useState<string | null>(null);
   const [showStopModal, setShowStopModal] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
+  const {unlockAchievement} = useAchievements();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -140,6 +143,38 @@ const SFHomeScreen = () => {
 
   useEffect(() => {
     fetchData();
+
+    const checkLocationWithinSF = async () => {
+      try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location permission not granted');
+        return;
+      }
+      
+      const location = await Location.getCurrentPositionAsync({});
+      
+      const sfPoint = [-122.4194, 37.7749]; 
+      const userPoint = [location.coords.longitude, location.coords.latitude];
+      
+      const options = { units: 'kilometers' };
+      const distance = turf.distance(
+        turf.point(sfPoint), 
+        turf.point(userPoint),
+        options
+      );
+      
+      if (distance <= 50) {
+        unlockAchievement('welcome_to_sf')
+      } 
+      } catch (error) {
+      console.error('Error checking location:', error);
+      }
+    };
+    
+    checkLocationWithinSF();
+
+    // Set up subscription for location changes
   }, []);
 
   const openPoiModal = (poi: POI) => {

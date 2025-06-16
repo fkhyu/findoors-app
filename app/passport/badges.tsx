@@ -1,40 +1,29 @@
+// app/screens/StampsScreen.js
+import { useAchievements } from '@/lib/AchievementContext';
+import { STAMP_DEFINITIONS } from '@/lib/stamps';
 import { Stack } from 'expo-router';
 import React, { useMemo } from 'react';
-import {
-  Dimensions,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 const STICKER_SIZE = width / 3;
 
-const sampleStamps = [
-  { id: '1', name: 'Golden Gate Walker', unlocked: true, image: require('@/assets/stamps/goldengatewalker.png') },
-  { id: '2', name: 'Mission Burrito', unlocked: false, image: 'https://via.placeholder.com/100?text=🌯' },
-  { id: '3', name: 'Note to Self', unlocked: true, image: require('@/assets/stamps/notetoself.png') },
-  { id: '4', name: 'Memory Maker', unlocked: false, image: require('@/assets/stamps/memorymaker.png') },
-  { id: '5', name: 'Map Master', unlocked: true, image: 'https://via.placeholder.com/100?text=🗺️' },
-  { id: '6', name: 'Hidden Stairway Explorer', unlocked: false, image: 'https://via.placeholder.com/100?text=🪜' },
-  { id: '7', name: 'Hidden Stairway Explorer', unlocked: false, image: 'https://via.placeholder.com/100?text=🪜' },
-  // …more stamps…
-];
-
 export default function StampsScreen() {
-  // 1) Compute random rotations/margins once
+  const { achievements } = useAchievements();
+
+  // Merge definitions with unlocked status and random layout
   const stamps = useMemo(
-    () => sampleStamps.map((stamp) => ({
-      ...stamp,
-      rotation: (Math.random() - 0.5) * 30,
-      margin: 12 + Math.random() * 12,
-    })),
-    []
+    () =>
+      STAMP_DEFINITIONS.map((stamp) => ({
+        ...stamp,
+        unlocked: achievements.some((a) => a.id === stamp.id),
+        rotation: (Math.random() - 0.5) * 30,
+        margin: 12 + Math.random() * 12,
+      })),
+    [achievements]
   );
 
-  // 2) Chunk into pages of 6
+  // Chunk into pages of 6
   const pages = useMemo(() => {
     const chunks = [];
     for (let i = 0; i < stamps.length; i += 6) {
@@ -43,16 +32,12 @@ export default function StampsScreen() {
     return chunks;
   }, [stamps]);
 
-  // 3) Single-stamp renderer
   const renderStamp = (stamp) => (
     <View
       key={stamp.id}
       style={[
         styles.sticker,
-        {
-          transform: [{ rotate: `${stamp.rotation}deg` }],
-          margin: stamp.margin,
-        },
+        { transform: [{ rotate: `${stamp.rotation}deg` }], margin: stamp.margin },
       ]}
     >
       <Image
@@ -76,6 +61,7 @@ export default function StampsScreen() {
           headerTintColor: '#5C4B51',
         }}
       />
+
       <ScrollView
         horizontal
         pagingEnabled
@@ -98,16 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF3E0',
     paddingBottom: 30,
   },
-  header: { 
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#5C4B51',
-    marginBottom: 20,
-    alignSelf: 'center',
-  },
-  pagingContainer: {
-    // pages themselves take care of width
-  },
+  pagingContainer: {},
   page: {
     width,
     flexDirection: 'row',
@@ -115,7 +92,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignContent: 'space-around',
     paddingBottom: 40,
-    paddingTop: 0,
   },
   sticker: {
     width: STICKER_SIZE,

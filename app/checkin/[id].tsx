@@ -1,3 +1,4 @@
+import { useAchievements } from '@/lib/AchievementContext';
 import { supabase } from '@/lib/supabase';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams } from 'expo-router';
@@ -22,6 +23,7 @@ const CheckinScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState<{ id: string; name: string }[]>([]);
   const [allFriends, setAllFriends] = useState<{ id: string; name: string }[]>([]);  const [searchQuery, setSearchQuery] = useState('');
+  const { unlockAchievement, achievements } = useAchievements();
 
   // Load friend list on mount
   useEffect(() => {
@@ -111,6 +113,7 @@ const CheckinScreen = () => {
       throw new Error(`R2 upload failed with ${uploadRes.status}`);
     }
 
+    unlockAchievement('memory_maker');
     const publicUrl = `https://media.brickks.dev/${fileName}`;
     console.debug('[uploadImageToR2] success, public URL:', publicUrl);
     return publicUrl;

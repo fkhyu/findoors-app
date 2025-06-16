@@ -1,4 +1,5 @@
 import Loading from '@/components/loading';
+import { useAchievements } from '@/lib/AchievementContext';
 import { supabase } from '@/lib/supabase';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -21,6 +22,7 @@ const NeighborsScreen = () => {
   const [friendsData, setFriendsData] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { unlockAchievement } = useAchievements();
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -47,6 +49,10 @@ const NeighborsScreen = () => {
 
   useEffect(() => {
     fetchNeighbors();
+
+    if (neighbors.length > 0) {
+      unlockAchievement('new_neighbor')
+    }
   }, []);
 
   useEffect(() => {

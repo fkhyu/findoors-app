@@ -1,3 +1,4 @@
+import { useAchievements } from '@/lib/AchievementContext';
 import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
@@ -10,6 +11,7 @@ const PassportScreen = () => {
   const [country, setCountry] = useState('');
   const [age, setAge] = useState<number | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { unlockAchievement, achievements } = useAchievements();
 
   useEffect(() => {
     const fetchUserData = async () => {
