@@ -18,7 +18,7 @@ type friend = {
 }[];
 
 export interface FriendModalProps {
-  friend?: friend
+  friend?: friend;
   initialSnap?: 'max' | 'mid' | 'min';
   maxHeight?: number;
   midHeight?: number;
@@ -82,7 +82,7 @@ const FriendModal = forwardRef<FriendModalMethods, FriendModalProps>(
         handleIndicatorStyle={styles.handle}
       >
         <BottomSheetView style={styles.content}>
-          <Text>Friends</Text>
+          <Text>Friend</Text>
         </BottomSheetView>
       </BottomSheetModal>
     )

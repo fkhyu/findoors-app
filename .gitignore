@@ -42,5 +42,6 @@ app-example
 *.ipa
 *.apk
 *.aab
+*.tar.gz
 
 maa11.py

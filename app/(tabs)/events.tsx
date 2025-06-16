@@ -83,7 +83,7 @@ const EventsScreen = () => {
         }).length > 0 && (
           <Text style={styles.header}>Neighbors Shares</Text>
         )}
-        {shares.length > 0 ? (
+        {shares.length > 0 && (
           shares
             .filter(share => {
               const endTime = new Date(share.end + 'Z'); 
@@ -127,8 +127,6 @@ const EventsScreen = () => {
               )}
             </Pressable>
           ))
-        ) : (
-          <Text style={styles.no}>No shares found.</Text>
         )}
 
         <Text style={styles.header}>Upcoming Events</Text>
