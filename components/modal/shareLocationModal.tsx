@@ -165,6 +165,7 @@ const ShareLocationModal = forwardRef<ShareLocationModalMethods, Props>(
               </Pressable>
             </View>
 
+            {/*}
             {renderOptionGroup(
               'Precision',
               [
@@ -182,6 +183,7 @@ const ShareLocationModal = forwardRef<ShareLocationModalMethods, Props>(
                 selectedRadius,
                 setSelectedRadius
               )}
+            */}
 
             {renderOptionGroup(
               'Who can see',
@@ -272,11 +274,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  header: { fontSize: 20, fontWeight: '700' },
+  header: { fontSize: 20, fontWeight: '700', color: '#333' },
   closeKeyboard: { paddingHorizontal: 8, paddingVertical: 4 },
   closeText: { fontSize: 14, color: '#007AFF', fontWeight: '500' },
-
-  // Option groups
   group: { marginVertical: 8 },
   groupLabel: { fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#333' },
   optionsRow: { flexDirection: 'row', flexWrap: 'wrap' },

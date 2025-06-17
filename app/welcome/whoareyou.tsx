@@ -74,6 +74,7 @@ export default function UserInfoScreen() {
           autoCapitalize="words"
           maxLength={35}
           placeholder="e.g. Rene"
+          placeholderTextColor={'#999'}
           style={styles.input}
           value={name}
           onChangeText={setName}
@@ -86,6 +87,7 @@ export default function UserInfoScreen() {
           autoCapitalize="words"
           maxLength={24}
           placeholder="e.g. Finland or California, USA"
+          placeholderTextColor={'#999'}
           style={styles.input}
           value={country}
           onChangeText={setCountry}
@@ -98,6 +100,7 @@ export default function UserInfoScreen() {
           maxLength={2}
           placeholder="e.g. 17"
           keyboardType="numeric"
+          placeholderTextColor={'#999'}
           style={styles.input}
           value={age}
           onChangeText={setAge}

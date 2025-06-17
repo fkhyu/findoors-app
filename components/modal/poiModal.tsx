@@ -2,92 +2,112 @@ import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { Dimensions, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Dimensions,
+  Linking,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 
+// Types
 export type POIModalMethods = {
   snapToMax: () => void;
   snapToMid: () => void;
   close: () => void;
   present: () => void;
-}
+};
 
 interface POI {
-  id: string; // Corrected from Text to string
+  id: string;
   lat: number;
-  lon: number; 
+  lon: number;
   title: string;
   icon_url: string;
-  address: string; // Assuming address is a string, adjust if necessary
-  type: string; // sight, food, view, event, gem
+  address?: string;
+  type: string;
   description?: string;
 }
 
-export interface POIModalProps {
-  initialSnap?: 'max' | 'mid' | 'min';
-  maxHeight?: number;
-  midHeight?: number;
-  minHeight?: number;
-  selectedPoiData?: POI;
-  messages?: [];
-}
+type WantToVisit = {
+  uid: string;
+  thingy_id: string[];
+};
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const openMapWithDirections = (lat: number, lon: number) => {
-  let url = '';
+// Ensure a want_to_visit row exists for this user
+async function ensureWantToVisitRow(uid: string): Promise<WantToVisit> {
+  const { data: profile, error: fetchErr } = await supabase
+    .from<WantToVisit>('want_to_visit')
+    .select('thingy_id')
+    .eq('uid', uid)
+    .maybeSingle();
 
-  if (Platform.OS === 'ios') {
-    // Apple Maps
-    url = `http://maps.apple.com/?daddr=${lat},${lon}&dirflg=d`;
-  } else {
-    // Google Maps
-    url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  if (fetchErr) throw fetchErr;
+
+  if (!profile) {
+    const { data, error: insertErr } = await supabase
+      .from<WantToVisit>('want_to_visit')
+      .insert({ uid, thingy_id: [] })
+      .single();
+    if (insertErr) throw insertErr;
+    return data;
   }
+
+  return profile;
+}
+
+const openMapWithDirections = (lat: number, lon: number) => {
+  const url =
+    Platform.OS === 'ios'
+      ? `http://maps.apple.com/?daddr=${lat},${lon}&dirflg=d`
+      : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
 
   Linking.openURL(url).catch(err => console.error('Error launching map:', err));
 };
 
-const POIModal = forwardRef<POIModalMethods, POIModalProps>(
+const POIModal = forwardRef<POIModalMethods, { initialSnap?: 'max' | 'mid' | 'min'; maxHeight?: number; midHeight?: number; minHeight?: number; selectedPoiData?: POI; messages?: any[] }>(
   (
     {
       initialSnap = 'mid',
       maxHeight = SCREEN_HEIGHT * 0.95,
       midHeight = SCREEN_HEIGHT * 0.5,
       minHeight = SCREEN_HEIGHT * 0.3,
-      selectedPoiData = {
-        id: '',
-        lat: 0,
-        lon: 0,
-        title: '',
-        icon_url: '',
-      } as POI, 
+      selectedPoiData,
       messages = [],
     },
     ref
   ) => {
     const sheetRef = useRef<BottomSheetModal>(null);
-
     const snapPoints = useMemo(
       () => [
-        `${Math.round(minHeight / SCREEN_HEIGHT * 100)}%`,
-        `${Math.round(midHeight / SCREEN_HEIGHT * 100)}%`,
-        `${Math.round(maxHeight / SCREEN_HEIGHT * 100)}%`,
+        `${Math.round((minHeight / SCREEN_HEIGHT) * 100)}%`,
+        `${Math.round((midHeight / SCREEN_HEIGHT) * 100)}%`,
+        `${Math.round((maxHeight / SCREEN_HEIGHT) * 100)}%`,
       ],
-      [maxHeight, midHeight, minHeight]
+      [minHeight, midHeight, maxHeight]
     );
 
     const initialIndex = useMemo(() => {
       switch (initialSnap) {
-        case 'max':
-          return 2;
-        case 'mid':
-          return 1;
-        default:
-          return 0;
+        case 'max': return 2;
+        case 'mid': return 1;
+        default: return 0;
       }
-    }, [initialSnap])
+    }, [initialSnap]);
 
     const handlePresent = useCallback(() => {
       sheetRef.current?.present();
@@ -101,182 +121,97 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
       close: () => sheetRef.current?.close(),
     }));
 
-
-    // Map of user_id to user name
+    // Chat user names
     const [userMap, setUserMap] = useState<Record<string, string>>({});
-    const [comment, setComment] = useState<string>('');
-    const [wantToVisit, setWantToVisit] = useState<boolean>(false);
+    const [comment, setComment] = useState('');
+    const [wantToVisit, setWantToVisit] = useState(false);
 
+    // Load users & want-to-visit status
     useEffect(() => {
-      if (messages.length > 0) {
-        const fetchUsers = async () => {
-          // Extract unique, non-null user IDs
-          const userIds = Array.from(new Set(
-            messages
-              .map((m: any) => m.user_id)
-              .filter((id: string | null): id is string => id !== null && id !== undefined)
-          ));
-          if (userIds.length === 0) {
-            return;
-          }
+      async function fetchMeta() {
+        // fetch chat users
+        const userIds = Array.from(
+          new Set(messages.map(m => m.user_id).filter(id => !!id))
+        );
+        if (userIds.length) {
           const { data, error } = await supabase
             .from('users')
             .select('id, name')
             .in('id', userIds);
-          if (error) {
-            console.error('Error fetching user data:', error);
-          } else if (data) {
-            const map: Record<string, string> = {};
-            data.forEach((u: any) => { map[u.id] = u.name; });
-            setUserMap(map);
+          if (!error && data) {
+            setUserMap(Object.fromEntries(data.map(u => [u.id, u.name])));
           }
-          
-          // Get want to visit status and set state
-          const status = await getWantToVisitStatus(selectedPoiData.id);
-          setWantToVisit(status);
-        };
-        fetchUsers();
-      }
-    }, [messages]);
+        }
 
+        // fetch want-to-visit flag
+        if (selectedPoiData?.id) {
+          try {
+            const { data: auth } = await supabase.auth.getUser();
+            if (auth.user) {
+              const profile = await ensureWantToVisitRow(auth.user.id);
+              setWantToVisit(profile.thingy_id.includes(selectedPoiData.id));
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      }
+      fetchMeta();
+    }, [messages, selectedPoiData]);
+
+    // Helpers
     const sendComment = async (content: string) => {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !userData.user) {
-        console.error('Error fetching user for comment:', userError);
-        return;
-      }
-
-      supabase
-        .from('messages')
-        .insert({
-          thingy_id: selectedPoiData.id,
-          user_id: userData.user.id,
-          content: content,
-        })
-        .then(({ data, error }) => {
-          if (error) {
-            console.error('Error sending comment:', error);
-          } else {
-            console.log('Comment sent successfully:', data);
-            setComment(''); // Clear the input after sending
-          }
-        });
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return;
+      await supabase.from('messages').insert({
+        thingy_id: selectedPoiData?.id,
+        user_id: auth.user.id,
+        content,
+      });
+      setComment('');
     };
 
-    async function getWantToVisitStatus(poiId: string): Promise<boolean> {
+    const handleAddToVisit = async () => {
       try {
-        const {
-          data: { user },
-          error: authError
-        } = await supabase.auth.getUser();
-        if (authError || !user) {
-          console.error('Error fetching auth user:', authError);
-          return false;
+        const { data: auth } = await supabase.auth.getUser();
+        if (!auth.user) throw new Error('Not signed in');
+
+        const profile = await ensureWantToVisitRow(auth.user.id);
+        const existing = profile.thingy_id || [];
+        if (existing.includes(selectedPoiData!.id)) {
+          setWantToVisit(true);
+          return;
         }
 
-        const { data: profile, error: profileError } = await supabase
+        const updated = [...existing, selectedPoiData!.id];
+        await supabase
           .from('want_to_visit')
-          .select('*')
-          .eq('uid', user.id)
-        if (profileError) {
-          console.error('Error fetching want_to_visit:', profileError);
-          return false;
-        }
-
-        console.log('Fetched profile:', profile);
-
-        return Array.isArray(profile.want_to_visit)
-          ? profile.want_to_visit.includes(poiId)
-          : false;
-
-      } catch (unexpected) {
-        console.error('Unexpected error in getWantToVisitStatus:', unexpected);
-        return false;
+          .upsert({ uid: auth.user.id, thingy_id: updated }, { onConflict: 'uid' });
+        setWantToVisit(true);
+      } catch (err) {
+        console.error(err);
       }
-    }
+    };
 
-  const handleAddToVisit = async () => {
-    const {
-      data: { user },
-      error: authError
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      console.error('Auth error:', authError);
-      return;
-    }
+    const handleRemoveFromVisit = async () => {
+      try {
+        const { data: auth } = await supabase.auth.getUser();
+        if (!auth.user) throw new Error('Not signed in');
 
-    // 2) fetch their current array
-    const { data: profile, error: fetchError } = await supabase
-      .from('want_to_visit')
-      .select('*')
-      .eq('uid', user.id)
-      .single();
-    if (fetchError) {
-      console.error('Fetch want_to_visit error:', fetchError);
-      return;
-    }
+        const profile = await ensureWantToVisitRow(auth.user.id);
+        const existing = profile.thingy_id || [];
+        const updated = existing.filter(id => id !== selectedPoiData!.id);
 
-    const existing = Array.isArray(profile.thingy_id)
-      ? profile.thingy_id
-      : [];
-    if (existing.includes(selectedPoiData.id)) {
-      return setWantToVisit(true);
-    }
-    const updated = [...existing, selectedPoiData.id];
+        await supabase
+          .from('want_to_visit')
+          .upsert({ uid: auth.user.id, thingy_id: updated }, { onConflict: 'uid' });
+        setWantToVisit(false);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-    // 4) write it back
-    const { error: updateError } = await supabase
-      .from('want_to_visit')
-      .update({ thingy_id: updated })
-      .eq('uid', user.id);
-    if (updateError) {
-      console.error('Update want_to_visit error:', updateError);
-    } else {
-      setWantToVisit(true);
-    }
-  };
-
-  // Removes the POI from want_to_visit
-  const handleRemoveFromVisit = async () => {
-    const {
-      data: { user },
-      error: authError
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      console.error('Auth error:', authError);
-      return;
-    }
-
-    const { data: profile, error: fetchError } = await supabase
-      .from('want_to_visit')
-      .select('*')
-      .eq('uid', user.id)
-      .single();
-    if (fetchError) {
-      console.error('Fetch want_to_visit error:', fetchError);
-      return;
-    }
-
-    const existing = Array.isArray(profile.thingy_id)
-      ? profile.thingy_id
-      : [];
-    const updated = existing.filter((id) => id !== selectedPoiData.id);
-
-    const { error: updateError } = await supabase
-      .from('want_to_visit')
-      .update({ thingy_id: updated })
-      .eq('uid', user.id);
-    if (updateError) {
-      console.error('Update want_to_visit error:', updateError);
-    } else {
-      setWantToVisit(false);
-    }
-  };
-
-    if (!selectedPoiData || !selectedPoiData.id) {
-      return null; 
-    }
+    if (!selectedPoiData?.id) return null;
 
     return (
       <BottomSheetModal
@@ -299,10 +234,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             '📍 Landmark'}
           </Text>
 
-          {selectedPoiData.address ? (
-            <Text style={styles.address}>{selectedPoiData.address}</Text> 
-          ) : null}
-
+          {selectedPoiData.address && <Text style={styles.address}>{selectedPoiData.address}</Text>}
 
           {wantToVisit ? (
             <Pressable style={styles.visitedContainer} onPress={handleRemoveFromVisit}>
@@ -310,12 +242,12 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
               <Text style={styles.visitedText}>Want to visit</Text>
             </Pressable>
           ) : (
-            <Pressable style={styles.wantToVisitContainer} onPress={handleAddToVisit}> 
+            <Pressable style={styles.wantToVisitContainer} onPress={handleAddToVisit}>
               <MaterialIcons name="bookmark-border" size={24} color="#F4A261" />
               <Text style={styles.wantToVisitText}>Want to visit</Text>
             </Pressable>
-          )} 
-          
+          )}
+
           <View style={styles.CTAContainer}>
             <Pressable
               onPress={() => openMapWithDirections(selectedPoiData.lat, selectedPoiData.lon)}
@@ -326,200 +258,73 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
             </Pressable>
             <Pressable
               onPress={() => {
-                sheetRef.current?.close(); 
-                router.push(`/checkin/${selectedPoiData.id}`)
+                sheetRef.current?.close();
+                router.push(`/checkin/${selectedPoiData.id}`);
               }}
               style={styles.directionsButton}
             >
               <MaterialCommunityIcons name="location-enter" size={24} color="#fff" />
               <Text style={styles.directionsText}>Check-In</Text>
-            </Pressable> 
+            </Pressable>
           </View>
 
-          {selectedPoiData.description ? (
+          {selectedPoiData.description && (
             <Text style={styles.description}>{selectedPoiData.description}</Text>
-          ) : null}
+          )}
 
           <BottomSheetScrollView style={styles.chatContainer}>
             <Text style={styles.photos}>Photos and Comments</Text>
 
             {messages.length > 0 ? (
-              messages.map((message: any) => (
-                <View key={message.id} style={{ marginBottom: 10 }}>
-                  <Text style={{ fontWeight: 'bold' }}>{userMap[message.user_id] || message.user_id}</Text>
-                  <Text>{message.content}</Text>
+              messages.map(msg => (
+                <View key={msg.id} style={{ marginBottom: 10 }}>
+                  <Text style={{ fontWeight: 'bold', color: '#555' }}>{userMap[msg.user_id] || msg.user_id}</Text>
+                  <Text style={{ color: '#444' }}>{msg.content}</Text>
                 </View>
               ))
             ) : (
-              <Text>No comments yet. Be the first to share!</Text>
+              <Text style={{ color: '#333' }}>No comments yet. Be the first to share!</Text>
             )}
-            
+
             <TextInput
               placeholder="Add a comment..."
-              style={{ 
-                height: 40, 
-                borderColor: '#ccc', 
-                borderWidth: 1, 
-                borderRadius: 8, 
-                paddingHorizontal: 10,
-                marginBottom: 10,
-              }}
+              style={styles.commentInput}
               value={comment}
-              onChangeText={(text) => {
-                setComment(text);
-              }}
-              onSubmitEditing={(e) => {
-                sendComment(e.nativeEvent.text);
-              }}
+              onChangeText={setComment}
+              onSubmitEditing={e => sendComment(e.nativeEvent.text)}
             />
-            <Pressable
-              onPress={() => {
-                sendComment(comment);
-                setComment('');
-              }}
-              style={{ 
-                backgroundColor: '#4CAF50', 
-                padding: 10, 
-                borderRadius: 8, 
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Send Comment</Text>
+            <Pressable style={styles.sendButton} onPress={() => sendComment(comment)}>
+              <Text style={styles.sendButtonText}>Send Comment</Text>
             </Pressable>
           </BottomSheetScrollView>
         </BottomSheetView>
       </BottomSheetModal>
     );
   }
-)
+);
 
 POIModal.displayName = 'POIModal';
 
-export default POIModal;
-
 const styles = StyleSheet.create({
-  background: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-  handle: { 
-    width: 40,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: '#ccc',
-    marginVertical: 8,
-  }, 
-  content: {
-    padding: 16, 
-    paddingTop: 0,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8, 
-  },
-  address: {
-    fontSize: 14,
-  },
-  type: {
-    fontSize: 14,
-    color: '#6B7B78',
-    marginBottom: 4,
-    fontStyle: 'italic',
-  }, 
-  description: {
-    fontSize: 15,
-    color: '#444',
-    marginTop: 8,
-    marginBottom: 10,
-  },
-  hours: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 6,
-  },
-  visited: {
-    color: '#4CAF50',
-    fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  unvisited: {
-    color: '#FF9800',
-    fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  photos: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 8,
-  },
-  directionsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F4A261',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    marginTop: 8,
-    flex: 1,
-  },
-  directionsText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  CTAContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 8,
-  },
-  chatContainer: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  visitedContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F4A261',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    marginTop: 8,
-    flex: 1,
-  },
-  wantToVisitText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#F4A261',
-    fontWeight: 'bold',
-  },
-  visitedText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  wantToVisitContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    marginTop: 8,
-    flex: 1,
-    borderWidth: 2,
-    borderColor: '#F4A261',
-  },
-})
+  background: { backgroundColor: '#fff', borderTopLeftRadius: 16, borderTopRightRadius: 16 },
+  handle: { width: 40, height: 5, borderRadius: 2.5, backgroundColor: '#ccc', marginVertical: 8 },
+  content: { padding: 16, paddingTop: 0 },
+  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 8, color: '#333' },
+  type: { fontSize: 14, color: '#6B7B78', marginBottom: 4, fontStyle: 'italic' },
+  address: { fontSize: 14 },
+  description: { fontSize: 15, color: '#444', marginVertical: 10 },
+  CTAContainer: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+  directionsButton: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#F4A261', padding: 10, borderRadius: 8 },
+  directionsText: { marginLeft: 8, fontSize: 16, color: '#fff', fontWeight: 'bold' },
+  visitedContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F4A261', padding: 10, borderRadius: 8, marginVertical: 8 },
+  wantToVisitContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: '#F4A261', padding: 10, borderRadius: 8, marginVertical: 8 },
+  wantToVisitText: { marginLeft: 8, fontSize: 16, color: '#F4A261', fontWeight: 'bold' },
+  visitedText: { marginLeft: 8, fontSize: 16, color: '#fff', fontWeight: 'bold' },
+  chatContainer: { marginTop: 16, padding: 12, backgroundColor: '#f9f9f9', borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
+  photos: { fontSize: 14, color: '#888', marginBottom: 8 },
+  commentInput: { height: 40, borderColor: '#ccc', borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, marginBottom: 10 },
+  sendButton: { backgroundColor: '#4CAF50', padding: 10, borderRadius: 8, alignItems: 'center' },
+  sendButtonText: { color: '#fff', fontWeight: 'bold' },
+});
+
+export default POIModal;

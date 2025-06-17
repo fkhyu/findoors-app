@@ -89,8 +89,8 @@ const AddFriendsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text>Your friend code:</Text>
-      <Text>{myFriendCode}</Text>
+      <Text style={{ color: '#333' }}>Your friend code:</Text>
+      <Text style={{ color: '#333', fontWeight: 'bold', fontSize: 18 }}>{myFriendCode}</Text>
       <Button
         title="Show QR Code"
         onPress={() => router.push(`/friends/qr/${myFriendCode}`)}
@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
+    color: '#333',
   },
   input: {
     height: 40,

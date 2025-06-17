@@ -206,7 +206,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd' 
   },
   tabText: { 
-    fontSize: 18 
+    fontSize: 18,
+    color: '#333',
   },
   error: { 
     color: 'red', 
@@ -230,7 +231,8 @@ const styles = StyleSheet.create({
   },
   caption: { 
     fontSize: 16, 
-    marginBottom: 8 
+    marginBottom: 8,
+    color: '#333',
   },
   meta: { 
     fontSize: 14, 

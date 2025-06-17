@@ -44,6 +44,7 @@ export default function WelcomeScreen() {
 
       if (!error) {
         router.replace('/welcome/whoareyou');
+        return;
       }
     }
 

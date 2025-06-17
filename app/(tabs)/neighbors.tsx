@@ -98,9 +98,13 @@ const NeighborsScreen = () => {
           ))}
         </View>
       ) : (
-        <View style={styles.container}>
-          <Text style={styles.text}>No neighbors found</Text>
-          <Text style={styles.text}>You can add neighbors from top right of the screen</Text>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+          <Text style={{ fontSize: 22, fontWeight: '700', color: '#888', marginBottom: 12 }}>
+            No neighbors yet!
+          </Text>
+          <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 24 }}>
+            Tap the <Text style={{ fontWeight: 'bold', color: '#007AFF' }}>+</Text> icon at the top right to add your first neighbor.
+          </Text>
         </View>
       )}
     </ScrollView>
