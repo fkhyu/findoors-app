@@ -72,7 +72,7 @@ const EventsScreen = () => {
           ),
         }}
       />
-      <ScrollView contentContainerStyle={styles.container}> 
+      <ScrollView contentContainerStyle={styles.container} style={{ marginBottom: 40}}> 
 
         {shares
           .filter(share => {
@@ -93,7 +93,7 @@ const EventsScreen = () => {
             <Pressable
               key={share.id} 
               style={styles.card}
-              onPress={() => goToMap(share.lat, share.lon)}
+              onPress={() => goToMap([share.lat, share.lon].join(','))}
             >
               <Text style={styles.name}>{share.name}</Text>
               <View style={{ flexDirection: 'row', gap: 4 }}>
@@ -158,7 +158,7 @@ const EventsScreen = () => {
                   hour12: false,
                 })}
               </Text>
-              <Text style={styles.time}>{event.poi_id}</Text>
+              {/* <Text style={styles.time}>{event.poi_id}</Text> */}
               {event.description && (
                 <Text style={styles.desc}>
                   {renderTextWithLinks(event.description)}
@@ -191,5 +191,5 @@ const styles = StyleSheet.create({
   time: { fontSize: 14, color: '#666', marginBottom: 10 },
   desc: { fontSize: 16, color: '#333' },
   link: { color: '#007AFF', textDecorationLine: 'underline' },
-  no: { textAlign: 'center', fontSize: 18, color: '#888', marginTop: 30 },
+  no: { textAlign: 'center', fontSize: 18, color: '#888', paddingVertical: 80 },
 });
