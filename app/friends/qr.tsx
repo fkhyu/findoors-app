@@ -11,7 +11,7 @@ const QRCodeScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Your Friend Code</Text>
       <QRCode
-        value={userId}
+        value={userId as string}
         size={200} 
         color="black" 
         backgroundColor="white"

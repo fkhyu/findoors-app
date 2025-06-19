@@ -1,7 +1,8 @@
 import { supabase } from '@/lib/supabase';
-import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
+
 
 const AddFriendsScreen = () => {
   const [friendId, setFriendId] = useState('');
@@ -16,7 +17,7 @@ const AddFriendsScreen = () => {
         .single();
       if (error) {
         console.error('Error fetching friend ID:', error.message);
-        Alert.alert('Error', 'Failed to fetch friend ID. Please try again.');
+        Alert.alert('Oops', 'Friend code looks invalid. Please check and try again.');
       } else if (data) {
         console.log('Fetched Friend ID:', data.user_id);
         return data.user_id; 
@@ -70,7 +71,7 @@ const AddFriendsScreen = () => {
           const { data: { user } } = await supabase.auth.getUser()
           supabase
             .from('friends')
-            .insert([{ user_id: user.id, friend_id: fetchedFriendId }])
+            .insert([{ user_id: user?.id, friend_id: fetchedFriendId }])
             .then(({ error }) => {
               if (error) {
                 console.error('Error adding friend:', error.message);
@@ -89,12 +90,24 @@ const AddFriendsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text>Your friend code:</Text>
-      <Text>{myFriendCode}</Text>
-      <Button
-        title="Show QR Code"
-        onPress={() => router.push(`/friends/qr/${myFriendCode}`)}
-      />
+      <View style={styles.yourCodeContainer}>
+        <Text style={styles.yourCodeLabel}>Your friend code:</Text>
+        <View style={styles.innerContainer}>
+          <QRCode
+            value={myFriendCode as string}
+            size={200} 
+            color={myFriendCode === "Loading..." ? "#f5f5f5" : "#262626"} 
+            backgroundColor="#ffffff"
+          />
+          <Text style={styles.myCode}>{myFriendCode}</Text>
+        </View>
+
+        {/* <Button
+          title="Show QR Code"
+          onPress={() => router.push(`/friends/qr/${myFriendCode}`)}
+        /> */}
+      </View>
+      
 
       <Text style={styles.label}>Enter Friend Code</Text>
       <View style={styles.codeInputContainer}>
@@ -126,7 +139,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
     backgroundColor: '#f5f5f5',
-    marginBottom: '60%'
+    paddingBottom: '50%'
+    // marginBottom: '60%'
   },
   title: {
     fontSize: 24,
@@ -137,6 +151,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
+    color: '#71717b',
   },
   input: {
     height: 40,
@@ -169,6 +184,36 @@ const styles = StyleSheet.create({
     letterSpacing: 12,
     textAlign: 'center',
   },
+  yourCodeContainer: {
+    // backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 40,
+    alignItems: 'center',
+  },
+  myCode: {
+    fontSize: 27,
+    fontWeight: '600',
+    marginTop: 10,
+    color: '#f54900',
+  },
+  innerContainer: {
+    marginTop: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+  }, 
+  yourCodeLabel: {
+    fontSize: 16,
+    fontWeight: '400',
+    marginBottom: 5,
+    color: '#333',
+  }
 
 });
 

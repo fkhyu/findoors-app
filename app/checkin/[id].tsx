@@ -263,7 +263,7 @@ const CheckinScreen = () => {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleCheckin} disabled={uploading}>
-        <Text style={styles.buttonText}>{uploading ? 'Checking in...' : '✨ Check In'}</Text>
+        <Text style={styles.buttonText}>{uploading ? 'Checking in...' : 'Check In'}</Text>
       </TouchableOpacity>
 
       </ScrollView>
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   imagePicker: {
-    width: 220,
+    width: '100%',
     height: 220,
     backgroundColor: '#FFF5E5',
     borderRadius: 20,
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   suggestions: {
     maxHeight: 120,
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff7ed',
     borderColor: '#ECD9C6',
     borderWidth: 1,
     borderRadius: 8,
@@ -360,18 +360,19 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   button: {
-    backgroundColor: '#FFE066',
+    backgroundColor: '#fe9a00',
     paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 18,
+    // paddingHorizontal: 60,
+    alignItems: 'center',
+    borderRadius: 12,
     marginTop: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    // shadowColor: '#000',
+    // shadowOpacity: 0.1,
+    // shadowRadius: 5,
   },
   buttonText: {
     fontSize: 18,
-    color: '#5C4B51',
+    color: '#461901',
     fontWeight: '600',
   },
 });
