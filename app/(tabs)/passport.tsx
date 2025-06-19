@@ -51,7 +51,7 @@ const PassportScreen = () => {
               uri: `https://ui-avatars.com/api/?name=${name.replace(
           / /g,
           '+'
-              )}&background=random&size=150`,
+              )}&background=random&size=256&bold=true`,
             }}
             style={styles.pfp}
           />
@@ -112,7 +112,7 @@ const PassportScreen = () => {
             router.push('/welcome');
           }}
         >
-          <Text>Log Out</Text>
+          <Text style={styles.logout}>Log Out</Text>
         </TouchableOpacity>
       )}
     </SafeAreaView>
@@ -238,4 +238,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#546C5E',
   },
+  logout: {
+    color: '#FF6B6B',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 20,
+  }
 });

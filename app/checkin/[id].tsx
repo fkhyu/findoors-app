@@ -22,6 +22,25 @@ const CheckinScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState<{ id: string; name: string }[]>([]);
   const [allFriends, setAllFriends] = useState<{ id: string; name: string }[]>([]);  const [searchQuery, setSearchQuery] = useState('');
+  // Added by Faru
+  const [poiName, setPoiName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPOIName = async () => {
+      if (!id) return;
+      const { data, error } = await supabase
+        .from('poi')
+        .select('title')
+        .eq('id', id)
+        .single();
+      if (error) {
+        console.error('[CheckinScreen] Error fetching POI name:', error);
+      } else {
+        setPoiName(data?.title || null);
+      }
+    };
+    fetchPOIName();
+  }, [id]);
 
   // Load friend list on mount
   useEffect(() => {
@@ -214,8 +233,11 @@ const CheckinScreen = () => {
           headerTintColor: '#5C4B51',
         }}
       />
-      <Text style={styles.subtext}>Stamp a memory for location: {id}</Text>
-
+      <View style={{ width: '100%', gap: 0 }}>
+        <Text style={styles.subtext_nomargin}>Stamp a memory for location:{"\n"}</Text>
+        <Text style={styles.subtext}>{poiName}</Text>
+      </View>
+      
       <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={styles.previewImage} />
@@ -293,9 +315,14 @@ const styles = StyleSheet.create({
     color: '#5C4B51',
   },
   subtext: {
-    fontSize: 16,
-    color: '#7D6E75',
+    fontSize: 18,
+    color: '#404040',
+    fontWeight: '500',
     marginBottom: 20,
+  },
+  subtext_nomargin: {
+    fontSize: 16,
+    color: '#7D6E75'
   },
   imagePicker: {
     width: '100%',

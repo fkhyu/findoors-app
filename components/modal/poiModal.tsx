@@ -351,11 +351,11 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
                 </View>
               ))
             ) : (
-              <Text>No comments yet. Be the first to share!</Text>
+              <Text style={{ paddingVertical: 72, textAlign: 'center', color: '#a1a1a1' }}>No comments yet. Be the first to share!</Text>
             )}
             
             <TextInput
-              placeholder="Add a comment..."
+              placeholder="Write a comment..."
               style={{ 
                 height: 40, 
                 borderColor: '#ccc', 
@@ -371,6 +371,7 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
               onSubmitEditing={(e) => {
                 sendComment(e.nativeEvent.text);
               }}
+              placeholderTextColor={'#a1a1a1'}
             />
             <Pressable
               onPress={() => {
@@ -378,11 +379,12 @@ const POIModal = forwardRef<POIModalMethods, POIModalProps>(
                 setComment('');
               }}
               style={{ 
-                backgroundColor: '#4CAF50', 
+                backgroundColor: comment.trim() ? '#F4A261' : '#ccc', 
                 padding: 10, 
                 borderRadius: 8, 
                 alignItems: 'center',
               }}
+              disabled={!comment.trim()}
             >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Send Comment</Text>
             </Pressable>
@@ -408,14 +410,14 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#ccc',
-    marginVertical: 8,
+    marginBottom: 8,
   }, 
   content: {
     padding: 16, 
     paddingTop: 0,
   },
   title: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 8, 
   },
@@ -425,7 +427,7 @@ const styles = StyleSheet.create({
   type: {
     fontSize: 14,
     color: '#6B7B78',
-    marginBottom: 4,
+    marginBottom: 12,
     fontStyle: 'italic',
   }, 
   description: {
@@ -450,9 +452,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   photos: {
-    fontSize: 14,
-    color: '#888',
-    marginBottom: 8,
+    fontSize: 18,
+    color: '#262626',
+    marginVertical: 8,
+    textAlign: 'center',
+    fontWeight: '500'
   },
   directionsButton: {
     flexDirection: 'row',
