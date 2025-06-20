@@ -283,18 +283,42 @@ const POIModal = forwardRef<POIModalMethods, { initialSnap?: 'max' | 'mid' | 'mi
                 </View>
               ))
             ) : (
-              <Text style={{ color: '#333' }}>No comments yet. Be the first to share!</Text>
+              <Text style={{ paddingVertical: 72, textAlign: 'center', color: '#a1a1a1' }}>No comments yet. Be the first to share!</Text>
             )}
 
             <TextInput
-              placeholder="Add a comment..."
-              style={styles.commentInput}
+              placeholder="Write a comment..."
+              style={{ 
+                height: 40, 
+                borderColor: '#ccc', 
+                borderWidth: 1, 
+                borderRadius: 8, 
+                paddingHorizontal: 10,
+                marginBottom: 10,
+              }}
               value={comment}
-              onChangeText={setComment}
-              onSubmitEditing={e => sendComment(e.nativeEvent.text)}
+              onChangeText={(text) => {
+                setComment(text);
+              }}
+              onSubmitEditing={(e) => {
+                sendComment(e.nativeEvent.text);
+              }}
+              placeholderTextColor={'#a1a1a1'}
             />
-            <Pressable style={styles.sendButton} onPress={() => sendComment(comment)}>
-              <Text style={styles.sendButtonText}>Send Comment</Text>
+            <Pressable
+              onPress={() => {
+                sendComment(comment);
+                setComment('');
+              }}
+              style={{ 
+                backgroundColor: comment.trim() ? '#F4A261' : '#ccc', 
+                padding: 10, 
+                borderRadius: 8, 
+                alignItems: 'center',
+              }}
+              disabled={!comment.trim()}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Send Comment</Text>
             </Pressable>
           </BottomSheetScrollView>
         </BottomSheetView>
@@ -306,25 +330,130 @@ const POIModal = forwardRef<POIModalMethods, { initialSnap?: 'max' | 'mid' | 'mi
 POIModal.displayName = 'POIModal';
 
 const styles = StyleSheet.create({
-  background: { backgroundColor: '#fff', borderTopLeftRadius: 16, borderTopRightRadius: 16 },
-  handle: { width: 40, height: 5, borderRadius: 2.5, backgroundColor: '#ccc', marginVertical: 8 },
-  content: { padding: 16, paddingTop: 0 },
-  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 8, color: '#333' },
-  type: { fontSize: 14, color: '#6B7B78', marginBottom: 4, fontStyle: 'italic' },
-  address: { fontSize: 14 },
-  description: { fontSize: 15, color: '#444', marginVertical: 10 },
-  CTAContainer: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
-  directionsButton: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#F4A261', padding: 10, borderRadius: 8 },
-  directionsText: { marginLeft: 8, fontSize: 16, color: '#fff', fontWeight: 'bold' },
-  visitedContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F4A261', padding: 10, borderRadius: 8, marginVertical: 8 },
-  wantToVisitContainer: { flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: '#F4A261', padding: 10, borderRadius: 8, marginVertical: 8 },
-  wantToVisitText: { marginLeft: 8, fontSize: 16, color: '#F4A261', fontWeight: 'bold' },
-  visitedText: { marginLeft: 8, fontSize: 16, color: '#fff', fontWeight: 'bold' },
-  chatContainer: { marginTop: 16, padding: 12, backgroundColor: '#f9f9f9', borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
-  photos: { fontSize: 14, color: '#888', marginBottom: 8 },
-  commentInput: { height: 40, borderColor: '#ccc', borderWidth: 1, borderRadius: 8, paddingHorizontal: 10, marginBottom: 10 },
-  sendButton: { backgroundColor: '#4CAF50', padding: 10, borderRadius: 8, alignItems: 'center' },
-  sendButtonText: { color: '#fff', fontWeight: 'bold' },
-});
-
-export default POIModal;
+  background: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  handle: { 
+    width: 40,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#ccc',
+    marginBottom: 8,
+  }, 
+  content: {
+    padding: 16, 
+    paddingTop: 0,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8, 
+  },
+  address: {
+    fontSize: 14,
+  },
+  type: {
+    fontSize: 14,
+    color: '#6B7B78',
+    marginBottom: 12,
+    fontStyle: 'italic',
+  }, 
+  description: {
+    fontSize: 15,
+    color: '#444',
+    marginTop: 8,
+    marginBottom: 10,
+  },
+  hours: {
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 6,
+  },
+  visited: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  unvisited: {
+    color: '#FF9800',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  photos: {
+    fontSize: 18,
+    color: '#262626',
+    marginVertical: 8,
+    textAlign: 'center',
+    fontWeight: '500'
+  },
+  directionsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F4A261',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    marginTop: 8,
+    flex: 1,
+  },
+  directionsText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  CTAContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+  },
+  chatContainer: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  visitedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F4A261',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    marginTop: 8,
+    flex: 1,
+  },
+  wantToVisitText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#F4A261',
+    fontWeight: 'bold',
+  },
+  visitedText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  wantToVisitContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    marginTop: 8,
+    flex: 1,
+    borderWidth: 2,
+    borderColor: '#F4A261',
+  },
+})

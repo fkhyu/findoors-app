@@ -93,7 +93,7 @@ const NeighborsScreen = () => {
           {friendsData.map((friend) => (
             <View key={friend.id} style={styles.friendCard}>
               <Text style={styles.name}>{friend.name}</Text>
-              <Text style={styles.details}>{friend.age} years • {friend.country}</Text>
+              <Text style={styles.details}>{friend.age} years • from {friend.country}</Text>
             </View>
           ))}
         </View>
@@ -128,13 +128,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    // shadowColor: '#000',
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 2,
+    // },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
     elevation: 3,
   },
   name: {
@@ -149,6 +149,11 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
-    color: '#333',
+    color: '#737373',
   },
+  emptyContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    gap: 16,
+  }
 });

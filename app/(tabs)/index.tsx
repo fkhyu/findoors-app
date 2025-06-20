@@ -509,7 +509,7 @@ const SFHomeScreen = () => {
           ]}
           onPress={centerOnUser}
         >
-          <MaterialIcons name="my-location" size={28} color="black" />
+          <MaterialIcons name="my-location" size={28} color="#404040" />
         </Pressable>
 
         {shareRowId ? (
@@ -536,7 +536,7 @@ const SFHomeScreen = () => {
             shareModalRef.current?.present();
           }}
         >
-          <MaterialIcons name="share-location" size={28} color="black" />
+          <MaterialIcons name="share-location" size={28} color="#404040" />
         </Pressable>
         )}
       </View>

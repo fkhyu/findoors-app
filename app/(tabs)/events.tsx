@@ -84,6 +84,7 @@ const EventsScreen = () => {
           ),
         }}
       />
+      <ScrollView contentContainerStyle={styles.container} style={{ marginBottom: 40}}> 
 
       <ScrollView contentContainerStyle={styles.container}>
         {/* Shares Section */}
@@ -132,19 +133,31 @@ const EventsScreen = () => {
             .filter(event => new Date(event.end_time) > new Date())
             .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
             .map(event => (
-              <Pressable
-                key={event.id}
-                style={styles.card}
-                onPress={() => goToMapById(event.poi_id)}
-              >
-                <Text style={styles.name}>{event.name}</Text>
-                <Text style={styles.time}>
-                  {new Date(event.start_time).toLocaleString([], {
-                    day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
-                  })} -{' '}
-                  {new Date(event.end_time).toLocaleString([], {
-                    hour: '2-digit', minute: '2-digit', hour12: false,
-                  })}
+            <Pressable
+              key={event.id}
+              style={styles.card}
+              onPress={() => {
+                goToMapById(event.poi_id);
+              }}
+            >
+              <Text style={styles.name}>{event.name}</Text>
+              <Text style={styles.time}>
+                {new Date(event.start_time).toLocaleString([], {
+                  day: 'numeric',
+                  month: 'long',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })} -{' '}
+                {new Date(event.end_time).toLocaleString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false,
+                })}
+              </Text>
+              {/* <Text style={styles.time}>{event.poi_id}</Text> */}
+              {event.description && (
+                <Text style={styles.desc}>
+                  {renderTextWithLinks(event.description)}
                 </Text>
                 {event.description && (
                   <Text style={styles.desc}>
@@ -171,5 +184,5 @@ const styles = StyleSheet.create({
   time: { fontSize: 14, color: '#666', marginBottom: 10 },
   desc: { fontSize: 16, color: '#333' },
   link: { color: '#007AFF', textDecorationLine: 'underline' },
-  no: { textAlign: 'center', fontSize: 18, color: '#888', marginTop: 30 },
+  no: { textAlign: 'center', fontSize: 18, color: '#888', paddingVertical: 80 },
 });
