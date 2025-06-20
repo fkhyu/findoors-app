@@ -106,7 +106,7 @@ export default NeighborsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f00',
+    backgroundColor: '#f0f0f0',
   },
   friendsList: {
     width: '100%',
