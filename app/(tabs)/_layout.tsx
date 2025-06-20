@@ -3,7 +3,10 @@ import { i18n } from '@lingui/core';
 import { I18nProvider } from "@lingui/react";
 import { router, Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, Pressable } from 'react-native';
+import { Appearance, Platform, Pressable } from 'react-native';
+
+const colorScheme = Appearance.getColorScheme();
+const isDark = colorScheme === 'dark' ? true : false;
 
 export default function TabLayout() {
   return (
@@ -31,7 +34,7 @@ export default function TabLayout() {
               <MaterialCommunityIcons
                 name="account-multiple-plus"
                 size={24}
-                color="black"
+                color={isDark ? 'white' : 'black'}
                 style={{ marginRight: 10 }}
               />
             </Pressable>

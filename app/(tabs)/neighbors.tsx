@@ -1,7 +1,10 @@
 import Loading from '@/components/loading';
 import { supabase } from '@/lib/supabase';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Appearance, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+const colorScheme = Appearance.getColorScheme();
+const isDark = colorScheme === 'dark' ? true : false;
 
 interface Friend {
   age: number;
@@ -106,7 +109,7 @@ export default NeighborsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f00',
+    backgroundColor:isDark ? '#121212' : '#f0f0f0',
   },
   friendsList: {
     width: '100%',
@@ -114,7 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
   }, 
   friendCard: {
-    backgroundColor: 'white',
+    backgroundColor:isDark ? '#262626' : 'white',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -125,12 +128,12 @@ const styles = StyleSheet.create({
     // },
     // shadowOpacity: 0.1,
     // shadowRadius: 4,
-    elevation: 3,
+    // elevation: 3,
   },
   name: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
+    color: isDark ? '#fff' : '#333',
     marginBottom: 4,
   },
   details: {
