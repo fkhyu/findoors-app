@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Button, Clipboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 
@@ -92,15 +92,15 @@ const AddFriendsScreen = () => {
     <View style={styles.container}>
       <View style={styles.yourCodeContainer}>
         <Text style={styles.yourCodeLabel}>Your friend code:</Text>
-        <View style={styles.innerContainer}>
+        <Pressable style={styles.innerContainer} onPress={() => {Clipboard.setString(myFriendCode); Alert.alert('Copied!')}}>
           <QRCode
             value={myFriendCode as string}
-            size={200} 
+            size={170} 
             color={myFriendCode === "Loading..." ? "#f5f5f5" : "#262626"} 
             backgroundColor="#ffffff"
           />
           <Text style={styles.myCode}>{myFriendCode}</Text>
-        </View>
+        </Pressable>
 
         {/* <Button
           title="Show QR Code"
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
     backgroundColor: '#f5f5f5',
-    paddingBottom: '50%'
+    paddingBottom: '60%'
     // marginBottom: '60%'
   },
   title: {
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   yourCodeContainer: {
     // backgroundColor: '#fff',
-    padding: 16,
+    padding: 10,
     borderRadius: 8,
     marginBottom: 40,
     alignItems: 'center',
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     color: '#f54900',
   },
   innerContainer: {
-    marginTop: 10,
+    marginTop: 7,
     paddingVertical: 15,
     paddingHorizontal: 15,
     borderRadius: 12,
