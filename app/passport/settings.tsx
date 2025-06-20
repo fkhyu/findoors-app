@@ -115,6 +115,14 @@ const SettingsScreen = () => {
           <Text style={styles.linkText}>Change Stay Length</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.linksContainerDestructive}>
+        <TouchableOpacity
+          style={styles.linkButtonDestructive}
+          onPress={() => router.push('https://sf.otamaps.fi/remove-my-account')}
+        >
+          <Text style={styles.linkText}>Delete Account</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -140,15 +148,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   card: {
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
+    // backgroundColor: '#fff',
+    // marginHorizontal: 16,
     borderRadius: 8,
     padding: 16,
     // iOS shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
     // Android elevation
     elevation: 3,
   },
@@ -167,17 +175,43 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
   },
   linksContainer: {
     marginHorizontal: 16,
-    marginBottom: 32,
+    // marginBottom: 32,
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    gap: 6
+  },
+  linksContainerDestructive: {
+    marginHorizontal: 16,
+    // marginBottom: 32,
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    gap: 6,
+    position: 'absolute',
+    bottom: -300,
   },
   linkButton: {
     backgroundColor: '#4CAF50',
-    borderRadius: 6,
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+    width: '45%'
+  },
+  linkButtonDestructive: {
+    backgroundColor: '#F44336',
+    borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
     marginBottom: 12,
+    width: '91.5%',
+    position: 'absolute',
+    bottom: 16,
   },
   linkText: {
     color: '#fff',
