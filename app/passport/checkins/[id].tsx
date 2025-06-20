@@ -62,6 +62,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 15,
     paddingBottom: 30, 
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
   },
   text: {
     color: 'white',

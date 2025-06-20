@@ -1,3 +1,4 @@
+import { useAchievements } from '@/lib/AchievementContext';
 import { supabase } from '@/lib/supabase';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
@@ -10,6 +11,7 @@ const PassportScreen = () => {
   const [country, setCountry] = useState('');
   const [age, setAge] = useState<number | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { unlockAchievement, achievements } = useAchievements();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -70,6 +72,13 @@ const PassportScreen = () => {
 
       {/* 🎒 Feature Buttons */}
       <View style={styles.buttonList}>
+        {/* 
+        <Link href="/neighbors" asChild>
+          <TouchableOpacity style={styles.listButton}>
+          <MaterialCommunityIcons name="home-group" size={32} color="#546C5E" />
+          <Text style={styles.listButtonText}>Friends & Neighbors</Text>
+          </TouchableOpacity>
+        </Link> */}
         <Link href="/passport/badges" asChild>
           <TouchableOpacity style={styles.listButton}>
           <MaterialCommunityIcons name="trophy-award" size={32} color="#546C5E" />
@@ -80,6 +89,12 @@ const PassportScreen = () => {
           <TouchableOpacity style={styles.listButton}>
           <MaterialCommunityIcons name="map-marker-check" size={32} color="#546C5E" />
           <Text style={styles.listButtonText}>Check-Ins</Text>
+          </TouchableOpacity>
+        </Link>
+        <Link href="/passport/saved" asChild>
+          <TouchableOpacity style={styles.listButton}>
+          <MaterialIcons name="bookmark" size={32} color="#546C5E" />
+          <Text style={styles.listButtonText}>Saved Locations</Text>
           </TouchableOpacity>
         </Link>
         <Link href="/passport/settings" asChild>

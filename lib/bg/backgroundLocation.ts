@@ -1,4 +1,3 @@
-// lib/backgroundLocation.ts
 import { supabase } from '@/lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';

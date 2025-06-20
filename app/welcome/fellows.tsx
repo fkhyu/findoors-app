@@ -5,10 +5,9 @@ import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -169,6 +168,7 @@ export default function FellowsScreen() {
         </>
       )}
 
+      {/*}
       <View style={styles.switchRow}>
         <Text style={styles.meta}>Hide me from others</Text>
         <Switch value={hideMe} onValueChange={toggleHide} />
@@ -178,7 +178,7 @@ export default function FellowsScreen() {
         <Text style={styles.meta}>Show my name, country & age</Text>
         <Switch value={showProfile} onValueChange={togglePublicProfile} />
       </View>
-
+      */}
       <Link href="/welcome/permissions" asChild>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Continue →</Text>

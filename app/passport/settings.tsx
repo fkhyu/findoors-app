@@ -28,6 +28,8 @@ const SettingsScreen = () => {
         return;
       }
 
+      console.log('Fetching user data for UID:', uid);
+
       const { data: user, error } = await supabase
         .from('users')
         .select('name, country, age')
@@ -44,6 +46,29 @@ const SettingsScreen = () => {
 
     fetchUserData();
   }, []);
+
+  const updateInformation = async (name: string, country: string, age: number | null) => {
+    if (!name || !country || age === null) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const uid = sessionData.session?.user.id;
+
+    console.log('Updating user information:', { name, country, age });
+    const { data, error } = await supabase
+      .from('users')
+      .update({ name, country, age })
+      .eq('id', uid);
+    if (error) {
+      console.error('Error updating user information:', error);
+      alert('Failed to update information. Please try again.');
+      return;
+    }
+    console.log('User information updated:', data);
+    alert('Information updated successfully!');
+  }
 
   if (loading) {
     return (
@@ -73,6 +98,7 @@ const SettingsScreen = () => {
             value={name}
             onChangeText={setName}
             style={styles.input}
+            placeholderTextColor={'#999'}
             placeholder="Enter your name"
           />
         </View>
@@ -83,6 +109,7 @@ const SettingsScreen = () => {
             value={country}
             onChangeText={setCountry}
             style={styles.input}
+            placeholderTextColor={'#999'}
             placeholder="Enter your country"
           />
         </View>
@@ -93,12 +120,21 @@ const SettingsScreen = () => {
             value={age !== null ? String(age) : ''}
             onChangeText={(t) => setAge(t ? parseInt(t, 10) : null)}
             style={styles.input}
+            placeholderTextColor={'#999'}
             placeholder="Enter your age"
             keyboardType="numeric"
           />
         </View>
+
+        <TouchableOpacity
+          style={styles.linkButton}
+          onPress={() => updateInformation(name, country, age)}
+        >
+          <Text style={styles.linkText}>Update your information</Text>
+        </TouchableOpacity>
       </View>
 
+      {/*}
       <Text style={styles.sectionTitle}>Preferences</Text> 
       <View style={styles.linksContainer}>
         <TouchableOpacity
@@ -115,10 +151,11 @@ const SettingsScreen = () => {
           <Text style={styles.linkText}>Change Stay Length</Text>
         </TouchableOpacity>
       </View>
+      */}
       <View style={styles.linksContainerDestructive}>
         <TouchableOpacity
           style={styles.linkButtonDestructive}
-          onPress={() => router.push('https://sf.otamaps.fi/remove-my-account')}
+          onPress={() => Linking.openURL('https://sf.otamaps.fi/remove-my-account')}
         >
           <Text style={styles.linkText}>Delete Account</Text>
         </TouchableOpacity>
@@ -175,6 +212,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     fontSize: 16,
+    color: '#333',
     borderWidth: 1,
     borderColor: '#D1D5DB',
   },

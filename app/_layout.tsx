@@ -1,3 +1,4 @@
+import { AchievementsProvider } from '@/lib/AchievementContext';
 import en from '@/locales/en/messages.po';
 import fi from '@/locales/fi/messages.po';
 import sv from '@/locales/sv/messages.po';
@@ -12,6 +13,7 @@ import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import Toast from 'react-native-toast-message';
 
 const locales = getLocales();
 const language = locales[0].languageCode;
@@ -48,6 +50,7 @@ export default function RootLayout() {
     <I18nProvider i18n={i18n}>  
       <GestureHandlerRootView style={{ flex: 1 }}>
         <BottomSheetModalProvider>{/* Wrap with BottomSheetModalProvider */}
+        <AchievementsProvider>
           <StatusBar barStyle={'dark-content'}/>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "App" }} />
@@ -62,6 +65,8 @@ export default function RootLayout() {
             <Stack.Screen name="friends/add" options={{ headerShown: true, title: "Add Neighbors" }} />
             <Stack.Screen name="+not-found" />
           </Stack>
+          <Toast />
+        </AchievementsProvider>
         </BottomSheetModalProvider>
       </GestureHandlerRootView>
     </I18nProvider>

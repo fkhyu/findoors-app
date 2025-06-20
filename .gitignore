@@ -38,8 +38,10 @@ yarn-error.*
 
 app-example
 .env
+.yarn
 *.ipa
 *.apk
 *.aab
+*.tar.gz
 
 maa11.py
