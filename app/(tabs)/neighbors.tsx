@@ -87,12 +87,12 @@ const NeighborsScreen = () => {
           {friendsData.map((friend) => (
             <View key={friend.id} style={styles.friendCard}>
               <Text style={styles.name}>{friend.name}</Text>
-              <Text style={styles.details}>{friend.age} years • {friend.country}</Text>
+              <Text style={styles.details}>{friend.age} years • from {friend.country}</Text>
             </View>
           ))}
         </View>
       ) : (
-        <View style={styles.container}>
+        <View style={styles.emptyContainer}>
           <Text style={styles.text}>No neighbors found</Text>
           <Text style={styles.text}>You can add neighbors from top right of the screen</Text>
         </View>
@@ -106,7 +106,7 @@ export default NeighborsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f0f00',
   },
   friendsList: {
     width: '100%',
@@ -139,6 +139,11 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
-    color: '#333',
+    color: '#737373',
   },
+  emptyContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    gap: 16,
+  }
 });

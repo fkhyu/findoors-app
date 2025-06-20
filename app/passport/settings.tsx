@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     bottom: -300,
   },
   linkButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#F4A261',
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
