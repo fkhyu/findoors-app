@@ -118,7 +118,7 @@ const SettingsScreen = () => {
       <View style={styles.linksContainerDestructive}>
         <TouchableOpacity
           style={styles.linkButtonDestructive}
-          onPress={() => router.push('https://sf.otamaps.fi/remove-my-account')}
+          onPress={() => Linking.openURL('https://sf.otamaps.fi/remove-my-account')}
         >
           <Text style={styles.linkText}>Delete Account</Text>
         </TouchableOpacity>
