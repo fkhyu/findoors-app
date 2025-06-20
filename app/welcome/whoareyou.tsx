@@ -74,6 +74,7 @@ export default function UserInfoScreen() {
           autoCapitalize="words"
           maxLength={35}
           placeholder="e.g. Rene"
+          placeholderTextColor={'#999'}
           style={styles.input}
           value={name}
           onChangeText={setName}
@@ -81,11 +82,12 @@ export default function UserInfoScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Country (or state)</Text>
+        <Text style={styles.label}>Country (or state) (optional)</Text>
         <TextInput
           autoCapitalize="words"
           maxLength={24}
           placeholder="e.g. Finland or California, USA"
+          placeholderTextColor={'#999'}
           style={styles.input}
           value={country}
           onChangeText={setCountry}
@@ -93,11 +95,12 @@ export default function UserInfoScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Age</Text> 
+        <Text style={styles.label}>Age (optional)</Text> 
         <TextInput
           maxLength={2}
           placeholder="e.g. 17"
           keyboardType="numeric"
+          placeholderTextColor={'#999'}
           style={styles.input}
           value={age}
           onChangeText={setAge}

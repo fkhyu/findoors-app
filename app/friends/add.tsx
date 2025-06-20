@@ -108,7 +108,6 @@ const AddFriendsScreen = () => {
         /> */}
       </View>
       
-
       <Text style={styles.label}>Enter Friend Code</Text>
       <View style={styles.codeInputContainer}>
         <TextInput

@@ -1,4 +1,5 @@
 import Loading from '@/components/loading';
+import { useAchievements } from '@/lib/AchievementContext';
 import { supabase } from '@/lib/supabase';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -21,6 +22,7 @@ const NeighborsScreen = () => {
   const [friendsData, setFriendsData] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { unlockAchievement } = useAchievements();
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -47,6 +49,10 @@ const NeighborsScreen = () => {
 
   useEffect(() => {
     fetchNeighbors();
+
+    if (neighbors.length > 0) {
+      unlockAchievement('new_neighbor')
+    }
   }, []);
 
   useEffect(() => {
@@ -92,9 +98,13 @@ const NeighborsScreen = () => {
           ))}
         </View>
       ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.text}>No neighbors found</Text>
-          <Text style={styles.text}>You can add neighbors from top right of the screen</Text>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+          <Text style={{ fontSize: 22, fontWeight: '700', color: '#888', marginBottom: 12 }}>
+            No neighbors yet!
+          </Text>
+          <Text style={{ fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 24 }}>
+            Tap the <Text style={{ fontWeight: 'bold', color: '#007AFF' }}>+</Text> icon at the top right to add your first neighbor.
+          </Text>
         </View>
       )}
     </ScrollView>

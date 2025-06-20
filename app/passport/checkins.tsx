@@ -230,7 +230,8 @@ const styles = StyleSheet.create({
   },
   caption: { 
     fontSize: 16, 
-    marginBottom: 8 
+    marginBottom: 8,
+    color: '#333',
   },
   meta: { 
     fontSize: 16, 

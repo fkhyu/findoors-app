@@ -1,7 +1,9 @@
+import FriendModal, { FriendModalMethods } from '@/components/modal/friendModalSheet';
 import POIModal, { POIModalMethods } from '@/components/modal/poiModal';
 import ShareLocationModal, {
   ShareLocationModalMethods,
 } from '@/components/modal/shareLocationModal';
+import { useAchievements } from '@/lib/AchievementContext';
 import { startBackgroundLocation, stopBackgroundLocation } from '@/lib/bg/backgroundLocation';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -11,6 +13,7 @@ import MapBox, {
   MarkerView,
   UserLocation
 } from '@rnmapbox/maps';
+import * as turf from '@turf/turf';
 import * as Location from 'expo-location';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -25,16 +28,32 @@ interface POI {
   type: string;
 }
 
+interface LocationShare {
+  id: string;
+  start: string;
+  sharer_id: string;
+  durationh: number;
+  note: string | null;
+  isPrecise: boolean;
+  lat: number;
+  lon: number;
+  radius: number;
+  shared_to: string[];
+  user_name: string | null;
+}
+
 const SFHomeScreen = () => {
   const router = useRouter();
   const [pois, setPois] = useState<POI[]>([]);
-  const [locationShares, setLocationShares] = useState<any[]>([]);
+  const [locationShares, setLocationShares] = useState<LocationShare[]>([]);
   const [userEvents, setUserEvents] = useState<any[]>([]);
   const [mapReady, setMapReady] = useState(false);
   const poiModalRef = useRef<POIModalMethods>(null);
   const [selectedPoi, setSelectedPoi] = useState<POI | null>(null);
+  const [selectedShare, setSelectedShare] = useState<LocationShare | null>(null);
   const shareModalRef = useRef<ShareLocationModalMethods>(null);
   const filterModalRef = useRef<ShareLocationModalMethods>(null);
+  const friendModalRef = useRef<FriendModalMethods>(null);
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
   const cameraRef = useRef<Camera>(null);
@@ -42,6 +61,11 @@ const SFHomeScreen = () => {
   const [shareRowId, setShareRowId] = useState<string | null>(null);
   const [showStopModal, setShowStopModal] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
+  const {unlockAchievement} = useAchievements();
+  const activeShares = locationShares.filter(share => {
+    const expiry = new Date(share.start).getTime() + share.durationh * 3600 * 1000;
+    return expiry > Date.now();
+  });
 
   useFocusEffect(
     React.useCallback(() => {
@@ -140,12 +164,49 @@ const SFHomeScreen = () => {
 
   useEffect(() => {
     fetchData();
+
+    const checkLocationWithinSF = async () => {
+      try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location permission not granted');
+        return;
+      }
+      
+      const location = await Location.getCurrentPositionAsync({});
+      
+      const sfPoint = [-122.4194, 37.7749]; 
+      const userPoint = [location.coords.longitude, location.coords.latitude];
+      
+      const options = { units: 'kilometers' };
+      const distance = turf.distance(
+        turf.point(sfPoint), 
+        turf.point(userPoint),
+        options
+      );
+      
+      if (distance <= 50) {
+        unlockAchievement('welcome_to_sf')
+      } 
+      } catch (error) {
+      console.error('Error checking location:', error);
+      }
+    };
+    
+    checkLocationWithinSF();
+
+    // Set up subscription for location changes
   }, []);
 
   const openPoiModal = (poi: POI) => {
     cameraRef.current?.flyTo([poi.lon, poi.lat], 250);
     setSelectedPoi(poi);
     poiModalRef.current?.present();
+  };
+
+  const openFriendModal = (share: LocationShare) => {
+    setSelectedShare(share);
+    friendModalRef.current?.present();
   };
 
   const centerOnUser = async () => {
@@ -216,6 +277,12 @@ const SFHomeScreen = () => {
       return;
     }
 
+    const { data: { user: userData }, error: userFetchError } = await supabase
+      .from('users')
+      .select('name')
+      .eq('id', user.id)
+      .single();
+
     const row = {
       start:     new Date().toISOString(),
       sharer_id: user.id,
@@ -226,6 +293,7 @@ const SFHomeScreen = () => {
       lon:       loc.coords.longitude,
       radius:    data.radiusMeters,
       shared_to: data.friendUserIds,
+      user_name: userData?.name || null,
     };
 
     const insertRes = await supabase
@@ -295,7 +363,7 @@ const SFHomeScreen = () => {
   useEffect(() => {
     if (!selectedPoi) return;
 
-    const fetchMessages = async () => {
+    const fetchMessages = async () => { 
       const { data, error } = await supabase
         .from('messages')
         .select('*')
@@ -366,19 +434,23 @@ const SFHomeScreen = () => {
           </MarkerView>
         ))}
 
-        {locationShares.map(share => {
+        {activeShares.map(share => {
           return (
             <MarkerView
             key={share.id}
             coordinate={[share.lon, share.lat]}
             anchor={{ x: 0.5, y: 0.5 }}
             >
-              <View>
-              <Image
-                source={{ uri: `https://ui-avatars.com/api/?name=${share.user_name || 'Anonymous'}&background=random&size=60` }}
-                style={{ width: 30, height: 30, borderRadius: 15 }}
-              />
-              </View>
+              <Pressable onPress={() => {openFriendModal(share); 
+              console.log("opened")
+              console.log("Share data:", share)
+            }}
+              hitSlop={10}>
+                <Image
+                  source={{ uri: `https://ui-avatars.com/api/?name=${share.user_name || 'Anonymous'}&background=random&size=60` }}
+                  style={{ width: 30, height: 30, borderRadius: 15 }}
+                />
+              </Pressable>
             </MarkerView>
           )
         })}
@@ -485,6 +557,12 @@ const SFHomeScreen = () => {
         maxHeight={800}
         selectedPoiData={selectedPoi}
         messages={messages}
+      />
+
+      <FriendModal
+        ref={friendModalRef}
+        share={selectedShare}
+        initialSnap="mid"
       />
       
       <Modal

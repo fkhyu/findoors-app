@@ -1,3 +1,4 @@
+import { useAchievements } from '@/lib/AchievementContext';
 import { supabase } from '@/lib/supabase';
 import * as ImagePicker from 'expo-image-picker';
 import { Stack, useLocalSearchParams } from 'expo-router';
@@ -12,7 +13,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 const CheckinScreen = () => {
@@ -22,6 +23,7 @@ const CheckinScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedFriends, setSelectedFriends] = useState<{ id: string; name: string }[]>([]);
   const [allFriends, setAllFriends] = useState<{ id: string; name: string }[]>([]);  const [searchQuery, setSearchQuery] = useState('');
+  const { unlockAchievement, achievements } = useAchievements();
   // Added by Faru
   const [poiName, setPoiName] = useState<string | null>(null);
 
@@ -90,7 +92,7 @@ const CheckinScreen = () => {
     console.debug('[uploadImageToR2] start uri:', uri);
     let response: Response;
     try {
-      response = await fetch(uri);
+      response = await fetch(uri); 
     } catch (e) {
       console.error('[uploadImageToR2] fetch(uri) failed:', e);
       throw new Error(`Could not fetch local image: ${e.message}`);
@@ -130,6 +132,7 @@ const CheckinScreen = () => {
       throw new Error(`R2 upload failed with ${uploadRes.status}`);
     }
 
+    unlockAchievement('memory_maker');
     const publicUrl = `https://media.brickks.dev/${fileName}`;
     console.debug('[uploadImageToR2] success, public URL:', publicUrl);
     return publicUrl;
