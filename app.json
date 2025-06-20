@@ -2,7 +2,7 @@
   "expo": {
     "name": "OtaMapSF",  
     "slug": "findoors",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "findoors",
@@ -11,20 +11,22 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "fi.otamaps.sf",
-      "buildNumber": "109",
+      "buildNumber": "110",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "BackgroundModes": [
           "location"
         ],
-        "NSLocationWhenInUseUsageDescription": "Show current location on map and scan for beacons.",
-        "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to scan for beacons.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location services to show your current location on the map and scan for beacons even when the app is in the background."
+        "NSLocationWhenInUseUsageDescription": "OtaMapSF uses your location to show your current position on the map and to share your location with others when you so request.",
+        // "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to scan for beacons.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "OtaMapSF uses your location in the background in order to share your location with others when you so request.",
+        "NSCameraUsageDescription": "OtaMapSF uses your camera to take photos and share them with your neighbors in the form of check-ins.",
+        "NSPhotoLibraryUsageDescription": "OtaMapSF accesses your photos to let you share them with your neighbors."
       }
     }, 
     "android": {
       "edgeToEdgeEnabled": true,
-      "versionCode": 20,
+      "versionCode": 21,
       "package": "fi.otamaps.sf",
       "permissions": [
         "ACCESS_FINE_LOCATION",

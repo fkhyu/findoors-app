@@ -75,7 +75,10 @@ export default function GuideScreen() {
       {currentIndex === slides.length - 1 && (
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.replace('/')}
+          onPress={() => {
+            router.dismissAll();
+            router.replace('/');
+          }}
         >
           <Text style={styles.buttonText}>Let’s Start!</Text>
         </TouchableOpacity>

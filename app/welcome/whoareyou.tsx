@@ -82,7 +82,7 @@ export default function UserInfoScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Country (or state)</Text>
+        <Text style={styles.label}>Country (or state) (optional)</Text>
         <TextInput
           autoCapitalize="words"
           maxLength={24}
@@ -95,7 +95,7 @@ export default function UserInfoScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Age</Text> 
+        <Text style={styles.label}>Age (optional)</Text> 
         <TextInput
           maxLength={2}
           placeholder="e.g. 17"

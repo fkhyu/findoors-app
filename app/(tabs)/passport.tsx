@@ -75,12 +75,13 @@ const PassportScreen = () => {
 
       {/* 🎒 Feature Buttons */}
       <View style={styles.buttonList}>
+        {/* 
         <Link href="/neighbors" asChild>
           <TouchableOpacity style={styles.listButton}>
           <MaterialCommunityIcons name="home-group" size={32} color="#546C5E" />
           <Text style={styles.listButtonText}>Friends & Neighbors</Text>
           </TouchableOpacity>
-        </Link>
+        </Link> */}
         <Link href="/passport/badges" asChild>
           <TouchableOpacity style={styles.listButton}>
           <MaterialCommunityIcons name="trophy-award" size={32} color="#546C5E" />
