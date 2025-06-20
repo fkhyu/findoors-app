@@ -48,10 +48,7 @@ const PassportScreen = () => {
         <View style={styles.pfpBlock}>
           <Image
             source={{
-              uri: `https://ui-avatars.com/api/?name=${name.replace(
-          / /g,
-          '+'
-              )}&background=random&size=256&bold=true`,
+              uri: `https://ui-avatars.com/api/?name=${name.charAt(0)}&background=random&size=256&bold=true`,
             }}
             style={styles.pfp}
           />
