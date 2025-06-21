@@ -25,15 +25,19 @@ export default function UserInfoScreen() {
   const [age, setAge] = useState('');
 
   const handleSubmit = async () => {
-    if (!name || !country || !age) {
-      Alert.alert('Missing info', 'Please fill out all fields.');
+    if (!name) {
+      Alert.alert('Missing name', 'Please fill out your name.');
       return;
     }
 
-    const parsedAge = parseInt(age);
-    if (isNaN(parsedAge) || parsedAge <= 0) {
-      Alert.alert('Invalid age', 'Please enter a valid number.');
-      return;
+    let parsedAge;
+
+    if (age) {
+      parsedAge = parseInt(age);
+      if (isNaN(parsedAge) || parsedAge <= 0) {
+        Alert.alert('Invalid age', 'Please enter a valid number.');
+        return;
+      }
     }
 
     const { data: session } = await supabase.auth.getSession();
@@ -48,8 +52,8 @@ export default function UserInfoScreen() {
       id: user.id,
       email: user.email,
       name,
-      country,
-      age: parsedAge,
+      country: country || null,
+      age: parsedAge || null,
       role: 'user',
     });
 
@@ -82,7 +86,7 @@ export default function UserInfoScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Country (or state) (optional)</Text>
+        <Text style={styles.label}>Country (or state) <Text style={styles.optional}>(optional)</Text></Text>
         <TextInput
           autoCapitalize="words"
           maxLength={24}
@@ -95,7 +99,7 @@ export default function UserInfoScreen() {
       </View>
 
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Age (optional)</Text> 
+        <Text style={styles.label}>Age <Text style={styles.optional}>(optional)</Text></Text> 
         <TextInput
           maxLength={2}
           placeholder="e.g. 17"
@@ -164,4 +168,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
   },
+  optional: {
+    fontSize: 12,
+    color: mainText
+  }
 });

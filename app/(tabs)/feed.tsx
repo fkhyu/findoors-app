@@ -1,14 +1,16 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 
 const FeedScreen = () => {
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Feed</Text>
-      <View style={styles.content}>
-        <Text style={styles.text}>This is the feed screen.</Text>
-      </View>
-    </ScrollView>
+    <View style={styles.container}>
+      <FlatList
+        data={null}
+        refreshControl={null}
+        renderItem={<FeedItem/>}
+      />
+    </View>
   );
 }
 
@@ -35,3 +37,17 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
+
+const FeedItem = () => {
+  return (
+    <View style={fStyles.container}>
+
+    </View>
+  )
+}
+
+const fStyles = StyleSheet.create({
+  container: {
+
+  }
+})
