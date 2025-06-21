@@ -1,14 +1,33 @@
 import { supabase } from '@/lib/supabase';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Alert, Button, Clipboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Button, Clipboard, Pressable, StyleSheet, Text, TextInput, View, useColorScheme } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 
 const AddFriendsScreen = () => {
+  const navigation = useNavigation();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
   const [friendId, setFriendId] = useState('');
   const [myFriendCode, setMyFriendCode] = useState('Loading...');
 
-  const fetchFriendId = async (code) => {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Add Friends',
+      headerStyle: {
+        backgroundColor: isDark ? '#121212' : '#f5f5f5',
+      },
+      headerTintColor: isDark ? '#ffffff' : '#000000',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        color: isDark ? '#ffffff' : '#000000',
+      },
+    });
+  }, [navigation, isDark]);
+
+  const fetchFriendId = async (code: string) => {
     try {
       const { data, error } = await supabase
         .from('friend_code')
@@ -89,17 +108,17 @@ const AddFriendsScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: isDark ? '#121212' : '#f5f5f5'}]}>
       <View style={styles.yourCodeContainer}>
-        <Text style={styles.yourCodeLabel}>Your friend code:</Text>
-        <Pressable style={styles.innerContainer} onPress={() => {Clipboard.setString(myFriendCode); Alert.alert('Copied!')}}>
+        <Text style={[styles.yourCodeLabel, {color: isDark ? '#e5e5e5' :'#333'}]}>Your friend code:</Text>
+        <Pressable style={[styles.innerContainer, {borderColor: isDark ? '#262626' : '#ccc', backgroundColor: isDark ? '#000000' : '#ffffff'}]} onPress={() => {Clipboard.setString(myFriendCode); Alert.alert('Copied!')}}>
           <QRCode
             value={myFriendCode as string}
             size={170} 
-            color={myFriendCode === "Loading..." ? "#f5f5f5" : "#262626"} 
-            backgroundColor="#ffffff"
+            color={myFriendCode === "Loading..." ? isDark ? "#ffffff" : '#000000' : isDark ? '#f5f5f5' : "#262626"} 
+            backgroundColor={isDark ? "#000000" : "#ffffff"}
           />
-          <Text style={styles.myCode}>{myFriendCode}</Text>
+          <Text style={[styles.myCode, {color: isDark ? '#ff8904' : '#f54900'}]}>{myFriendCode}</Text>
         </Pressable>
 
         {/* <Button
@@ -109,9 +128,9 @@ const AddFriendsScreen = () => {
       </View>
       
       <Text style={styles.label}>Enter Friend Code</Text>
-      <View style={styles.codeInputContainer}>
+      <View style={[styles.codeInputContainer, {borderColor: isDark ? '#262626' : '#ccc',}]}>
         <TextInput
-          style={[styles.codeInput, { letterSpacing: 12, textAlign: 'center' }]}
+          style={[styles.codeInput, { letterSpacing: 12, textAlign: 'center', backgroundColor: isDark ? '#000' : '#fff', color: isDark ? '#fafafa' : '#333', borderColor: isDark ? '#444' : '#ccc' }]}
           value={friendId}
           onChangeText={setFriendId}
           maxLength={6}
@@ -137,7 +156,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
     paddingBottom: '60%'
     // marginBottom: '60%'
   },
@@ -169,17 +187,14 @@ const styles = StyleSheet.create({
   codeInput: {
     flex: 1,
     height: 50,
-    borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
-    fontSize: 24,
-    backgroundColor: '#fff',
-    color: '#333',
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    fontSize: 24, 
+    // shadowColor: '#000',
+    // shadowOpacity: 0.04,
+    // shadowRadius: 6,
+    // elevation: 2,
     letterSpacing: 12,
     textAlign: 'center',
   },
@@ -194,7 +209,6 @@ const styles = StyleSheet.create({
     fontSize: 27,
     fontWeight: '600',
     marginTop: 10,
-    color: '#f54900',
   },
   innerContainer: {
     marginTop: 7,
@@ -203,15 +217,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderCurve: 'continuous',
     borderWidth: 1,
-    borderColor: '#ccc',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
   }, 
   yourCodeLabel: {
     fontSize: 16,
     fontWeight: '400',
     marginBottom: 5,
-    color: '#333',
   }
 
 });

@@ -2,10 +2,7 @@ import Loading from '@/components/loading';
 import { useAchievements } from '@/lib/AchievementContext';
 import { supabase } from '@/lib/supabase';
 import React, { useEffect, useState } from 'react';
-import { Appearance, ScrollView, StyleSheet, Text, View } from 'react-native';
-
-const colorScheme = Appearance.getColorScheme();
-const isDark = colorScheme === 'dark' ? true : false;
+import { ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 
 interface Friend {
   age: number;
@@ -26,6 +23,9 @@ const NeighborsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const { unlockAchievement } = useAchievements();
+
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark' ? true : false;
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -90,12 +90,12 @@ const NeighborsScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, {backgroundColor: isDark ? '#121212' : '#f0f0f0',}]}>
       {friendsData.length > 0 ? (
         <View style={styles.friendsList}>
           {friendsData.map((friend) => (
-            <View key={friend.id} style={styles.friendCard}>
-              <Text style={styles.name}>{friend.name}</Text>
+            <View key={friend.id} style={[styles.friendCard, {backgroundColor:isDark ? '#262626' : 'white',}]}>
+              <Text style={[styles.name, {color: isDark ? '#fff' : '#333',}]}>{friend.name}</Text>
               <Text style={styles.details}>{friend.age} years • from {friend.country}</Text>
             </View>
           ))}
@@ -119,7 +119,6 @@ export default NeighborsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:isDark ? '#121212' : '#f0f0f0',
   },
   friendsList: {
     width: '100%',
@@ -127,7 +126,6 @@ const styles = StyleSheet.create({
     flex: 1,
   }, 
   friendCard: {
-    backgroundColor:isDark ? '#262626' : 'white',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -143,7 +141,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 20,
     fontWeight: '600',
-    color: isDark ? '#fff' : '#333',
     marginBottom: 4,
   },
   details: {
