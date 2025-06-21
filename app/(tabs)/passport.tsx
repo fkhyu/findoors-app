@@ -50,10 +50,7 @@ const PassportScreen = () => {
         <View style={styles.pfpBlock}>
           <Image
             source={{
-              uri: `https://ui-avatars.com/api/?name=${name.replace(
-          / /g,
-          '+'
-              )}&background=random&size=150`,
+              uri: `https://ui-avatars.com/api/?name=${name.charAt(0)}&background=random&size=256&bold=true`,
             }}
             style={styles.pfp}
           />
@@ -127,7 +124,7 @@ const PassportScreen = () => {
             router.push('/welcome');
           }}
         >
-          <Text>Log Out</Text>
+          <Text style={styles.logout}>Log Out</Text>
         </TouchableOpacity>
       )}
     </SafeAreaView>
@@ -144,17 +141,18 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   passportHeader: {
-    backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 7,
     borderRadius: 18,
     width: '90%',
     marginBottom: 30,
     elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    // shadowColor: '#000',
+    // shadowOpacity: 0.04,
+    // shadowRadius: 8,
   },
   pfpBlock: {
     flexDirection: 'row',
@@ -168,9 +166,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
   },
   name: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '700',
     color: '#546C5E',
+    marginBottom: 4,
   },
   country: {
     fontSize: 14,
@@ -253,4 +252,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#546C5E',
   },
+  logout: {
+    color: '#FF6B6B',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 20,
+  }
 });

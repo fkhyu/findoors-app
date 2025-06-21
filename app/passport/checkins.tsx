@@ -153,7 +153,7 @@ export default function CheckinsScreen() {
         ))}
       </View>
 
-      {loading && <ActivityIndicator size="large" color="#888" />}
+      {loading && <ActivityIndicator size="small" color="#888" style={{ marginTop: 20 }}/>}
       {error && <Text style={styles.error}>{error}</Text>}
       {!loading && !error && items.length === 0 && (
         <Text style={styles.empty}>No check-ins here.</Text>
@@ -169,7 +169,7 @@ export default function CheckinsScreen() {
           <Text style={styles.meta}>
             {tab === 'tagged' && `By ${ci.poster} `}
             {ci.tagged.length > 0 && `With ${ci.tagged.join(', ')} `}
-            {ci.poiTitle && `@ ${ci.poiTitle}`}
+            <Text style={styles.place}>{ci.poiTitle && `@ ${ci.poiTitle}`}</Text>
           </Text>
           {ci.image_url && (
             <Image
@@ -203,11 +203,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   tabActive: { 
-    backgroundColor: '#ddd' 
+    backgroundColor: '#ffd6a7' 
   },
   tabText: { 
-    fontSize: 18,
-    color: '#333',
+    fontSize: 16 
   },
   error: { 
     color: 'red', 
@@ -221,8 +220,8 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 16, 
-    padding: 12, 
-    borderRadius: 8,
+    padding: 16, 
+    borderRadius: 16,
     backgroundColor: '#f9f9f9',
     shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
@@ -235,13 +234,22 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   meta: { 
-    fontSize: 14, 
-    color: '#555' 
+    fontSize: 16, 
+    color: '#555',
+    marginBottom: 8,
   },
   image: { 
     width: '100%', 
     height: 200, 
     borderRadius: 8, 
-    resizeMode: 'cover' 
+    resizeMode: 'cover',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginTop: 8,
   },
+  place: {
+    fontStyle: 'italic', 
+    color: '#777',
+    fontSize: 14,
+  }
 });

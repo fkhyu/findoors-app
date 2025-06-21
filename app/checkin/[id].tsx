@@ -24,6 +24,25 @@ const CheckinScreen = () => {
   const [selectedFriends, setSelectedFriends] = useState<{ id: string; name: string }[]>([]);
   const [allFriends, setAllFriends] = useState<{ id: string; name: string }[]>([]);  const [searchQuery, setSearchQuery] = useState('');
   const { unlockAchievement, achievements } = useAchievements();
+  // Added by Faru
+  const [poiName, setPoiName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPOIName = async () => {
+      if (!id) return;
+      const { data, error } = await supabase
+        .from('poi')
+        .select('title')
+        .eq('id', id)
+        .single();
+      if (error) {
+        console.error('[CheckinScreen] Error fetching POI name:', error);
+      } else {
+        setPoiName(data?.title || null);
+      }
+    };
+    fetchPOIName();
+  }, [id]);
 
   // Load friend list on mount
   useEffect(() => {
@@ -217,8 +236,11 @@ const CheckinScreen = () => {
           headerTintColor: '#5C4B51',
         }}
       />
-      <Text style={styles.subtext}>Stamp a memory for location: {id}</Text>
-
+      <View style={{ width: '100%', gap: 0 }}>
+        <Text style={styles.subtext_nomargin}>Stamp a memory for location:{"\n"}</Text>
+        <Text style={styles.subtext}>{poiName}</Text>
+      </View>
+      
       <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={styles.previewImage} />
@@ -266,7 +288,7 @@ const CheckinScreen = () => {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleCheckin} disabled={uploading}>
-        <Text style={styles.buttonText}>{uploading ? 'Checking in...' : '✨ Check In'}</Text>
+        <Text style={styles.buttonText}>{uploading ? 'Checking in...' : 'Check In'}</Text>
       </TouchableOpacity>
 
       </ScrollView>
@@ -296,12 +318,17 @@ const styles = StyleSheet.create({
     color: '#5C4B51',
   },
   subtext: {
-    fontSize: 16,
-    color: '#7D6E75',
+    fontSize: 18,
+    color: '#404040',
+    fontWeight: '500',
     marginBottom: 20,
   },
+  subtext_nomargin: {
+    fontSize: 16,
+    color: '#7D6E75'
+  },
   imagePicker: {
-    width: 220,
+    width: '100%',
     height: 220,
     backgroundColor: '#FFF5E5',
     borderRadius: 20,
@@ -337,7 +364,7 @@ const styles = StyleSheet.create({
   },
   suggestions: {
     maxHeight: 120,
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff7ed',
     borderColor: '#ECD9C6',
     borderWidth: 1,
     borderRadius: 8,
@@ -363,18 +390,19 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   button: {
-    backgroundColor: '#FFE066',
+    backgroundColor: '#fe9a00',
     paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 18,
+    // paddingHorizontal: 60,
+    alignItems: 'center',
+    borderRadius: 12,
     marginTop: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    // shadowColor: '#000',
+    // shadowOpacity: 0.1,
+    // shadowRadius: 5,
   },
   buttonText: {
     fontSize: 18,
-    color: '#5C4B51',
+    color: '#461901',
     fontWeight: '600',
   },
 });

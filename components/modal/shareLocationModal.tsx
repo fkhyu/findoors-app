@@ -150,6 +150,7 @@ const ShareLocationModal = forwardRef<ShareLocationModalMethods, Props>(
           backgroundStyle={styles.background}
           handleIndicatorStyle={styles.handle}
           onDismiss={onClose}
+          style={styles.sheet}
         >
           <BottomSheetScrollView
             contentContainerStyle={styles.contentContainer}
@@ -252,6 +253,13 @@ ShareLocationModal.displayName = 'ShareLocationModal';
 export default ShareLocationModal;
 
 const styles = StyleSheet.create({
+  sheet: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 5,
+  },
   background: {
     backgroundColor: '#fff',
     borderTopLeftRadius: 16,
@@ -262,10 +270,11 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#ccc',
-    marginVertical: 8,
+    marginTop: 0,
+    marginBottom: 10,
   },
   contentContainer: {
-    padding: 20,
+    paddingHorizontal: 20,
     flexGrow: 1,
     gap: 20,
   },
