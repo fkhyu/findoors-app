@@ -36,7 +36,7 @@
     "eas-cli": "^16.4.1",
     "expo": "^53.0.2",
     "expo-auth-session": "~6.1.5",
-    "expo-blur": "~14.1.4",
+    "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.6",
     "expo-crypto": "~14.1.4",
     "expo-dev-client": "~5.1.8",
