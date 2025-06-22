@@ -86,6 +86,8 @@ const EventsScreen = () => {
           ),
         }}
       />
+
+      <ScrollView contentContainerStyle={styles.container} style={{ marginBottom: 40}}> 
       <ScrollView contentContainerStyle={[styles.container, {backgroundColor: isDark ? '#121212' : '#f0f0f0'}]} style={{ marginBottom: 40 }}>
         {/* Shares Section */}
         {shares.filter(share => new Date(share.end + 'Z') > new Date()).length > 0 && (
@@ -165,6 +167,7 @@ const EventsScreen = () => {
         ) : (
           <Text style={styles.no}>No events found.</Text>
         )}
+      </ScrollView>
       </ScrollView>
     </View>
   );
