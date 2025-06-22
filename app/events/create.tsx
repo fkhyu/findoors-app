@@ -16,6 +16,7 @@ import React, {
 } from 'react';
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -25,28 +26,32 @@ import {
   Text,
   TextInput,
   useColorScheme,
-  View,
+  View
 } from 'react-native';
 
 // Map Picker Bottom Sheet (unchanged)
-const MapPickerModal = forwardRef(({ initialLocation, onConfirm, onClose }, ref) => {
-  const sheetRef = useRef(null);
+interface MapPickerModalProps {
+  initialLocation?: { lat: number; lon: number } | null;
+  onConfirm: (location: { lat: number; lon: number }) => void;
+  onClose?: () => void;
+}
+const MapPickerModal = forwardRef<BottomSheetModal, MapPickerModalProps>(({ initialLocation, onConfirm, onClose }, ref) => {
+  const sheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['96%'], []);
   const [marker, setMarker] = useState(initialLocation || { lat: 37.77, lon: -122.42 });
 
-  useImperativeHandle(ref, () => ({
-    present: () => sheetRef.current?.present(),
-    close: () => sheetRef.current?.close(),
-  }));
+  useImperativeHandle(ref, () => sheetRef.current as any);
 
-  const handleMapPress = (e) => {
+  const isDark = useColorScheme() === 'dark';
+
+  const handleMapPress = (e: any) => {
     const [lon, lat] = e.geometry.coordinates;
     setMarker({ lat, lon });
   };
 
   const handleConfirm = () => {
     onConfirm(marker);
-    sheetRef.current?.close();
+    (sheetRef.current as any)?.close();
     onClose?.();
   };
 
@@ -56,11 +61,11 @@ const MapPickerModal = forwardRef(({ initialLocation, onConfirm, onClose }, ref)
       index={0}
       snapPoints={snapPoints}
       enablePanDownToClose
-      backgroundStyle={styles.modalBackground}
-      handleIndicatorStyle={styles.handle}
+      backgroundStyle={isDark ? [styles.modalBackground, { backgroundColor: '#262626' }] : styles.modalBackground}
+      handleIndicatorStyle={isDark ? [styles.handle, { backgroundColor: '#444' }] : styles.handle}
       onDismiss={onClose}
     >
-      <BottomSheetView style={styles.mapContainer}>
+      <BottomSheetView style={[styles.mapContainer, isDark && { backgroundColor: '#262626' }]}> 
         <MapboxGL.MapView style={styles.map} onPress={handleMapPress}>
           <MapboxGL.Camera zoomLevel={14} centerCoordinate={[marker.lon, marker.lat]} />
           <MapboxGL.ShapeSource
@@ -68,6 +73,7 @@ const MapPickerModal = forwardRef(({ initialLocation, onConfirm, onClose }, ref)
             shape={{
               type: 'Feature',
               geometry: { type: 'Point', coordinates: [marker.lon, marker.lat] },
+              properties: {},
             }}
           >
             <MapboxGL.CircleLayer
@@ -81,8 +87,8 @@ const MapPickerModal = forwardRef(({ initialLocation, onConfirm, onClose }, ref)
             />
           </MapboxGL.ShapeSource>
         </MapboxGL.MapView>
-        <Pressable style={styles.confirmButton} onPress={handleConfirm}>
-          <Text style={styles.confirmText}>Place Pin Here</Text>
+        <Pressable style={[styles.confirmButton, isDark && { backgroundColor: '#ff6900' }]} onPress={handleConfirm}>
+          <Text style={[styles.confirmText, isDark && { color: '#fff' }]}>Place Pin Here</Text>
         </Pressable>
       </BottomSheetView>
     </BottomSheetModal>
@@ -91,28 +97,32 @@ const MapPickerModal = forwardRef(({ initialLocation, onConfirm, onClose }, ref)
 MapPickerModal.displayName = 'MapPickerModal';
 
 // iOS Bottom-Sheet DateTime Picker (unchanged)
-const DateTimePickerModal = forwardRef(({ initialDateTime, onConfirm, onClose, label }, ref) => {
-  const sheetRef = useRef(null);
-  const snapPoints = useMemo(() => ['80%'], []);
-  const [date, setDate] = useState(initialDateTime || new Date());
+interface DateTimePickerModalProps {
+  initialDateTime?: Date;
+  onConfirm: (date: Date) => void;
+  onClose?: () => void;
+  label: string;
+}
+const DateTimePickerModal = forwardRef<BottomSheetModal, DateTimePickerModalProps>(({ initialDateTime, onConfirm, onClose, label }, ref) => {
+  const sheetRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useMemo(() => ['85%'], []);
+  const [date, setDate] = useState<Date>(initialDateTime || new Date());
+  const isDark = useColorScheme() === 'dark';
 
-  useImperativeHandle(ref, () => ({
-    present: () => sheetRef.current?.present(),
-    close: () => sheetRef.current?.close(),
-  }));
+  useImperativeHandle(ref, () => sheetRef.current as any);
 
-  const handleDateChange = (_, selected) => {
+  const handleDateChange = (_: any, selected: Date | undefined) => {
     if (selected) {
-      setDate((prev) => {
+      setDate((prev: Date) => {
         const d = new Date(prev);
         d.setFullYear(selected.getFullYear(), selected.getMonth(), selected.getDate());
         return d;
       });
     }
   };
-  const handleTimeChange = (_, selected) => {
+  const handleTimeChange = (_: any, selected: Date | undefined) => {
     if (selected) {
-      setDate((prev) => {
+      setDate((prev: Date) => {
         const d = new Date(prev);
         d.setHours(selected.getHours(), selected.getMinutes());
         return d;
@@ -121,7 +131,7 @@ const DateTimePickerModal = forwardRef(({ initialDateTime, onConfirm, onClose, l
   };
   const handleConfirm = () => {
     onConfirm(date);
-    sheetRef.current?.close();
+    (sheetRef.current as any)?.close();
     onClose?.();
   };
 
@@ -131,31 +141,31 @@ const DateTimePickerModal = forwardRef(({ initialDateTime, onConfirm, onClose, l
       index={0}
       snapPoints={snapPoints}
       enablePanDownToClose
-      backgroundStyle={styles.modalBackground}
-      handleIndicatorStyle={styles.handle}
+      backgroundStyle={isDark ? [styles.modalBackground, { backgroundColor: '#262626' }] : styles.modalBackground}
+      handleIndicatorStyle={isDark ? [styles.handle, { backgroundColor: '#444' }] : styles.handle}
       onDismiss={onClose}
     >
-      <BottomSheetView style={styles.pickerContainer}>
-        <Text style={styles.pickerLabel}>Select {label} Date</Text>
+      <BottomSheetView style={[styles.pickerContainer, isDark && { backgroundColor: '#262626' }]}> 
+        <Text style={[styles.pickerLabel, isDark && { color: '#e5e5e5' }]}>Select {label} Date</Text>
         <DateTimePicker
           value={date}
           mode="date"
           display="spinner"
           onChange={handleDateChange}
-          style={styles.picker}
-          textColor="#000"
+          style={[styles.picker, { backgroundColor: isDark ? '#252525' : '#FAFAFA' }]}
+          textColor={isDark ? '#fff' : '#000'}
         />
-        <Text style={styles.pickerLabel}>Select {label} Time</Text>
+        <Text style={[styles.pickerLabel, isDark && { color: '#e5e5e5' }]}>Select {label} Time</Text>
         <DateTimePicker
           value={date}
           mode="time"
           display="spinner"
           onChange={handleTimeChange}
-          style={styles.picker}
-          textColor="#000"
+          style={[styles.picker, { backgroundColor: isDark ? '#252525' : '#FAFAFA' }]}
+          textColor={isDark ? '#fff' : '#000'}
         />
-        <Pressable style={styles.confirmButton} onPress={handleConfirm}>
-          <Text style={styles.confirmText}>Confirm {label} Time</Text>
+        <Pressable style={[styles.confirmButton, isDark && { backgroundColor: '#ff6900', width: '90%' }]} onPress={handleConfirm}>
+          <Text style={[styles.confirmText, isDark && { color: '#fff' }]}>Confirm {label} Time</Text>
         </Pressable>
       </BottomSheetView>
     </BottomSheetModal>
@@ -164,9 +174,9 @@ const DateTimePickerModal = forwardRef(({ initialDateTime, onConfirm, onClose, l
 DateTimePickerModal.displayName = 'DateTimePickerModal';
 
 const CreateEventPage = () => {
-  const mapModalRef = useRef(null);
-  const startModalRef = useRef(null);
-  const endModalRef = useRef(null);
+  const mapModalRef = useRef<any>(null);
+  const startModalRef = useRef<any>(null);
+  const endModalRef = useRef<any>(null);
 
   const isDark = useColorScheme() === 'dark';
 
@@ -175,14 +185,18 @@ const CreateEventPage = () => {
   const [endDateTime, setEndDateTime] = useState(
     new Date(new Date().getTime() + 2 * 60 * 60 * 1000)
   );
-  const [eventLocation, setEventLocation] = useState(null);
+  const [eventLocation, setEventLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [eventDescription, setEventDescription] = useState('');
 
   // Android-only picker state
-  const [androidPicker, setAndroidPicker] = useState({
+  const [androidPicker, setAndroidPicker] = useState<{
+    show: boolean;
+    mode: 'date' | 'time';
+    for: 'start' | 'end';
+  }>({
     show: false,
-    mode: 'date',   // 'date' or 'time'
-    for: 'start',   // 'start' or 'end'
+    mode: 'date',
+    for: 'start',
   });
 
   // Open handlers
@@ -193,7 +207,7 @@ const CreateEventPage = () => {
   const openEnd = () => endModalRef.current?.present();
 
   // Android native picker change handler
-  const onAndroidChange = (event, selected) => {
+  const onAndroidChange = (event: any, selected: Date | undefined) => {
     // hide current
     setAndroidPicker((prev) => ({ ...prev, show: false }));
     if (event.type === 'dismissed' || !selected) return;
@@ -244,7 +258,13 @@ const CreateEventPage = () => {
   return (
     <BottomSheetModalProvider>
       <SafeAreaView style={[styles.safeArea, { backgroundColor: isDark ? '#171717' : '#F7F5F2' }]}>
-        <Stack.Screen options={{ title: 'Create New Event' }} />
+        <Stack.Screen options={{
+          title: 'Create New Event',
+          headerStyle: { backgroundColor: isDark ? '#171717' : '#f5f5f5' },
+          headerTitleStyle: { color: isDark ? '#fff' : '#000' },
+          // headerTintColor: isDark ? '#fff' : '#000',
+          headerShadowVisible: false,
+        }} />
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.container}
@@ -254,7 +274,7 @@ const CreateEventPage = () => {
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>Event Name</Text>
               <TextInput
-                style={[styles.input, { backgroundColor: isDark ? '#262626' : '#FAFAFA' }]}
+                style={[styles.input, { backgroundColor: isDark ? '#262626' : '#FAFAFA', borderColor: isDark ? '#525252' : '#DDD', color: isDark ? '#e5e5e5' : '#333' }]}
                 value={eventName}
                 onChangeText={setEventName}
                 placeholder="e.g. Sunday Brunch"
@@ -266,13 +286,16 @@ const CreateEventPage = () => {
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>Start</Text>
               <Pressable
-                style={styles.input}
+                style={[styles.input, { backgroundColor: isDark ? '#262626' : '#FAFAFA', borderColor: isDark ? '#525252' : '#DDD' }]}
                 onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Keyboard.dismiss();
+                  }
                   if (Platform.OS === 'ios') openStart();
                   else setAndroidPicker({ show: true, mode: 'date', for: 'start' });
                 }}
               >
-                <Text style={styles.inputText}>
+                <Text style={{ color: isDark ? '#e5e5e5' : '#333' }}>
                   {startDateTime.toDateString()} @{' '}
                   {startDateTime.toLocaleTimeString([], {
                     hour: '2-digit',
@@ -286,13 +309,16 @@ const CreateEventPage = () => {
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>End</Text>
               <Pressable
-                style={styles.input}
+                style={[styles.input, { backgroundColor: isDark ? '#262626' : '#FAFAFA', borderColor: isDark ? '#525252' : '#DDD' }]}
                 onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Keyboard.dismiss();
+                  }
                   if (Platform.OS === 'ios') openEnd();
                   else setAndroidPicker({ show: true, mode: 'date', for: 'end' });
                 }}
               >
-                <Text style={styles.inputText}>
+                <Text style={{ color: isDark ? '#e5e5e5' : '#333' }}>
                   {endDateTime.toDateString()} @{' '}
                   {endDateTime.toLocaleTimeString([], {
                     hour: '2-digit',
@@ -305,12 +331,20 @@ const CreateEventPage = () => {
             {/* Location */}
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>Event Location</Text>
-              <Pressable style={styles.input} onPress={openMap}>
-                <Text style={styles.inputText}>
-                  {eventLocation
-                    ? `📍 ${eventLocation.lat.toFixed(4)}, ${eventLocation.lon.toFixed(4)}`
-                    : 'Pin on map...'}
-                </Text>
+              <Pressable
+              style={[styles.input, { backgroundColor: isDark ? '#262626' : '#FAFAFA', borderColor: isDark ? '#525252' : '#DDD' }]}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Keyboard.dismiss();
+                }
+                openMap();
+              }}
+              >
+              <Text style={{ color: isDark ? '#e5e5e5' : '#333' }}>
+                {eventLocation
+                ? `📍 ${eventLocation.lat.toFixed(4)}, ${eventLocation.lon.toFixed(4)}`
+                : 'Pin on map...'}
+              </Text>
               </Pressable>
             </View>
 
@@ -318,7 +352,7 @@ const CreateEventPage = () => {
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>Description</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={[styles.input, styles.textArea, { backgroundColor: isDark ? '#262626' : '#FAFAFA', borderColor: isDark ? '#525252' : '#DDD', color: isDark ? '#e5e5e5' : '#333' }]}
                 value={eventDescription}
                 onChangeText={setEventDescription}
                 placeholder="Tell us more..."
@@ -327,7 +361,14 @@ const CreateEventPage = () => {
               />
             </View>
 
-            <Pressable style={styles.button} onPress={handleSubmit}>
+            <Pressable
+              style={[
+              styles.button,
+              { backgroundColor: isDark ? '#ff6900' : '#ff6900', opacity: eventName && eventLocation && eventDescription ? 1 : 0.5 }
+              ]}
+              onPress={handleSubmit}
+              disabled={!(eventName && eventLocation && eventDescription)}
+            >
               <Text style={styles.buttonText}>Create Event</Text>
             </Pressable>
           </ScrollView>
@@ -388,11 +429,10 @@ const styles = StyleSheet.create({
   input: {
     padding: 12,
     borderWidth: 1,
-    borderColor: '#DDD',
     borderRadius: 8,
-    backgroundColor: '#FAFAFA',
+    // backgroundColor: '#FAFAFA',
   },
-  inputText: { color: '#333' },
+  // inputText: { color: '#333' },
   textArea: { height: 100, textAlignVertical: 'top' },
   button: {
     marginTop: 10,
@@ -420,8 +460,8 @@ const styles = StyleSheet.create({
   pickerLabel: { fontSize: 16, color: '#555', marginVertical: 6 },
   picker: {
     width: '90%',
-    backgroundColor: '#FAFAFA',
-    borderRadius: 8,
+    // backgroundColor: '#FAFAFA',
+    borderRadius:  16,
     marginBottom: 10,
     color: '#333',
   },
@@ -430,7 +470,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     paddingVertical: 12,
     paddingHorizontal: 8,
-    backgroundColor: '#8AB6D6',
+    // backgroundColor: '#8AB6D6',
+    width: '100%',
     borderRadius: 8,
     alignItems: 'center',
   },
