@@ -81,7 +81,7 @@ const SFHomeScreen = () => {
       }
     }, [mapReady, poiId, pois])
   );
-
+  /*
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
@@ -89,7 +89,7 @@ const SFHomeScreen = () => {
       }
     });
   }, []);
-
+  */
   useEffect(() => {
     console.log('POI ID from params:', poiId);
     if (!poiId || pois.length === 0) return;

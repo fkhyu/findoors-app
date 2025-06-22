@@ -20,6 +20,13 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
+        name="feed"
+        options={{
+          title: "Feed",
+          headerShown: true
+        }}
+      />
+      <Tabs.Screen
         name="neighbors"
         options={{
           title: `Neighbors`,
