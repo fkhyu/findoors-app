@@ -459,3 +459,5 @@ const styles = StyleSheet.create({
     borderColor: '#F4A261',
   },
 })
+
+export default POIModal;

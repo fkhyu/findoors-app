@@ -1,13 +1,20 @@
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from "@lingui/react";
+import { BlurView } from 'expo-blur';
 import { router, Tabs } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Platform, Pressable } from 'react-native';
+import { Platform, Pressable, useColorScheme } from 'react-native';
+
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
   return (
     <I18nProvider i18n={i18n}>
+    <StatusBar style={isDark ? 'light' : 'dark'} />
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -15,9 +22,25 @@ export default function TabLayout() {
           ios: {
             // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
+            backgroundColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.8)',
+            borderTopWidth: 0,
+            shadowColor: 'transparent'
           },
-          default: {},
+          default: {
+            backgroundColor: isDark ? '#121212' : '#ffffff',
+            borderTopWidth: 0,
+            elevation: 0,
+            shadowColor: 'transparent',
+          },
         }),
+        tabBarBackground: () =>
+          Platform.OS === 'ios' ? (
+            <BlurView
+              intensity={20}
+              tint={isDark ? 'dark' : 'light'}
+              style={{ flex: 1 }}
+            />
+          ) : null
       }}>
       <Tabs.Screen
         name="feed"
@@ -31,6 +54,8 @@ export default function TabLayout() {
         options={{
           title: `Neighbors`,
           headerShown: true,
+          headerStyle: { backgroundColor: isDark ? '#121212' : '#ffffff' },
+          headerTitleStyle: { color: isDark ? 'white' : 'black' },
           headerRight: () => (
             <Pressable
               onPress={() => {router.push('/friends/add');}}
@@ -38,7 +63,7 @@ export default function TabLayout() {
               <MaterialCommunityIcons
                 name="account-multiple-plus"
                 size={24}
-                color="black"
+                color={isDark ? 'white' : 'black'}
                 style={{ marginRight: 10 }}
               />
             </Pressable>
