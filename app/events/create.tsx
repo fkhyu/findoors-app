@@ -24,6 +24,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useColorScheme,
   View,
 } from 'react-native';
 
@@ -167,6 +168,8 @@ const CreateEventPage = () => {
   const startModalRef = useRef(null);
   const endModalRef = useRef(null);
 
+  const isDark = useColorScheme() === 'dark';
+
   const [eventName, setEventName] = useState('');
   const [startDateTime, setStartDateTime] = useState(new Date());
   const [endDateTime, setEndDateTime] = useState(
@@ -240,7 +243,7 @@ const CreateEventPage = () => {
 
   return (
     <BottomSheetModalProvider>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: isDark ? '#171717' : '#F7F5F2' }]}>
         <Stack.Screen options={{ title: 'Create New Event' }} />
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -249,9 +252,9 @@ const CreateEventPage = () => {
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             {/* Event Name */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Event Name</Text>
+              <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>Event Name</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: isDark ? '#262626' : '#FAFAFA' }]}
                 value={eventName}
                 onChangeText={setEventName}
                 placeholder="e.g. Sunday Brunch"
@@ -261,7 +264,7 @@ const CreateEventPage = () => {
 
             {/* Start */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Start</Text>
+              <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>Start</Text>
               <Pressable
                 style={styles.input}
                 onPress={() => {
@@ -281,7 +284,7 @@ const CreateEventPage = () => {
 
             {/* End */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>End</Text>
+              <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>End</Text>
               <Pressable
                 style={styles.input}
                 onPress={() => {
@@ -301,7 +304,7 @@ const CreateEventPage = () => {
 
             {/* Location */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Event Location</Text>
+              <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>Event Location</Text>
               <Pressable style={styles.input} onPress={openMap}>
                 <Text style={styles.inputText}>
                   {eventLocation
@@ -313,7 +316,7 @@ const CreateEventPage = () => {
 
             {/* Description */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Description</Text>
+              <Text style={[styles.label, { color: isDark ? '#a1a1a1' : '#555' }]}>Description</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 value={eventDescription}
@@ -370,7 +373,7 @@ const CreateEventPage = () => {
 export default CreateEventPage;
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F7F5F2' },
+  safeArea: { flex: 1 },
   container: { flex: 1 },
   content: {
     padding: 10,
@@ -381,7 +384,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   inputGroup: { marginBottom: 20 },
-  label: { fontSize: 16, marginBottom: 6, color: '#555' },
+  label: { fontSize: 16, marginBottom: 6 },
   input: {
     padding: 12,
     borderWidth: 1,
@@ -409,10 +412,10 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#ccc',
-    marginVertical: 8,
+    marginBottom: 8,
   },
   mapContainer: { flex: 1, padding: 10 },
-  map: { flex: 1, borderRadius: 8, height: 600 },
+  map: { flex: 1, borderRadius: 16, height: 500 },
   pickerContainer: { flex: 1, alignItems: 'center', paddingTop: 10 },
   pickerLabel: { fontSize: 16, color: '#555', marginVertical: 6 },
   picker: {
@@ -424,6 +427,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     marginTop: 10,
+    marginBottom: 30,
     paddingVertical: 12,
     paddingHorizontal: 8,
     backgroundColor: '#8AB6D6',
