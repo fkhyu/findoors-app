@@ -329,6 +329,8 @@ const POIModal = forwardRef<POIModalMethods, { initialSnap?: 'max' | 'mid' | 'mi
 
 POIModal.displayName = 'POIModal';
 
+export default POIModal;
+
 const styles = StyleSheet.create({
   background: {
     backgroundColor: '#fff',

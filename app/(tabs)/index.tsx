@@ -7,12 +7,7 @@ import { useAchievements } from '@/lib/AchievementContext';
 import { startBackgroundLocation, stopBackgroundLocation } from '@/lib/bg/backgroundLocation';
 import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
-import MapBox, {
-  Camera,
-  MapView,
-  MarkerView,
-  UserLocation
-} from '@rnmapbox/maps';
+import MapBox, { Camera, MapView, MarkerView, UserLocation } from '@rnmapbox/maps';
 import * as turf from '@turf/turf';
 import * as Location from 'expo-location';
 import { useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
