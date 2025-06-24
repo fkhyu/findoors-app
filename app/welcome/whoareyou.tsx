@@ -23,10 +23,16 @@ export default function UserInfoScreen() {
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
   const [age, setAge] = useState('');
+  const [eulaAccepted, setEulaAccepted] = useState(false);
 
   const handleSubmit = async () => {
     if (!name) {
       Alert.alert('Missing name', 'Please fill out your name.');
+      return;
+    }
+
+    if (!eulaAccepted) {
+      Alert.alert('EULA Required', 'Please accept the End User License Agreement to continue.');
       return;
     }
 
@@ -111,8 +117,40 @@ export default function UserInfoScreen() {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Continue →</Text>
+      <View style={styles.eulaContainer}>
+        <TouchableOpacity 
+          style={styles.checkboxContainer}
+          onPress={() => setEulaAccepted(!eulaAccepted)}
+        >
+          <View style={[styles.checkbox, eulaAccepted && styles.checkboxChecked]}>
+            {eulaAccepted && <Text style={styles.checkmark}>✓</Text>}
+          </View>
+          <Text style={styles.checkboxLabel}>
+            I accept the{' '}
+            <Text 
+              style={styles.eulaLink}
+              onPress={() => router.push('/welcome/EULA')}
+            >
+              End User License Agreement
+            </Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity 
+        style={[
+          styles.button, 
+          !eulaAccepted && styles.buttonDisabled
+        ]} 
+        onPress={handleSubmit}
+        disabled={!eulaAccepted}
+      >
+        <Text style={[
+          styles.buttonText,
+          !eulaAccepted && styles.buttonTextDisabled
+        ]}>
+          Continue →
+        </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
@@ -163,13 +201,61 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+    shadowColor: '#ccc',
+    shadowOpacity: 0.1,
+  },
   buttonText: {
     color: '#FFF',
     fontSize: 18,
     fontWeight: '700',
   },
+  buttonTextDisabled: {
+    color: '#999',
+  },
   optional: {
     fontSize: 12,
     color: mainText
-  }
+  },
+  eulaContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: mainText,
+    borderRadius: 4,
+    marginRight: 12,
+    marginTop: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  checkboxChecked: {
+    backgroundColor: accent,
+    borderColor: accent,
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  checkboxLabel: {
+    flex: 1,
+    fontSize: 14,
+    color: mainText,
+    lineHeight: 20,
+  },
+  eulaLink: {
+    color: accent,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
 });

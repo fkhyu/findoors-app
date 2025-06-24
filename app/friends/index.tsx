@@ -1,8 +1,10 @@
 import Loading from '@/components/loading';
 import { useAchievements } from '@/lib/AchievementContext';
 import { supabase } from '@/lib/supabase';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router, Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 
 interface Friend {
   age: number;
@@ -91,6 +93,27 @@ const NeighborsScreen = () => {
 
   return (
     <ScrollView style={[styles.container, {backgroundColor: isDark ? '#121212' : '#f0f0f0',}]}>
+      <Stack.Screen
+        name="neighbors"
+        options={{
+          title: `Neighbors`,
+          headerShown: true,
+          headerStyle: { backgroundColor: isDark ? '#121212' : '#ffffff' },
+          headerTitleStyle: { color: isDark ? 'white' : 'black' },
+          headerRight: () => (
+            <Pressable
+              onPress={() => {router.push('/friends/add');}}
+            >
+              <MaterialCommunityIcons
+                name="account-multiple-plus"
+                size={24}
+                color={isDark ? 'white' : 'black'}
+                style={{ marginRight: 10 }}
+              />
+            </Pressable>
+          ),
+        }}
+      />
       {friendsData.length > 0 ? (
         <View style={styles.friendsList}>
           {friendsData.map((friend) => (
