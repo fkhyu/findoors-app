@@ -238,10 +238,10 @@ export default function CheckinsScreen() {
             style={[
               styles.tabButton,
               { backgroundColor: isDark ? '#2c2c2c' : '#fff' },
-              tab === t && [styles.tabActive, { backgroundColor: isDark ? '#ffd6a7' : '#ffd6a7' }]
+              tab === t && [styles.tabActive, { backgroundColor: isDark ? '#f54900' : '#ffd6a7' }]
             ]}
           >
-            <Text style={[styles.tabText, { color: isDark ? '#fff' : '#000' }]}>
+            <Text style={[styles.tabText, { color: isDark ? '#fff' : '#000'}]}>
               {t === 'my' ? 'My Check-ins' : 'Tagged Check-ins'}
             </Text>
           </Pressable>
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   tabActive: { 
-    backgroundColor: '#ffd6a7' 
+    fontWeight: '500', 
   },
   tabText: { 
     fontSize: 16 
