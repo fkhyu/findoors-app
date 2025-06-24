@@ -1,8 +1,7 @@
 import { supabase } from '@/lib/supabase';
-import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, StyleSheet, Text, View } from 'react-native';
 
 const FullScreenImageScreen = () => {
   const { id } = useLocalSearchParams();
@@ -38,11 +37,15 @@ const FullScreenImageScreen = () => {
           headerTintColor: '#5C4B51'
         }}
       />
-      <Image source={{ uri: checkinData?.image_url }} contentFit='contain' style={styles.image}>
+      <ImageBackground
+        source={{ uri: checkinData?.image_url }}
+        style={styles.image}
+        imageStyle={{ resizeMode: 'contain' }} // matches your contentFit
+      >
         <View style={styles.textContainer}>
           <Text style={styles.text}>{checkinData?.caption}</Text>
         </View>
-      </Image>
+      </ImageBackground>
     </View>
   );
 };
@@ -53,9 +56,6 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
-    justifyContent: 'flex-end', // Aligns children (textContainer) to the bottom
   },
   textContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background for text

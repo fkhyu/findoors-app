@@ -2,10 +2,10 @@ import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { i18n } from '@lingui/core';
 import { I18nProvider } from "@lingui/react";
 import { BlurView } from 'expo-blur';
-import { router, Tabs } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Platform, Pressable, useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 
 
 export default function TabLayout() {
@@ -46,30 +46,9 @@ export default function TabLayout() {
         name="feed"
         options={{
           title: "Feed",
-          headerShown: true
-        }}
-      />
-      <Tabs.Screen
-        name="neighbors"
-        options={{
-          title: `Neighbors`,
           headerShown: true,
-          headerStyle: { backgroundColor: isDark ? '#121212' : '#ffffff' },
-          headerTitleStyle: { color: isDark ? 'white' : 'black' },
-          headerRight: () => (
-            <Pressable
-              onPress={() => {router.push('/friends/add');}}
-            >
-              <MaterialCommunityIcons
-                name="account-multiple-plus"
-                size={24}
-                color={isDark ? 'white' : 'black'}
-                style={{ marginRight: 10 }}
-              />
-            </Pressable>
-          ),
-          tabBarIcon: ({ color }) => ( 
-            <MaterialCommunityIcons name="home-group" size={24} color={color} />
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="dynamic-feed" size={24} color={color} />
           ),
         }}
       />

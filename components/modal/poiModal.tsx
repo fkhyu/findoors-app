@@ -352,6 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 8, 
+    color: '#333'
   },
   address: {
     fontSize: 14,
@@ -459,5 +460,3 @@ const styles = StyleSheet.create({
     borderColor: '#F4A261',
   },
 })
-
-export default POIModal;

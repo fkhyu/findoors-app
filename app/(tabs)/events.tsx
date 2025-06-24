@@ -87,8 +87,7 @@ const EventsScreen = () => {
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.container} style={{ marginBottom: 40}}> 
-      <ScrollView contentContainerStyle={[styles.container, {backgroundColor: isDark ? '#121212' : '#f0f0f0'}]} style={{ marginBottom: 40 }}>
+      <ScrollView contentContainerStyle={[styles.container, {backgroundColor: isDark ? '#121212' : '#f0f0f0'}]} style={{ paddingBottom: 40 }}>
         {/* Shares Section */}
         {shares.filter(share => new Date(share.end + 'Z') > new Date()).length > 0 && (
           <Text style={[styles.header, {color: isDark ? '#e5e5e5' : '#262626'}]}>Neighbors Shares</Text>
@@ -168,7 +167,6 @@ const EventsScreen = () => {
           <Text style={styles.no}>No events found.</Text>
         )}
       </ScrollView>
-      </ScrollView>
     </View>
   );
 };
@@ -176,7 +174,7 @@ const EventsScreen = () => {
 export default EventsScreen;
 
 const styles = StyleSheet.create({
-  container: { padding: 20, paddingBottom: 50 },
+  container: { padding: 20 },
   header: { fontSize: 22, fontWeight: '500', marginBottom: 20, color: '#333' },
   card: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 15, elevation: 3 },
   name: { fontSize: 20, fontWeight: 'bold', marginBottom: 5, color: '#222' },

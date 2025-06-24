@@ -24,8 +24,8 @@ const CheckinScreen = () => {
   const [selectedFriends, setSelectedFriends] = useState<{ id: string; name: string }[]>([]);
   const [allFriends, setAllFriends] = useState<{ id: string; name: string }[]>([]);  const [searchQuery, setSearchQuery] = useState('');
   const { unlockAchievement, achievements } = useAchievements();
-  // Added by Faru
   const [poiName, setPoiName] = useState<string | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
 
   useEffect(() => {
     const fetchPOIName = async () => {
@@ -195,6 +195,7 @@ const CheckinScreen = () => {
           caption,
           image_url: uploadedUrl,
           tagged_ids: selectedFriends.map((f) => f.id),
+          public: isPublic,
         })
         .select('*')
         .single();
@@ -252,6 +253,7 @@ const CheckinScreen = () => {
       <TextInput
         placeholder="Write a cute caption..."
         value={caption}
+        placeholderTextColor={'#999'}
         onChangeText={setCaption}
         style={styles.input}
       />
@@ -261,6 +263,7 @@ const CheckinScreen = () => {
           placeholder="Tag friends by name..."
           value={searchQuery}
           onChangeText={setSearchQuery}
+          placeholderTextColor={'#999'}
           style={[styles.input, { marginBottom: 5 }]}
         />
         {searchQuery.length > 0 && (
@@ -285,6 +288,35 @@ const CheckinScreen = () => {
             </View>
           ))}
         </View>
+      </View>
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
+        <TouchableOpacity
+          onPress={() => setIsPublic((prev) => !prev)}
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 6,
+            borderWidth: 2,
+            borderColor: '#DABFAA',
+            backgroundColor: isPublic ? '#fe9a00' : '#FFF',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 10,
+          }}
+        >
+          {isPublic && (
+            <View
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 12,
+                backgroundColor: '#fff',
+              }}
+            />
+          )}
+        </TouchableOpacity>
+        <Text style={{ fontSize: 16, color: '#5C4B51' }}>Make this check-in public</Text>
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleCheckin} disabled={uploading}>
