@@ -128,6 +128,9 @@ const PassportScreen = () => {
         >
           <Text style={style.logout}>Log Out</Text>
         </TouchableOpacity>
+
+        // debug (buttons to go thru welcome flow)
+
       )}
     </SafeAreaView>
   );
