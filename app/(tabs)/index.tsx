@@ -501,18 +501,18 @@ const SFHomeScreen = () => {
         <Pressable
           style={({ pressed }) => [
             styles.mapButton,
-            { opacity: pressed ? 0.6 : 1, backgroundColor: isDark ? '#171717' : '#fff' },
+            { opacity: pressed ? 0.6 : 1, backgroundColor: isDark ? '#181C1B' : '#fff' },
           ]}
           onPress={centerOnUser}
         >
-          <MaterialIcons name="my-location" size={28} color={ isDark ? '#fff' : '#404040' } />
+          <MaterialIcons name="my-location" size={28} color={ isDark ? '#e1e6e4' : '#404040' } />
         </Pressable>
 
         {shareRowId ? (
           <Pressable
             style={({ pressed }) => [
               styles.mapButton,
-              { opacity: pressed ? 0.6 : 1, backgroundColor: isDark ? '#171717' : '#fff' },
+              { opacity: pressed ? 0.6 : 1, backgroundColor: isDark ? '#181C1B' : '#fff' },
             ]}
             onPress={() => setShowStopModal(true)}
           >
@@ -524,7 +524,7 @@ const SFHomeScreen = () => {
           <Pressable
           style={({ pressed }) => [
             styles.mapButton,
-            { opacity: pressed ? 0.6 : 1, backgroundColor: isDark ? '#171717' : '#fff'},
+            { opacity: pressed ? 0.6 : 1, backgroundColor: isDark ? '#181C1B' : '#fff'},
           ]}
           onPress={() => {
             setIsSelectingLocation(true);
@@ -532,7 +532,7 @@ const SFHomeScreen = () => {
             shareModalRef.current?.present();
           }}
         >
-          <MaterialIcons name="share-location" size={28} color={ isDark ? '#fff' : '#404040' } />
+          <MaterialIcons name="share-location" size={28} color={ isDark ? '#e1e6e4' : '#404040' } />
         </Pressable>
         )}
       </View>

@@ -106,12 +106,12 @@ export default function SavedLocationsScreen() {
   const { pois, loading, error } = useSavedLocations();
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: isDark ? '#171717' : '#f5f5f5' }]}>
+    <ScrollView style={[styles.container, { backgroundColor: isDark ? '#181C1B' : '#f5f5f5' }]}>
       <Stack.Screen options={{
         title: 'Saved Locations',
-        headerStyle: { backgroundColor: isDark ? '#171717' : '#f5f5f5' },
+        headerStyle: { backgroundColor: isDark ? '#181C1B' : '#f5f5f5' },
           headerTitleStyle: { color: isDark ? '#fff' : '#000' },
-          // headerShadowVisible: false,
+          headerShadowVisible: false,
       }} />
 
       {loading && <ActivityIndicator size="large" color="#888" />}
@@ -125,7 +125,7 @@ export default function SavedLocationsScreen() {
         pois.map((poi) => (
           <View
             key={poi.id}
-            style={[styles.card, { backgroundColor: isDark ? '#1e1e1e' : '#fff' }]}
+            style={[styles.card, { backgroundColor: isDark ? '#2e3332' : '#fff' }]}
           >
             <Text style={[styles.title, { color: isDark ? '#fff' : '#333' }]}>{poi.title}</Text>
             {poi.image_url && (

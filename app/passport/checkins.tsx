@@ -205,11 +205,11 @@ export default function CheckinsScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
+              style={[styles.modalButton, styles.cancelButton, { borderTopColor: isDark ? '#444' : '#eee' }]}
               onPress={() => setModalVisible(false)}
             >
-              <MaterialIcons name="close" size={20} color={isDark ? '#888' : '#666'} />
-              <Text style={[styles.modalButtonText, { color: isDark ? '#888' : '#666' }]}>
+              <MaterialIcons name="close" size={20} color={isDark ? '#d4d4d4' : '#666'} />
+              <Text style={[styles.modalButtonText, { color: isDark ? '#d4d4d4' : '#666' }]}>
                 Cancel
               </Text>
             </TouchableOpacity>
@@ -220,13 +220,14 @@ export default function CheckinsScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: isDark ? '#121212' : '#fff' }]}>
+    <ScrollView style={[styles.container, { backgroundColor: isDark ? '#181C1B' : '#fff' }]}>
       <Stack.Screen 
         options={{ 
           title: 'Check-ins',
-          headerStyle: { backgroundColor: isDark ? '#121212' : '#fff' },
+          headerStyle: { backgroundColor: isDark ? '#181C1B' : '#fff' },
           headerTitleStyle: { color: isDark ? '#fff' : '#000' },
           headerTintColor: isDark ? '#fff' : '#000',
+          headerShadowVisible: false,
         }} 
       />
 
@@ -257,7 +258,7 @@ export default function CheckinsScreen() {
       {!loading && !error && items.map(ci => (
         <Pressable
           key={ci.id}
-          style={[styles.card, { backgroundColor: isDark ? '#1e1e1e' : '#f9f9f9' }]}
+          style={[styles.card, { backgroundColor: isDark ? '#2e3332' : '#f9f9f9' }]}
           onPress={() => router.push(`/passport/checkins/${ci.id}`)}
         >
           <View style={styles.cardHeader}>
@@ -392,7 +393,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     borderRadius: 12,
-    padding: 20,
+    padding: 10,
+    paddingTop: 20,
     minWidth: 280,
     maxWidth: 320,
     shadowColor: '#000',

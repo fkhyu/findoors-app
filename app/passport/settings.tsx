@@ -81,13 +81,14 @@ const SettingsScreen = () => {
   }
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: isDark ? '#121212' : '#f5f5f5' }]}>
+    <ScrollView style={[styles.container, { backgroundColor: isDark ? '#181C1B' : '#f5f5f5' }]}>
       <Stack.Screen
         options={{
           title: 'Settings',
-          headerStyle: { backgroundColor: isDark ? '#121212' : '#fff' },
+          headerStyle: { backgroundColor: isDark ? '#181C1B' : '#fff' },
           headerTitleStyle: { color: isDark ? '#fff' : '#000' },
-          headerTintColor: isDark ? '#fff' : '#000',
+          headerTintColor: isDark ? '#fff' : '#000',  
+          headerShadowVisible: false,
         }}
       />
 
@@ -99,7 +100,7 @@ const SettingsScreen = () => {
           <TextInput
             value={name}
             onChangeText={setName}
-            style={[styles.input, { backgroundColor: isDark ? '#262626' : '#f8f8f8', borderColor: isDark ? '#444' : '#D1D5DB', color: isDark ? '#e5e5e5' : '#333' }]}
+            style={[styles.input, { backgroundColor: isDark ? '#2e3332' : '#f8f8f8', borderColor: isDark ? '#3e4744' : '#D1D5DB', color: isDark ? '#e5e5e5' : '#333' }]}
             placeholderTextColor={'#999'}
             placeholder="Enter your name"
           />
@@ -110,7 +111,7 @@ const SettingsScreen = () => {
           <TextInput
             value={country}
             onChangeText={setCountry}
-            style={[styles.input, { backgroundColor: isDark ? '#262626' : '#f8f8f8', borderColor: isDark ? '#444' : '#D1D5DB', color: isDark ? '#e5e5e5' : '#333' }]}
+            style={[styles.input, { backgroundColor: isDark ? '#2e3332' : '#f8f8f8', borderColor: isDark ? '#3e4744' : '#D1D5DB', color: isDark ? '#e5e5e5' : '#333' }]}
             placeholderTextColor={'#999'}
             placeholder="Enter your country"
           />
@@ -121,7 +122,7 @@ const SettingsScreen = () => {
           <TextInput
             value={age !== null ? String(age) : ''}
             onChangeText={(t) => setAge(t ? parseInt(t, 10) : null)}
-            style={[styles.input, { backgroundColor: isDark ? '#262626' : '#f8f8f8', borderColor: isDark ? '#444' : '#D1D5DB', color: isDark ? '#e5e5e5' : '#333' }]}
+            style={[styles.input, { backgroundColor: isDark ? '#2e3332' : '#f8f8f8', borderColor: isDark ? '#3e4744' : '#D1D5DB', color: isDark ? '#e5e5e5' : '#333' }]}
             placeholderTextColor={'#999'}
             placeholder="Enter your age"
             keyboardType="numeric"

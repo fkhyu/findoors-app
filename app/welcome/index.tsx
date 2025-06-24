@@ -3,7 +3,7 @@ import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import MapboxGL from '@rnmapbox/maps';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
 
 const MAP_STYLE = 'https://api.maptiler.com/maps/019717fd-a8fc-78fa-afaf-c660bbb6b406/style.json?key=XSJRg4GXeLgDiZ98hfVp';
 const START_COORD: [number, number] = [-122.401297, 37.773972];
@@ -20,6 +20,8 @@ export default function WelcomeScreen() {
   const [email, setEmail] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState('');
+
+  const isDark = useColorScheme() === 'dark';
 
   useEffect(() => {
     let theta = 0;
